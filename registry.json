@@ -14,6 +14,20 @@
           "endDate": "2027-10-01"
         }
       ]
+    },
+    {
+      "id": "genesis",
+      "name": "Genesis",
+      "programs": [
+        {
+          "id": "release-2-1",
+          "name": "Release 2.1",
+          "file": "programs/genesis-release-2-1.json",
+          "pm": "Jason Sadler",
+          "startDate": "2026-05-11",
+          "endDate": "2026-08-31"
+        }
+      ]
     }
   ]
 }
