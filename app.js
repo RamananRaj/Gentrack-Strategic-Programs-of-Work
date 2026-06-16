@@ -28,17 +28,28 @@ const DASH_HTML = `
   <section class="tab active" id="overview">
     <div class="kpis" id="kpis"></div>
     <div class="card">
+      <h2 class="sec">Program Details</h2>
+      <div class="pgrid">
+        <div><div class="l">Program Manager</div><div class="editable bindfill" data-bind="meta.projectManager"></div></div>
+        <div><div class="l">Start Date</div><div class="editable bindfill" data-bind="meta.programStartDate"></div></div>
+        <div><div class="l">End Date</div><div class="editable bindfill" data-bind="meta.programEndDate"></div></div>
+        <div><div class="l">Account / Client</div><div class="editable bindfill" data-bind="meta.client"></div></div>
+        <div><div class="l">Supplier</div><div class="editable bindfill" data-bind="meta.supplier"></div></div>
+        <div><div class="l">SOW Reference</div><div class="editable bindfill" data-bind="meta.sowRef"></div></div>
+      </div>
+    </div>
+    <div class="card">
       <h2 class="sec">Program Health — Scope · Timeline · Quality</h2>
       <p class="hint">Top-level RAG against the three reporting pillars. Edit mode lets you change status and narrative; click <b>Save data.json</b> to publish to Git.</p>
       <div class="grid3" id="pillars"></div>
     </div>
     <div class="card">
       <h2 class="sec">Executive Summary</h2>
-      <p class="editable" data-bind="meta.overallNarrative" style="margin:0"></p>
+      <p class="editable bindfill" data-bind="meta.overallNarrative" style="margin:0"></p>
     </div>
     <div class="card" style="border-left:4px solid var(--brand2)">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <h2 class="sec" style="margin:0">Weekly Update — <span class="editable" data-bind="meta.reportWeek"></span></h2>
+        <h2 class="sec" style="margin:0">Weekly Update — <span class="editable bindfill" data-bind="meta.reportWeek"></span></h2>
         <span style="flex:1"></span>
         <button class="toolbtn warn no-print" id="archiveWeek" title="Save this week as a snapshot in the archive">📌 Archive this week</button>
       </div>
@@ -259,9 +270,10 @@ function renderHeader(){
   const m=DATA.meta;
   document.getElementById('h-program').textContent=m.program+' — Program Dashboard';
   document.getElementById('h-sub').textContent=m.subtitle;
+  const fd=s=>{ if(!s)return '—'; const d=new Date(s+'T00:00:00'); return isNaN(d)?s:d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}); };
   document.getElementById('h-meta').innerHTML=[
-    ['Client',m.client],['Supplier',m.supplier],['Owner',m.reportOwner],
-    ['Reporting',m.reportWeek],['Program start',dmToDate('DM0')],['Duration',m.programDuration]
+    ['Client',m.client],['Supplier',m.supplier],['PM',m.projectManager||'—'],
+    ['Start',fd(m.programStartDate)],['End',fd(m.programEndDate)],['Reporting',m.reportWeek]
   ].map(([k,v])=>`<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('');
   document.getElementById('footer').textContent=`${m.program} · ${m.sowRef} · generated from data.json · ${m.reportDate}`;
 }
@@ -580,10 +592,20 @@ function renderAll(){
   renderHeader();renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderRisks();renderWP();
   renderTimeline();renderDeliverables();renderOOTB();renderGaps();renderCatalog();
   renderPayments();renderResources();renderNewsletter();
+  fillBinds();
   bindEditables();
 }
 
 /* ---------- editing ---------- */
+function getByPath(path){
+  try{ return path.split('.').reduce((o,k)=>o[k],DATA); }catch(e){ return undefined; }
+}
+function fillBinds(){
+  document.querySelectorAll('.bindfill').forEach(el=>{
+    const v=getByPath(el.dataset.bind);
+    el.textContent=(v==null?'':String(v));
+  });
+}
 function setByPath(path,val){
   const parts=path.split('.');let o=DATA;
   for(let i=0;i<parts.length-1;i++){o=o[parts[i]];}

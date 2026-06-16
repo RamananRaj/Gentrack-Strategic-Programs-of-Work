@@ -57,6 +57,47 @@
 <div id="dash"></div>
 <div id="loadMsg" style="padding:30px;text-align:center;color:#64748b">Connect (optional) and click <b>Load</b> to edit a program.</div>
 
+<!-- Add Program modal -->
+<div class="modal-back" id="programModal">
+  <div class="modal">
+    <h3>Add Program</h3>
+    <p class="sub">Create a program under a Strategic Account. It will be added to the portfolio and published to Git.</p>
+    <label>Strategic Account</label>
+    <select id="mpAccount"></select>
+    <label>Program name</label>
+    <input id="mpName" placeholder="e.g. Billing Uplift">
+    <label>Program Manager (PM)</label>
+    <input id="mpPM" placeholder="e.g. Ram Raj">
+    <div class="row2">
+      <div><label>Start date</label><input id="mpStart" type="date"></div>
+      <div><label>End date</label><input id="mpEnd" type="date"></div>
+    </div>
+    <label>Start from</label>
+    <select id="mpTemplate">
+      <option value="template">RSR template (11 work packages + milestones)</option>
+      <option value="blank">Blank program</option>
+    </select>
+    <div class="actions">
+      <button class="toolbtn" data-close="programModal">Cancel</button>
+      <button class="pubbtn" id="mpCreate">Create program</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Account modal -->
+<div class="modal-back" id="accountModal">
+  <div class="modal">
+    <h3>Add Strategic Account</h3>
+    <p class="sub">A Strategic Account groups one or more programs (e.g. Horizon Power).</p>
+    <label>Account name</label>
+    <input id="maName" placeholder="e.g. Horizon Power">
+    <div class="actions">
+      <button class="toolbtn" data-close="accountModal">Cancel</button>
+      <button class="pubbtn" id="maCreate">Create account</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 <script>
 /* ---------------- GitHub API layer ---------------- */
@@ -159,35 +200,56 @@ document.getElementById('btnPublishReg').onclick=async function(){
   }catch(e){ setStatus('saveStatus','Registry publish failed: '+e.message,false); }
 };
 
+/* ----- in-page modals (replace browser prompts) ----- */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
+document.querySelectorAll('.modal-back').forEach(m=>m.onclick=e=>{ if(e.target===m) m.classList.remove('open'); });
+
 document.getElementById('btnNewAccount').onclick=function(){
-  const name=prompt('New Strategic Account name (e.g. Horizon Power):'); if(!name) return;
+  if(!REG){ alert('Load the portfolio first (Connect).'); return; }
+  maName.value=''; openModal('accountModal'); maName.focus();
+};
+document.getElementById('maCreate').onclick=function(){
+  const name=maName.value.trim(); if(!name){ maName.focus(); return; }
   const id=slug(name);
   if(REG.accounts.some(a=>a.id===id)){ alert('An account with that id already exists.'); return; }
   REG.accounts.push({id,name,programs:[]}); regDirty=true;
   fillAccounts(); accountSel.value=id; fillPrograms();
-  setStatus('saveStatus','Account added. Click "Publish registry changes" to save it to Git.',true);
+  closeModal('accountModal');
+  setStatus('saveStatus','Account "'+name+'" added. Add a program, or click "Publish registry changes" to save.',true);
 };
 
-document.getElementById('btnNewProgram').onclick=async function(){
-  const a=curAccount(); if(!a){ alert('Create/select an account first.'); return; }
-  const name=prompt('New Program name (e.g. Billing Uplift):'); if(!name) return;
+document.getElementById('btnNewProgram').onclick=function(){
+  if(!REG||!REG.accounts.length){ alert('Create an account first.'); return; }
+  // populate account dropdown, preselect current
+  mpAccount.innerHTML=REG.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  if(curAccount()) mpAccount.value=curAccount().id;
+  mpName.value=''; mpPM.value=''; mpStart.value=''; mpEnd.value=''; mpTemplate.value='template';
+  openModal('programModal'); mpName.focus();
+};
+document.getElementById('mpCreate').onclick=async function(){
+  const acc=REG.accounts.find(a=>a.id===mpAccount.value); if(!acc){ alert('Pick an account.'); return; }
+  const name=mpName.value.trim(); if(!name){ mpName.focus(); return; }
   const id=slug(name);
-  if(a.programs.some(p=>p.id===id)){ alert('A program with that id already exists in this account.'); return; }
-  const useTemplate=confirm('Start from the RSR template?\n\nOK = pre-filled work packages / milestones structure\nCancel = blank program');
-  const file='programs/'+a.id+'-'+id+'.json';
-  const data=useTemplate?templateData(name,a.name):blankData(name,a.name);
-  // write the new program file
+  if(acc.programs.some(p=>p.id===id)){ alert('A program with that id already exists in this account.'); return; }
+  const pm=mpPM.value.trim(), start=mpStart.value, end=mpEnd.value;
+  const file='programs/'+acc.id+'-'+id+'.json';
+  const data=(mpTemplate.value==='template')?templateData(name,acc.name):blankData(name,acc.name);
+  data.meta.projectManager=pm; if(start)data.meta.programStartDate=start; data.meta.programEndDate=end||'';
   try{
-    if(GH.token){ const res=await ghPut(file, data, 'Create program '+name, null); }
-    else { setStatus('saveStatus','No token: program added locally. Connect + Publish to save the file.',null); }
+    if(GH.token){ await ghPut(file, data, 'Create program '+name, null); }
+    else { setStatus('saveStatus','No token: program added locally only. Connect + Publish to save the file.',null); }
   }catch(e){ setStatus('saveStatus','Could not create file: '+e.message,false); return; }
-  a.programs.push({id,name,file}); regDirty=true;
-  fillPrograms(); programSel.value=id;
-  // publish registry too
+  acc.programs.push({id,name,file,pm,startDate:start,endDate:end}); regDirty=true;
+  // switch selection to the new account+program
+  fillAccounts(); accountSel.value=acc.id; fillPrograms(); programSel.value=id;
   if(GH.token){ try{ const r=await ghPut('registry.json',REG,'Add program '+name,regSha); regSha=r.content.sha; regDirty=false; }catch(e){} }
   setData(data); EDIT=true; progSha=null; renderAll();
+  const et=document.getElementById('editToggle'); if(et){ et.textContent='✎ Edit: On'; et.style.background='var(--amberbg)'; }
   document.getElementById('loadMsg').textContent='';
-  setStatus('saveStatus','Program "'+name+'" created'+(GH.token?' and published ✓':' locally').trim(),true);
+  closeModal('programModal');
+  setStatus('saveStatus','Program "'+name+'" created under '+acc.name+(GH.token?' and published ✓':' (local)'),true);
 };
 
 document.getElementById('btnDeleteProgram').onclick=async function(){
@@ -209,7 +271,7 @@ document.getElementById('btnDownload').onclick=function(){
 /* ---------------- helpers ---------------- */
 function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);}
 function blankData(name,account){
-  return {meta:{program:name,subtitle:'',client:account,supplier:'Gentrack Pty Ltd',sowRef:'',reportOwner:'Ram Raj',reportDate:new Date().toISOString().slice(0,10),reportWeek:'Week ending '+new Date().toISOString().slice(0,10),programStartDate:new Date().toISOString().slice(0,10),programStart:'Month 0',programDuration:'',overallStatus:'Green',overallNarrative:''},
+  return {meta:{program:name,subtitle:'',client:account,supplier:'Gentrack Pty Ltd',sowRef:'',reportOwner:'Ram Raj',projectManager:'',reportDate:new Date().toISOString().slice(0,10),reportWeek:'Week ending '+new Date().toISOString().slice(0,10),programStartDate:new Date().toISOString().slice(0,10),programEndDate:'',programStart:'Month 0',programDuration:'',overallStatus:'Green',overallNarrative:''},
     pillars:[{id:'scope',name:'Scope',status:'Green',summary:''},{id:'timeline',name:'Timeline',status:'Green',summary:''},{id:'quality',name:'Quality',status:'Green',summary:''}],
     workPackages:[],milestones:[],deliverables:[],ootb:[],gaps:[],catalog:[],risks:[],
     weekly:{accomplishments:[],planned:[],blockers:[]},weeklyUpdates:[],payments:[],resources:[]};

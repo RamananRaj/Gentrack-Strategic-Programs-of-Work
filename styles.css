@@ -100,3 +100,17 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gh-ok{color:var(--green);font-weight:700}.gh-bad{color:var(--red);font-weight:700}
 .pubbtn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
 .pill-note{font-size:11px;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.pgrid .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.pgrid .editable{font-size:13px;font-weight:600}
+@media(max-width:760px){.pgrid{grid-template-columns:1fr 1fr}}
+/* in-page modal (replaces browser prompts) */
+.modal-back{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:flex-start;justify-content:center;z-index:100;padding:60px 16px}
+.modal-back.open{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{margin:0 0 4px;font-size:16px}
+.modal .sub{color:var(--muted);font-size:12px;margin:0 0 16px}
+.modal label{display:block;font-size:12px;font-weight:600;color:#334155;margin:10px 0 4px}
+.modal input,.modal select{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
