@@ -64,5 +64,39 @@
   .footer{color:var(--muted);font-size:11px;text-align:center;margin-top:30px}
   .row-actions{white-space:nowrap}
   .xbtn{border:0;background:transparent;color:var(--red);cursor:pointer;font-weight:700}
+  .wpdrill{background:#fff;border:1px solid var(--line);border-left-width:3px;border-radius:10px;margin-bottom:8px;overflow:hidden}
+  .wpdrill>summary{list-style:none;cursor:pointer;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:13px;user-select:none}
+  .wpdrill>summary::-webkit-details-marker{display:none}
+  .wpdrill>summary:hover{background:#f8fafc}
+  .wpdrill .wpdrill-tri{transition:transform .15s;color:var(--muted);font-size:11px}
+  .wpdrill[open] .wpdrill-tri{transform:rotate(90deg)}
+  .wpdrill-body{padding:4px 16px 16px;font-size:12.5px;border-top:1px solid var(--line)}
+  .critcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .critcol{border-radius:10px;padding:10px 12px}
+  .critcol.entry{background:#f0fdf4;border:1px solid #bbf7d0}
+  .critcol.exit{background:#eff6ff;border:1px solid #bfdbfe}
+  .critcol h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  .critcol.entry h4{color:#166534}.critcol.exit h4{color:#1e40af}
+  .critlist{margin:0;padding-left:18px}.critlist li{margin:3px 0}
+  @media(max-width:760px){.critcols{grid-template-columns:1fr}}
   @media(max-width:760px){.grid3,.kpis{grid-template-columns:1fr 1fr}.tlrow,.tlaxis{grid-template-columns:110px 1fr}}
   @media print{nav.tabs,header.top .meta,.no-print{display:none!important}.card{break-inside:avoid}}
+
+/* ---- multi-program portfolio bar ---- */
+.portfolio{background:#0b2545;color:#fff;padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.portfolio .pf-title{font-weight:800;font-size:15px;letter-spacing:.3px}
+.portfolio .pf-sel{display:flex;align-items:center;gap:6px;font-size:12px}
+.portfolio select{font:inherit;border:1px solid #1e3a5f;background:#13315c;color:#fff;border-radius:7px;padding:5px 8px}
+.portfolio .spacer{flex:1}
+.portfolio a.adminlink{color:#9ec5ff;font-size:12px;text-decoration:none;border:1px solid #1e3a5f;padding:5px 10px;border-radius:7px}
+/* hide editing affordances in read-only viewer */
+body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWeek, body.view-mode .addrow{display:none!important}
+/* admin panel */
+.adminbar{background:#fff;border-bottom:1px solid var(--line);padding:12px 18px}
+.adminbar h2{margin:0 0 8px;font-size:14px}
+.adminrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.adminrow input,.adminrow select{font:inherit;border:1px solid var(--line);border-radius:7px;padding:6px 9px}
+.adminrow input[type=password],.adminrow input.wide{min-width:280px}
+.gh-ok{color:var(--green);font-weight:700}.gh-bad{color:var(--red);font-weight:700}
+.pubbtn{background:var(--green);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+.pill-note{font-size:11px;color:var(--muted)}

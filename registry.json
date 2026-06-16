@@ -1,0 +1,16 @@
+{
+  "portfolio": "Gentrack Strategic Programs of Work",
+  "accounts": [
+    {
+      "id": "horizon-power",
+      "name": "Horizon Power",
+      "programs": [
+        {
+          "id": "rsr",
+          "name": "Retail Systems Replacement (RSR)",
+          "file": "programs/horizon-power-rsr.json"
+        }
+      ]
+    }
+  ]
+}

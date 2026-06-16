@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Gentrack Strategic Programs of Work</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-mode">
+
+<div class="portfolio">
+  <span class="pf-title">⚙ Admin — Gentrack Strategic Programs</span>
+  <span class="spacer"></span>
+  <a class="adminlink" href="index.html">↩ Open viewer</a>
+</div>
+
+<div class="adminbar">
+  <h2>1 · Connect to GitHub</h2>
+  <div class="adminrow">
+    <input id="ghOwner" placeholder="owner" value="RamananRaj" title="GitHub owner/org">
+    <span>/</span>
+    <input id="ghRepo" class="wide" placeholder="repo" value="Gentrack-Strategic-Programs-of-Work">
+    <input id="ghBranch" placeholder="branch" value="main" style="width:90px">
+  </div>
+  <div class="adminrow">
+    <input id="ghToken" type="password" placeholder="GitHub Personal Access Token (Contents: Read & Write)">
+    <button class="toolbtn" id="btnConnect">Connect</button>
+    <label class="pill-note"><input type="checkbox" id="ghRemember"> remember token in this browser</label>
+    <span id="ghStatus" class="pill-note">Not connected — you can still preview, but publishing needs a token.</span>
+  </div>
+  <div class="pill-note">Your token is used only by your browser to call GitHub’s API. It is never committed. Use a fine-grained PAT scoped to this one repo with <b>Contents: Read &amp; Write</b>.</div>
+</div>
+
+<div class="adminbar">
+  <h2>2 · Choose / manage what you’re editing</h2>
+  <div class="adminrow">
+    <span class="pf-sel">Account
+      <select id="accountSel"></select>
+    </span>
+    <span class="pf-sel">Program
+      <select id="programSel"></select>
+    </span>
+    <button class="toolbtn" id="btnLoad">Load</button>
+    <span style="flex:1"></span>
+    <button class="toolbtn" id="btnNewAccount">+ New account</button>
+    <button class="toolbtn" id="btnNewProgram">+ New program</button>
+    <button class="toolbtn" id="btnDeleteProgram" style="color:var(--red)">Delete program</button>
+  </div>
+  <div class="adminrow">
+    <button class="pubbtn" id="btnPublish">⬆ Publish current program to Git</button>
+    <button class="toolbtn" id="btnPublishReg">Publish registry changes</button>
+    <button class="toolbtn" id="btnDownload">⬇ Download JSON (backup)</button>
+    <span id="saveStatus" class="pill-note"></span>
+  </div>
+</div>
+
+<div id="dash"></div>
+<div id="loadMsg" style="padding:30px;text-align:center;color:#64748b">Connect (optional) and click <b>Load</b> to edit a program.</div>
+
+<script src="app.js"></script>
+<script>
+/* ---------------- GitHub API layer ---------------- */
+const GH={owner:'',repo:'',branch:'main',token:''};
+let REG=null, regSha=null, progSha=null, regDirty=false;
+
+function b64e(s){return btoa(unescape(encodeURIComponent(s)));}
+function b64d(s){return decodeURIComponent(escape(atob(s)));}
+function hdr(){const h={'Accept':'application/vnd.github+json'}; if(GH.token)h['Authorization']='Bearer '+GH.token; return h;}
+function readGH(){ GH.owner=ghOwner.value.trim(); GH.repo=ghRepo.value.trim(); GH.branch=(ghBranch.value.trim()||'main'); GH.token=ghToken.value.trim(); }
+function apiUrl(path){return `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${GH.branch}`;}
+
+async function ghGet(path){
+  const r=await fetch(apiUrl(path),{headers:hdr()});
+  if(r.status===404) return {json:null,sha:null};
+  if(!r.ok) throw new Error('GET '+path+' → '+r.status);
+  const j=await r.json();
+  return {json:JSON.parse(b64d(j.content)), sha:j.sha};
+}
+async function ghPut(path,obj,msg,sha){
+  if(!GH.token) throw new Error('No token — cannot publish.');
+  const body={message:msg, content:b64e(JSON.stringify(obj,null,2)), branch:GH.branch};
+  if(sha) body.sha=sha;
+  const r=await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`,
+    {method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr()),body:JSON.stringify(body)});
+  if(!r.ok) throw new Error('PUT '+path+' → '+r.status+' '+(await r.text()).slice(0,200));
+  return r.json();
+}
+function setStatus(el,msg,ok){ const e=document.getElementById(el); e.textContent=msg; e.className='pill-note '+(ok===true?'gh-ok':ok===false?'gh-bad':''); }
+
+/* ---------------- registry & data loading ---------------- */
+async function loadRegistry(){
+  // Prefer GitHub (authenticated, freshest); fall back to local fetch for preview.
+  if(GH.token){ const r=await ghGet('registry.json'); REG=r.json; regSha=r.sha; }
+  else { const res=await fetch('registry.json?_='+Date.now()); REG=await res.json(); regSha=null; }
+  regDirty=false;
+}
+function fillAccounts(){
+  accountSel.innerHTML=(REG.accounts||[]).map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  fillPrograms();
+}
+function curAccount(){ return (REG.accounts||[]).find(a=>a.id===accountSel.value); }
+function fillPrograms(){
+  const a=curAccount();
+  programSel.innerHTML=((a&&a.programs)||[]).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+}
+function curProgram(){ const a=curAccount(); return a&&a.programs.find(p=>p.id===programSel.value); }
+
+async function loadProgram(){
+  const p=curProgram(); if(!p){ alert('No program selected. Add one first.'); return; }
+  let data;
+  if(GH.token){ const r=await ghGet(p.file); data=r.json; progSha=r.sha; }
+  else { const res=await fetch(p.file+'?_='+Date.now()); data=await res.json(); progSha=null; }
+  document.getElementById('loadMsg').textContent='';
+  setData(data); EDIT=true; renderAll();
+  // turn edit mode on visibly
+  const et=document.getElementById('editToggle'); if(et){ et.textContent='✎ Edit: On'; et.style.background='var(--amberbg)'; }
+  setStatus('saveStatus','Loaded "'+p.name+'". Edit below, then Publish.',true);
+}
+
+/* ---------------- actions ---------------- */
+document.getElementById('btnConnect').onclick=async function(){
+  readGH();
+  if(ghRemember.checked && GH.token) localStorage.setItem('gh_pat',GH.token);
+  if(!ghRemember.checked) localStorage.removeItem('gh_pat');
+  localStorage.setItem('gh_owner',GH.owner); localStorage.setItem('gh_repo',GH.repo); localStorage.setItem('gh_branch',GH.branch);
+  try{
+    if(GH.token){
+      const r=await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}`,{headers:hdr()});
+      if(!r.ok) throw new Error(r.status===401?'Bad token':r.status===404?'Repo not found / no access':('HTTP '+r.status));
+    }
+    await loadRegistry(); fillAccounts();
+    setStatus('ghStatus', GH.token?'Connected ✓ — publishing enabled.':'Preview mode (no token).', GH.token?true:null);
+  }catch(e){ setStatus('ghStatus','Connection failed: '+e.message,false); }
+};
+
+document.getElementById('btnLoad').onclick=()=>loadProgram().catch(e=>setStatus('saveStatus',e.message,false));
+document.getElementById('accountSel').onchange=fillPrograms;
+
+document.getElementById('btnPublish').onclick=async function(){
+  const p=curProgram(); if(!p){ alert('No program selected.'); return; }
+  if(!GH.token){ alert('Enter a token and Connect to publish.'); return; }
+  if(!DATA||!DATA.meta){ alert('Load a program first.'); return; }
+  try{
+    setStatus('saveStatus','Publishing…');
+    DATA.meta.reportDate=new Date().toISOString().slice(0,10);
+    const res=await ghPut(p.file, DATA, 'Update '+p.name+' — '+DATA.meta.reportDate, progSha);
+    progSha=res.content.sha;
+    setStatus('saveStatus','Published ✓ — live in ~1 min at the Pages URL.',true);
+  }catch(e){ setStatus('saveStatus','Publish failed: '+e.message,false); }
+};
+
+document.getElementById('btnPublishReg').onclick=async function(){
+  if(!GH.token){ alert('Enter a token and Connect to publish.'); return; }
+  try{
+    setStatus('saveStatus','Publishing registry…');
+    const res=await ghPut('registry.json', REG, 'Update registry (accounts/programs)', regSha);
+    regSha=res.content.sha; regDirty=false;
+    setStatus('saveStatus','Registry published ✓',true);
+  }catch(e){ setStatus('saveStatus','Registry publish failed: '+e.message,false); }
+};
+
+document.getElementById('btnNewAccount').onclick=function(){
+  const name=prompt('New Strategic Account name (e.g. Horizon Power):'); if(!name) return;
+  const id=slug(name);
+  if(REG.accounts.some(a=>a.id===id)){ alert('An account with that id already exists.'); return; }
+  REG.accounts.push({id,name,programs:[]}); regDirty=true;
+  fillAccounts(); accountSel.value=id; fillPrograms();
+  setStatus('saveStatus','Account added. Click "Publish registry changes" to save it to Git.',true);
+};
+
+document.getElementById('btnNewProgram').onclick=async function(){
+  const a=curAccount(); if(!a){ alert('Create/select an account first.'); return; }
+  const name=prompt('New Program name (e.g. Billing Uplift):'); if(!name) return;
+  const id=slug(name);
+  if(a.programs.some(p=>p.id===id)){ alert('A program with that id already exists in this account.'); return; }
+  const useTemplate=confirm('Start from the RSR template?\n\nOK = pre-filled work packages / milestones structure\nCancel = blank program');
+  const file='programs/'+a.id+'-'+id+'.json';
+  const data=useTemplate?templateData(name,a.name):blankData(name,a.name);
+  // write the new program file
+  try{
+    if(GH.token){ const res=await ghPut(file, data, 'Create program '+name, null); }
+    else { setStatus('saveStatus','No token: program added locally. Connect + Publish to save the file.',null); }
+  }catch(e){ setStatus('saveStatus','Could not create file: '+e.message,false); return; }
+  a.programs.push({id,name,file}); regDirty=true;
+  fillPrograms(); programSel.value=id;
+  // publish registry too
+  if(GH.token){ try{ const r=await ghPut('registry.json',REG,'Add program '+name,regSha); regSha=r.content.sha; regDirty=false; }catch(e){} }
+  setData(data); EDIT=true; progSha=null; renderAll();
+  document.getElementById('loadMsg').textContent='';
+  setStatus('saveStatus','Program "'+name+'" created'+(GH.token?' and published ✓':' locally').trim(),true);
+};
+
+document.getElementById('btnDeleteProgram').onclick=async function(){
+  const a=curAccount(); const p=curProgram(); if(!p){ alert('No program selected.'); return; }
+  if(!confirm('Remove "'+p.name+'" from the portfolio? (The data file stays in the repo; it just won’t be listed.)')) return;
+  a.programs=a.programs.filter(x=>x.id!==p.id); regDirty=true;
+  fillPrograms();
+  if(GH.token){ try{ const r=await ghPut('registry.json',REG,'Remove program '+p.name,regSha); regSha=r.content.sha; regDirty=false; setStatus('saveStatus','Program removed ✓',true);}catch(e){ setStatus('saveStatus','Failed: '+e.message,false);} }
+  else setStatus('saveStatus','Removed locally. Publish registry to save.',null);
+};
+
+document.getElementById('btnDownload').onclick=function(){
+  if(!DATA||!DATA.meta){ alert('Load a program first.'); return; }
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(curProgram()?curProgram().id:'program')+'.json';a.click();
+};
+
+/* ---------------- helpers ---------------- */
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);}
+function blankData(name,account){
+  return {meta:{program:name,subtitle:'',client:account,supplier:'Gentrack Pty Ltd',sowRef:'',reportOwner:'Ram Raj',reportDate:new Date().toISOString().slice(0,10),reportWeek:'Week ending '+new Date().toISOString().slice(0,10),programStartDate:new Date().toISOString().slice(0,10),programStart:'Month 0',programDuration:'',overallStatus:'Green',overallNarrative:''},
+    pillars:[{id:'scope',name:'Scope',status:'Green',summary:''},{id:'timeline',name:'Timeline',status:'Green',summary:''},{id:'quality',name:'Quality',status:'Green',summary:''}],
+    workPackages:[],milestones:[],deliverables:[],ootb:[],gaps:[],catalog:[],risks:[],
+    weekly:{accomplishments:[],planned:[],blockers:[]},weeklyUpdates:[],payments:[],resources:[]};
+}
+function templateData(name,account){
+  const d=blankData(name,account);
+  d.meta.subtitle='M2C / Billing implementation';
+  d.meta.programDuration='16 delivery months (DM0–DM16)';
+  const wps=[["WP1","Technical Design Validation – Configure – Build","Design & Build"],["WP2","System Testing","Testing"],["WP3","Data Migration","Data Migration"],["WP4","Integration Rebuild","Design & Build"],["WP5","End-to-End Testing Cycles","Testing"],["WP6","Training (Train the Trainer)","Training"],["WP7","Production Readiness and Cutover","Cutover"],["WP8","Hypercare Support & Warranty","Hypercare"],["WP9","Inflight Transactions","Plan & Initiation"],["WP10","Meter Data Conversion","Cutover"],["WP11","Legacy System Decommissioning","Post Go-Live"]];
+  d.workPackages=wps.map(([id,nm,ph])=>({id,name:nm,owner:'Gentrack',status:'Not Started',pct:0,rag:'Green',phase:ph,scopeNote:'',deliverables:'',note:'',entry:[],exit:[]}));
+  const ms=[["PM1","DM0","Readiness","Kick Off","SOW Signature","—"],["PM2","DM1","Plan & Initiation","Build Start","Implementation Schedule","10%"],["PM3","DM6","Design & Build","Build End","Customisation Solution Design + ICDs","15%"],["PM4","DM7","System Testing","SIT Start","Test Summary Report","10%"],["PM5","DM10","Testing","SIT End","Final SIT Report","10%"],["PM6","DM10","Data Migration","Trial Migration End","Data Migration Design + Report","10%"],["PM7","DM12","Testing","UAT End","UAT Report + Migration Cutover Strategy","10%"],["PM8","DM14","Cutover & Hypercare","Go-Live & Hypercare Start","CAB Report + Deployment Runbook","10%"],["PM9","DM16","Cutover & Hypercare","Hypercare End","Program Closure Report","5%"]];
+  d.milestones=ms.map(([id,dm,ph,nm,del,pct])=>({id,delMonth:dm,phase:ph,name:nm,trigger:del,pct,status:'Not Started',deliverables:del}));
+  d.payments=ms.map(([id,dm,ph,nm,del,pct])=>({id,delMonth:dm,milestone:nm,pct,amount:'',status:'Not Due'}));
+  return d;
+}
+
+/* ---------------- boot ---------------- */
+(function boot(){
+  mountDashboard('dash');
+  ghOwner.value=localStorage.getItem('gh_owner')||ghOwner.value;
+  ghRepo.value=localStorage.getItem('gh_repo')||ghRepo.value;
+  ghBranch.value=localStorage.getItem('gh_branch')||ghBranch.value;
+  const saved=localStorage.getItem('gh_pat');
+  if(saved){ ghToken.value=saved; ghRemember.checked=true; }
+  // load registry for preview immediately (no token needed)
+  fetch('registry.json?_='+Date.now()).then(r=>r.json()).then(reg=>{ REG=reg; fillAccounts(); })
+    .catch(()=>setStatus('ghStatus','Could not read registry.json locally. Connect with a token.',false));
+})();
+</script>
+</body>
+</html>

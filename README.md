@@ -1,66 +1,52 @@
-# RSR Program Dashboard
+# Gentrack Strategic Programs of Work
 
-A self-contained, editable IT program dashboard for the **Retail Systems Replacement (RSR)** program — Horizon Power M2C upgrade (G2 Billing + Velocity for Network), delivered by Gentrack. Built from the Implementation SOW (HPSR0548).
+A static, Git-hosted portfolio dashboard. One **viewer** site that anyone can read, and a separate **admin** page that writes changes straight back to this repo via the GitHub API — so updates publish to everyone without using a terminal.
 
-It reports against three pillars — **Scope · Timeline · Quality** — and covers Work Packages, Timeline/Milestones, Deliverables, G2/VFN OOTB build, Product Gaps, and Product Catalog, plus an auto-generated **management newsletter** you can email.
+Structure: **Portfolio → Strategic Account → Program → dashboard.**
+Example: *Gentrack Strategic Programs of Work* → *Horizon Power* → *Retail Systems Replacement (RSR)*.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `index.html` | The dashboard (open in any browser). No build step, no dependencies. |
-| `data.json` | All the program data. **This is the single source of truth** — edit it to update the dashboard. |
-| `README.md` | This file. |
+| `index.html` | **Viewer** (read-only). Account + Program pickers, then the full dashboard. Share this URL with management. |
+| `admin.html` | **Admin**. Connect with a GitHub token, edit any program, add accounts/programs, publish to Git. |
+| `app.js` | Shared dashboard markup + rendering logic used by both pages. |
+| `styles.css` | Shared styling. |
+| `registry.json` | The portfolio index: accounts and their programs (each pointing to a data file). |
+| `programs/*.json` | One file per program (e.g. `programs/horizon-power-rsr.json`). The single source of truth for that program. |
 
-The dashboard reads `data.json` when served over the web. When you open `index.html` directly off disk, it falls back to a copy of the data embedded inside the file, so it always renders.
+## The dashboard
 
-## How to update the dashboard
+Each program reports against **Scope · Timeline · Quality**, with tabs for Overview, Weekly Updates (archive), Work Packages (drill into Entry/Exit criteria), Timeline (SOW DM0–DM16 with calendar dates), Deliverables (grouped by work package), G2/VFN OOTB, Product Gaps, Product Catalog, Payments, Resources, and an emailable Newsletter.
 
-1. Open `index.html` in your browser.
-2. Click **✎ Edit: Off** (top right) to turn editing on.
-3. Edit any cell, status dropdown, RAG, %, narrative, or use **+ Add** buttons to add rows.
-4. Click **⬇ Save data.json** — your browser downloads an updated `data.json`.
-5. Replace the `data.json` in the repo with the downloaded file and commit (see below). Everyone viewing the site now sees your update.
+## Hosting (GitHub Pages)
 
-> Tip: edits live only in your browser until you download and commit `data.json`. Nothing is lost — just remember to Save + commit to publish.
+Already set up for this repo. If recreating: **Settings → Pages → Deploy from a branch → main / (root) → Save**. Live at:
 
-## Host it on GitHub Pages (everyone can see it)
+- Viewer: `https://ramananraj.github.io/Gentrack-Strategic-Programs-of-Work/`
+- Admin:  `https://ramananraj.github.io/Gentrack-Strategic-Programs-of-Work/admin.html`
 
-1. Create a repo (e.g. `rsr-program-dashboard`) and add these three files at the root.
-   ```bash
-   git init
-   git add index.html data.json README.md
-   git commit -m "RSR program dashboard"
-   git branch -M main
-   git remote add origin https://github.com/<your-org>/rsr-program-dashboard.git
-   git push -u origin main
-   ```
-2. In GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch**, pick **main / (root)**, Save.
-3. After a minute your dashboard is live at:
-   `https://<your-org>.github.io/rsr-program-dashboard/`
-4. Share that URL with management. It's read-only for viewers — they always see the latest committed `data.json`.
+## Updating via the admin page (no terminal)
 
-### Publishing an update
+1. **Create a GitHub Personal Access Token** (one-off): GitHub → Settings → Developer settings → **Fine-grained tokens** → Generate. Repository access = only `Gentrack-Strategic-Programs-of-Work`. Permissions → **Contents: Read and write**. Copy the token.
+2. Open **admin.html**, paste the token, click **Connect** (tick "remember" to store it in your browser only).
+3. Pick an Account + Program → **Load**. Turn edits inline (Edit is on automatically).
+4. For the weekly cycle: update the Weekly Update lists, click **📌 Archive this week**, then **⬆ Publish current program to Git**. Live in ~1 minute.
+5. **+ New account** / **+ New program** to grow the portfolio (new programs can start from the RSR template). **Publish registry changes** saves the portfolio index.
+
+The token lives only in your browser and is sent only to GitHub's API. It is never written into the repo. Keep `admin.html` for yourself; viewers use `index.html`.
+
+## Updating via terminal (alternative)
+
+Edit a `programs/*.json` file (or use the admin **⬇ Download JSON** then replace the file), then:
+
 ```bash
-# after replacing data.json with the file you downloaded from the dashboard
-git add data.json
-git commit -m "Program update — <date>"
-git push
+git add -A && git commit -m "Update <program> $(date +%Y-%m-%d)" && git push
 ```
-GitHub Pages redeploys automatically; viewers get the new data on refresh.
 
-> If you want updates restricted to you, keep the repo private to editors and rely on the Pages URL for read-only viewers, or protect `main` and update via pull request so changes are reviewed.
+## Notes
 
-## The newsletter
-
-Open the **Newsletter** tab. It's generated live from the current data:
-
-- **Copy (rich)** — paste straight into Outlook/Gmail with formatting.
-- **Copy (plain text)** — for plain emails.
-- **Open in email** — drafts an email with the update in your mail client.
-- **Print / PDF** — print the whole dashboard or save the newsletter as PDF.
-
-## Notes on the data
-
-- Statuses, %, RAG and dates are seeded as a starting baseline from the SOW — review and set them to the real current position before your first management report.
-- The MSC (Master Supply Contract) governs legal terms and isn't tracked here; this dashboard is the delivery/scope/timeline/quality view.
+- Seeded statuses/percentages are a baseline from the SOW — set them to the real position.
+- `programStartDate` in each program drives the calendar timeline; set it to the real SOW commencement.
+- The MSC (master legal contract) is not tracked here; this is the delivery/scope/timeline/quality view.
