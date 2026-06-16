@@ -282,7 +282,7 @@ function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-
 function blankData(name,account){
   return {meta:{program:name,subtitle:'',client:account,supplier:'Gentrack Pty Ltd',sowRef:'',reportOwner:'Ram Raj',projectManager:'',reportDate:new Date().toISOString().slice(0,10),reportWeek:'Week ending '+new Date().toISOString().slice(0,10),programStartDate:new Date().toISOString().slice(0,10),programEndDate:'',programStart:'Month 0',programDuration:'',overallStatus:'Green',overallNarrative:''},
     pillars:[{id:'scope',name:'Scope',status:'Green',summary:''},{id:'timeline',name:'Timeline',status:'Green',summary:''},{id:'quality',name:'Quality',status:'Green',summary:''}],
-    workPackages:[],milestones:[],deliverables:[],ootb:[],gaps:[],catalog:[],risks:[],
+    workPackages:[],milestones:[],deliverables:[],stories:[],gaps:[],catalog:[],risks:[],
     weekly:{accomplishments:[],planned:[],blockers:[]},weeklyUpdates:[],payments:[],resources:[]};
 }
 function templateData(name,account){

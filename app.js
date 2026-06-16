@@ -11,7 +11,7 @@ const DASH_HTML = `
   <button data-tab="workpackages">Work Packages</button>
   <button data-tab="timeline">Timeline</button>
   <button data-tab="deliverables">Deliverables</button>
-  <button data-tab="ootb">G2/VFN OOTB</button>
+  <button data-tab="stories">Functional Build Packages</button>
   <button data-tab="gaps">Product Gaps</button>
   <button data-tab="catalog">Product Catalog</button>
   <button data-tab="payments">Payments</button>
@@ -149,14 +149,20 @@ const DASH_HTML = `
   </section>
 
   <!-- OOTB -->
-  <section class="tab" id="ootb">
+  <section class="tab" id="stories">
     <div class="card">
-      <h2 class="sec">G2 / VFN Execution — Building the OOTB Solution</h2>
-      <p class="hint">Out-of-the-box build status by functional area. Approach reflects the SOW "Adopt first, Adapt when needed" principle.</p>
-      <table id="ootbTable"><thead><tr>
-        <th>Functional Area</th><th class="pillcell">Platform</th><th class="pillcell">Approach</th><th class="pillcell">Build Status</th><th class="pillcell">RAG</th><th>Note</th><th class="no-print"></th>
+      <h2 class="sec">Functional Build Packages</h2>
+      <p class="hint">User stories as line items — track status and progress, and allocate the resource doing the work. Assignees come from the Resources tab.</p>
+      <div class="kpis" id="storyKpis" style="grid-template-columns:repeat(4,1fr)"></div>
+      <table id="storyTable"><thead><tr>
+        <th>ID</th><th>User Story</th><th>Area</th><th class="pillcell">Platform</th><th class="pillcell">Type</th><th class="pillcell">Assignee</th><th class="pillcell">Status</th><th>Progress</th><th class="pillcell">Sprint</th><th class="no-print"></th>
       </tr></thead><tbody></tbody></table>
-      <div class="addrow no-print"><button class="toolbtn" data-add="ootb">+ Add area</button></div>
+      <div class="addrow no-print"><button class="toolbtn" data-add="stories">+ Add user story</button></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Allocation — Who’s Doing What</h2>
+      <p class="hint">Rolled up from the Assignee column. Helps see workload and unassigned stories at a glance.</p>
+      <table id="allocTable"><thead><tr><th>Resource</th><th class="pillcell">Stories</th><th class="pillcell">In Progress</th><th class="pillcell">Complete</th><th class="pillcell">Avg Progress</th></tr></thead><tbody></tbody></table>
     </div>
   </section>
 
@@ -514,17 +520,46 @@ function renderDeliverables(){
   tb.innerHTML=html;
 }
 
-function renderOOTB(){
-  const tb=document.querySelector('#ootbTable tbody');
-  tb.innerHTML=DATA.ootb.map((o,i)=>`<tr>
-    <td>${ce('ootb.'+i+'.area',o.area)}</td>
-    <td class="pillcell">${ce('ootb.'+i+'.platform',o.platform)}</td>
-    <td class="pillcell">${ce('ootb.'+i+'.approach',o.approach)}</td>
-    <td class="pillcell">${statusSelect('ootb.'+i+'.buildStatus',o.buildStatus,["Not Started","In Progress","Complete","At Risk"])}</td>
-    <td class="pillcell">${ragSelect('ootb.'+i+'.rag',o.rag)}</td>
-    <td>${ce('ootb.'+i+'.note',o.note)}</td>
-    ${delBtn('ootb',i)}
-  </tr>`).join('');
+function assigneeSelect(bind,val){
+  if(!EDIT) return `<b>${esc(val||'—')}</b>`;
+  const names=(DATA.resources||[]).map(r=>r.name);
+  if(val && !names.includes(val)) names.unshift(val);
+  return `<select class="st" data-bind="${bind}"><option value="">— unassigned —</option>`+
+    names.map(n=>`<option ${n===val?'selected':''}>${esc(n)}</option>`).join('')+`</select>`;
+}
+function renderStories(){
+  const arr=DATA.stories||[];
+  const tb=document.querySelector('#storyTable tbody');
+  tb.innerHTML=arr.map((o,i)=>{
+    const locked=(o.status==='Not Started'||o.status==='Complete');
+    const pctCell=(EDIT&&!locked)?`<span class="editable" data-bind="stories.${i}.pct">${esc(o.pct)}</span>`:esc(o.pct);
+    return `<tr>
+    <td><b>${ce('stories.'+i+'.id',o.id)}</b></td>
+    <td>${ce('stories.'+i+'.title',o.title)}</td>
+    <td>${ce('stories.'+i+'.area',o.area)}</td>
+    <td class="pillcell">${ce('stories.'+i+'.platform',o.platform)}</td>
+    <td class="pillcell">${ce('stories.'+i+'.type',o.type)}</td>
+    <td class="pillcell">${assigneeSelect('stories.'+i+'.assignee',o.assignee)}</td>
+    <td class="pillcell">${statusSelect('stories.'+i+'.status',o.status,["Not Started","In Progress","Complete","At Risk","On Hold"])}</td>
+    <td><div class="prog"><i style="width:${+o.pct||0}%;background:${ragColor(o.status==='At Risk'?'Amber':o.status==='Complete'?'Green':'Amber')}"></i></div><small>${pctCell}%${(EDIT&&locked)?' <span style="color:#94a3b8" title="Set by status">🔒</span>':''}</small></td>
+    <td class="pillcell">${ce('stories.'+i+'.sprint',o.sprint)}</td>
+    ${delBtn('stories',i)}
+  </tr>`;}).join('')||'<tr><td colspan="10" style="color:#94a3b8">No user stories yet. Click “+ Add user story”.</td></tr>';
+  // KPIs
+  const total=arr.length, inprog=arr.filter(s=>s.status==='In Progress').length,
+        done=arr.filter(s=>s.status==='Complete').length, unassigned=arr.filter(s=>!s.assignee).length;
+  document.getElementById('storyKpis').innerHTML=[
+    ['User Stories',total],['In Progress',inprog],['Complete',done],['Unassigned',unassigned]
+  ].map(([l,n])=>`<div class="kpi"><div class="n">${n}</div><div class="l">${esc(l)}</div></div>`).join('');
+  // Allocation rollup
+  const by={};
+  arr.forEach(s=>{ const k=s.assignee||'— Unassigned —'; (by[k]=by[k]||[]).push(s); });
+  const rows=Object.keys(by).sort().map(k=>{
+    const list=by[k], ip=list.filter(s=>s.status==='In Progress').length, cp=list.filter(s=>s.status==='Complete').length;
+    const avg=Math.round(list.reduce((a,s)=>a+(+s.pct||0),0)/list.length);
+    return `<tr><td><b>${esc(k)}</b></td><td class="pillcell">${list.length}</td><td class="pillcell">${ip}</td><td class="pillcell">${cp}</td><td class="pillcell">${avg}%</td></tr>`;
+  }).join('');
+  document.querySelector('#allocTable tbody').innerHTML=rows||'<tr><td colspan="5" style="color:#94a3b8">No stories to allocate yet.</td></tr>';
 }
 
 function renderGaps(){
@@ -590,7 +625,7 @@ function renderNewsletter(){
 
 function renderAll(){
   renderHeader();renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderRisks();renderWP();
-  renderTimeline();renderDeliverables();renderOOTB();renderGaps();renderCatalog();
+  renderTimeline();renderDeliverables();renderStories();renderGaps();renderCatalog();
   renderPayments();renderResources();renderNewsletter();
   fillBinds();
   bindEditables();
@@ -625,6 +660,11 @@ function bindEditables(){
         if(s.value==='Not Started') wp.pct=0;
         else if(s.value==='Complete'){ wp.pct=100; wp.rag='Green'; }
       }
+      const ms=s.dataset.bind.match(/^stories\.(\d+)\.status$/);
+      if(ms){ const st=DATA.stories[+ms[1]];
+        if(s.value==='Not Started') st.pct=0;
+        else if(s.value==='Complete') st.pct=100;
+      }
       renderAll();
     };
   });
@@ -652,7 +692,7 @@ const TEMPLATES={
   workPackages:{id:'WP?',name:'New work package',owner:'Gentrack',status:'Not Started',pct:0,rag:'Green',phase:'',scopeNote:'',deliverables:'',note:''},
   milestones:{id:'PM?',delMonth:'DM0',phase:'',name:'New milestone',trigger:'',pct:'0%',status:'Not Started',deliverables:''},
   deliverables:{wp:'WP?',phase:'',name:'New deliverable',criteria:'',draft:'—',final:'—',status:'Not Started'},
-  ootb:{area:'New area',platform:'G2',approach:'OOTB',buildStatus:'Not Started',rag:'Green',note:''},
+  stories:{id:'FBP-???',title:'New user story',area:'',platform:'G2',type:'OOTB',assignee:'',status:'Not Started',pct:0,sprint:'',note:''},
   gaps:{id:'GAP-???',area:'',description:'',ootb:'No',disposition:'Adapt',status:'Open',owner:'',priority:'Medium'},
   catalog:{item:'New item',type:'Product',platform:'G2',status:'Not Started',note:''},
   payments:{id:'PM?',delMonth:'DM0',milestone:'New milestone',pct:'0%',amount:'',status:'Not Due'},

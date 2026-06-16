@@ -571,72 +571,6 @@
       "status": "Not Started"
     }
   ],
-  "ootb": [
-    {
-      "area": "G2 Billing — Core Bill Calc",
-      "platform": "G2",
-      "approach": "OOTB",
-      "buildStatus": "In Progress",
-      "rag": "Amber",
-      "note": "Validate co-design user stories; configure standard rating."
-    },
-    {
-      "area": "G2 Billing — Invoicing & Statements",
-      "platform": "G2",
-      "approach": "OOTB",
-      "buildStatus": "In Progress",
-      "rag": "Green",
-      "note": ""
-    },
-    {
-      "area": "G2 — Payments & Receipting",
-      "platform": "G2",
-      "approach": "OOTB",
-      "buildStatus": "Not Started",
-      "rag": "Green",
-      "note": ""
-    },
-    {
-      "area": "G2 — Service Orders / Field",
-      "platform": "G2",
-      "approach": "Adapt",
-      "buildStatus": "Not Started",
-      "rag": "Amber",
-      "note": "Workflow mapping vs HP as-is in progress."
-    },
-    {
-      "area": "G2 — Customer & Account Mgmt",
-      "platform": "G2",
-      "approach": "OOTB",
-      "buildStatus": "In Progress",
-      "rag": "Green",
-      "note": ""
-    },
-    {
-      "area": "VFN — Network Billing",
-      "platform": "VFN",
-      "approach": "OOTB",
-      "buildStatus": "In Progress",
-      "rag": "Amber",
-      "note": ""
-    },
-    {
-      "area": "VFN — Metering / Reads",
-      "platform": "VFN",
-      "approach": "OOTB",
-      "buildStatus": "Not Started",
-      "rag": "Green",
-      "note": "Aligns to WP10 meter conversion."
-    },
-    {
-      "area": "Integrations (G2/VFN)",
-      "platform": "Both",
-      "approach": "Adapt",
-      "buildStatus": "In Progress",
-      "rag": "Amber",
-      "note": "Per Integration Register & ICDs (WP4)."
-    }
-  ],
   "gaps": [
     {
       "id": "GAP-001",
@@ -999,6 +933,104 @@
       "location": "Perth",
       "availability": "Part Time",
       "status": "Active"
+    }
+  ],
+  "stories": [
+    {
+      "id": "FBP-001",
+      "title": "G2 Billing — Core Bill Calc",
+      "area": "G2 Billing — Core Bill Calc",
+      "platform": "G2",
+      "type": "OOTB",
+      "assignee": "",
+      "status": "In Progress",
+      "pct": 50,
+      "sprint": "",
+      "note": "Validate co-design user stories; configure standard rating."
+    },
+    {
+      "id": "FBP-002",
+      "title": "G2 Billing — Invoicing & Statements",
+      "area": "G2 Billing — Invoicing & Statements",
+      "platform": "G2",
+      "type": "OOTB",
+      "assignee": "",
+      "status": "In Progress",
+      "pct": 50,
+      "sprint": "",
+      "note": ""
+    },
+    {
+      "id": "FBP-003",
+      "title": "G2 — Payments & Receipting",
+      "area": "G2 — Payments & Receipting",
+      "platform": "G2",
+      "type": "OOTB",
+      "assignee": "",
+      "status": "Not Started",
+      "pct": 0,
+      "sprint": "",
+      "note": ""
+    },
+    {
+      "id": "FBP-004",
+      "title": "G2 — Service Orders / Field",
+      "area": "G2 — Service Orders / Field",
+      "platform": "G2",
+      "type": "Adapt",
+      "assignee": "",
+      "status": "Not Started",
+      "pct": 0,
+      "sprint": "",
+      "note": "Workflow mapping vs HP as-is in progress."
+    },
+    {
+      "id": "FBP-005",
+      "title": "G2 — Customer & Account Mgmt",
+      "area": "G2 — Customer & Account Mgmt",
+      "platform": "G2",
+      "type": "OOTB",
+      "assignee": "",
+      "status": "In Progress",
+      "pct": 50,
+      "sprint": "",
+      "note": ""
+    },
+    {
+      "id": "FBP-006",
+      "title": "VFN — Network Billing",
+      "area": "VFN — Network Billing",
+      "platform": "VFN",
+      "type": "OOTB",
+      "assignee": "",
+      "status": "In Progress",
+      "pct": 50,
+      "sprint": "",
+      "note": ""
+    },
+    {
+      "id": "FBP-007",
+      "title": "VFN — Metering / Reads",
+      "area": "VFN — Metering / Reads",
+      "platform": "VFN",
+      "type": "OOTB",
+      "assignee": "",
+      "status": "Not Started",
+      "pct": 0,
+      "sprint": "",
+      "note": "Aligns to WP10 meter conversion."
+    },
+    {
+      "id": "FBP-008",
+      "title": "Integrations (G2/VFN)",
+      "area": "Integrations (G2/VFN)",
+      "platform": "Both",
+      "type": "Adapt",
+      "assignee": "",
+      "status": "In Progress",
+      "pct": 50,
+      "sprint": "",
+      "note": "Per Integration Register & ICDs (WP4)."
     }
   ]
 }

@@ -39,7 +39,6 @@
   "workPackages": [],
   "milestones": [],
   "deliverables": [],
-  "ootb": [],
   "gaps": [],
   "catalog": [],
   "risks": [],
@@ -50,5 +49,6 @@
   },
   "weeklyUpdates": [],
   "payments": [],
-  "resources": []
+  "resources": [],
+  "stories": []
 }
