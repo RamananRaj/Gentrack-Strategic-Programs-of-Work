@@ -428,7 +428,7 @@ function renderWP(){
     <td>${ce('workPackages.'+i+'.phase',w.phase)}</td>
     <td class="pillcell">${statusSelect('workPackages.'+i+'.status',w.status)}</td>
     <td><div class="prog"><i style="width:${+w.pct||0}%;background:${ragColor(w.rag)}"></i></div>
-        <small>${EDIT?`<span class="editable" data-bind="workPackages.${i}.pct">${esc(w.pct)}</span>`:esc(w.pct)}%</small></td>
+        <small>${(EDIT && w.status!=='Not Started' && w.status!=='Complete')?`<span class="editable" data-bind="workPackages.${i}.pct">${esc(w.pct)}</span>`:esc(w.pct)}%${(EDIT&&(w.status==='Not Started'||w.status==='Complete'))?' <span style="color:#94a3b8" title="Set by status">🔒</span>':''}</small></td>
     <td class="pillcell">${ragSelect('workPackages.'+i+'.rag',w.rag)}</td>
     <td>${ce('workPackages.'+i+'.note',w.note)}</td>
     ${delBtn('workPackages',i)}
@@ -617,7 +617,16 @@ function bindEditables(){
     el.onblur=()=>{ setByPath(el.dataset.bind, el.textContent.trim()); softRefresh(); };
   });
   document.querySelectorAll('select[data-bind]').forEach(s=>{
-    s.onchange=()=>{ setByPath(s.dataset.bind,s.value); renderAll(); };
+    s.onchange=()=>{
+      setByPath(s.dataset.bind,s.value);
+      // Work Package status drives the progress bar: Not Started → 0%, Complete → 100%
+      const m=s.dataset.bind.match(/^workPackages\.(\d+)\.status$/);
+      if(m){ const wp=DATA.workPackages[+m[1]];
+        if(s.value==='Not Started') wp.pct=0;
+        else if(s.value==='Complete'){ wp.pct=100; wp.rag='Green'; }
+      }
+      renderAll();
+    };
   });
   document.querySelectorAll('[data-del]').forEach(b=>{
     b.onclick=()=>{ const [arr,idx]=b.dataset.del.split(':'); DATA[arr].splice(+idx,1); renderAll(); };
