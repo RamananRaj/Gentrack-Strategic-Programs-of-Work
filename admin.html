@@ -190,6 +190,8 @@ document.getElementById('btnPublish').onclick=async function(){
   try{
     setStatus('saveStatus','Publishing…');
     DATA.meta.reportDate=new Date().toISOString().slice(0,10);
+    // Always resolve the current sha so updating an existing file never 422s.
+    if(!progSha){ try{ const ex=await ghGet(p.file); progSha=ex.sha; }catch(e){} }
     const res=await ghPut(p.file, DATA, 'Update '+p.name+' — '+DATA.meta.reportDate, progSha);
     progSha=res.content.sha;
     setStatus('saveStatus','Published ✓ — live in ~1 min at the Pages URL.',true);
@@ -243,15 +245,16 @@ document.getElementById('mpCreate').onclick=async function(){
   const file='programs/'+acc.id+'-'+id+'.json';
   const data=(mpTemplate.value==='template')?templateData(name,acc.name):blankData(name,acc.name);
   data.meta.projectManager=pm; if(start)data.meta.programStartDate=start; data.meta.programEndDate=end||'';
+  let newSha=null;
   try{
-    if(GH.token){ await ghPut(file, data, 'Create program '+name, null); }
+    if(GH.token){ const res=await ghPut(file, data, 'Create program '+name, null); newSha=res.content.sha; }
     else { setStatus('saveStatus','No token: program added locally only. Connect + Publish to save the file.',null); }
   }catch(e){ setStatus('saveStatus','Could not create file: '+e.message,false); return; }
   acc.programs.push({id,name,file,pm,startDate:start,endDate:end}); regDirty=true;
   // switch selection to the new account+program
   fillAccounts(); accountSel.value=acc.id; fillPrograms(); programSel.value=id;
   if(GH.token){ try{ const r=await ghPut('registry.json',REG,'Add program '+name,regSha); regSha=r.content.sha; regDirty=false; }catch(e){} }
-  setData(data); EDIT=true; progSha=null; renderAll();
+  setData(data); EDIT=true; progSha=newSha; renderAll();
   const et=document.getElementById('editToggle'); if(et){ et.textContent='✎ Edit: On'; et.style.background='var(--amberbg)'; }
   document.getElementById('loadMsg').textContent='';
   closeModal('programModal');
