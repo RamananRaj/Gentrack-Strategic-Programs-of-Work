@@ -25,7 +25,8 @@
   <div class="adminrow">
     <input id="ghToken" type="password" placeholder="GitHub Personal Access Token (Contents: Read & Write)">
     <button class="toolbtn" id="btnConnect">Connect</button>
-    <label class="pill-note"><input type="checkbox" id="ghRemember"> remember token in this browser</label>
+    <button class="toolbtn" id="btnForget" title="Clear the saved token from this browser">Forget token</button>
+    <label class="pill-note"><input type="checkbox" id="ghRemember" checked> stay signed in on this browser</label>
     <span id="ghStatus" class="pill-note">Not connected — you can still preview, but publishing needs a token.</span>
   </div>
   <div class="pill-note">Your token is used only by your browser to call GitHub’s API. It is never committed. Use a fine-grained PAT scoped to this one repo with <b>Contents: Read &amp; Write</b>.</div>
@@ -159,7 +160,7 @@ async function loadProgram(){
 }
 
 /* ---------------- actions ---------------- */
-document.getElementById('btnConnect').onclick=async function(){
+async function doConnect(silent){
   readGH();
   if(ghRemember.checked && GH.token) localStorage.setItem('gh_pat',GH.token);
   if(!ghRemember.checked) localStorage.removeItem('gh_pat');
@@ -167,11 +168,16 @@ document.getElementById('btnConnect').onclick=async function(){
   try{
     if(GH.token){
       const r=await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}`,{headers:hdr()});
-      if(!r.ok) throw new Error(r.status===401?'Bad token':r.status===404?'Repo not found / no access':('HTTP '+r.status));
+      if(!r.ok) throw new Error(r.status===401?'Bad/expired token':r.status===404?'Repo not found / no access':('HTTP '+r.status));
     }
     await loadRegistry(); fillAccounts();
     setStatus('ghStatus', GH.token?'Connected ✓ — publishing enabled.':'Preview mode (no token).', GH.token?true:null);
-  }catch(e){ setStatus('ghStatus','Connection failed: '+e.message,false); }
+  }catch(e){ setStatus('ghStatus','Connection failed: '+e.message+(silent?' — re-enter your token.':''),false); }
+}
+document.getElementById('btnConnect').onclick=()=>doConnect(false);
+document.getElementById('btnForget').onclick=function(){
+  localStorage.removeItem('gh_pat'); ghToken.value=''; GH.token=''; ghRemember.checked=false;
+  setStatus('ghStatus','Token forgotten on this browser. Preview mode.',null);
 };
 
 document.getElementById('btnLoad').onclick=()=>loadProgram().catch(e=>setStatus('saveStatus',e.message,false));
@@ -295,10 +301,16 @@ function templateData(name,account){
   ghRepo.value=localStorage.getItem('gh_repo')||ghRepo.value;
   ghBranch.value=localStorage.getItem('gh_branch')||ghBranch.value;
   const saved=localStorage.getItem('gh_pat');
-  if(saved){ ghToken.value=saved; ghRemember.checked=true; }
-  // load registry for preview immediately (no token needed)
-  fetch('registry.json?_='+Date.now()).then(r=>r.json()).then(reg=>{ REG=reg; fillAccounts(); })
-    .catch(()=>setStatus('ghStatus','Could not read registry.json locally. Connect with a token.',false));
+  if(saved){
+    // token remembered → sign in automatically, no need to re-enter each refresh
+    ghToken.value=saved; ghRemember.checked=true;
+    setStatus('ghStatus','Reconnecting…');
+    doConnect(true);
+  } else {
+    // no token → load registry read-only for preview
+    fetch('registry.json?_='+Date.now()).then(r=>r.json()).then(reg=>{ REG=reg; fillAccounts(); })
+      .catch(()=>setStatus('ghStatus','Could not read registry.json locally. Connect with a token.',false));
+  }
 })();
 </script>
 </body>
