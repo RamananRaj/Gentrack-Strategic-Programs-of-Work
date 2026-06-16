@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "program": "Release 2.1",
+    "subtitle": "",
+    "client": "Genesis",
+    "supplier": "Gentrack Pty Ltd",
+    "sowRef": "",
+    "reportOwner": "Ram Raj",
+    "projectManager": "Jason Sadler",
+    "reportDate": "2026-06-16",
+    "reportWeek": "Week ending 2026-06-16",
+    "programStartDate": "2026-05-11",
+    "programEndDate": "2026-08-31",
+    "programStart": "Month 0",
+    "programDuration": "",
+    "overallStatus": "Green",
+    "overallNarrative": ""
+  },
+  "pillars": [
+    {
+      "id": "scope",
+      "name": "Scope",
+      "status": "Green",
+      "summary": ""
+    },
+    {
+      "id": "timeline",
+      "name": "Timeline",
+      "status": "Green",
+      "summary": ""
+    },
+    {
+      "id": "quality",
+      "name": "Quality",
+      "status": "Green",
+      "summary": ""
+    }
+  ],
+  "workPackages": [],
+  "milestones": [],
+  "deliverables": [],
+  "ootb": [],
+  "gaps": [],
+  "catalog": [],
+  "risks": [],
+  "weekly": {
+    "accomplishments": [],
+    "planned": [],
+    "blockers": []
+  },
+  "weeklyUpdates": [],
+  "payments": [],
+  "resources": []
+}
