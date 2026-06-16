@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSR Program Dashboard — Horizon Power M2C (G2 / VFN)</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --green:#16a34a; --greenbg:#dcfce7; --amber:#d97706; --amberbg:#fef3c7;
+    --red:#dc2626; --redbg:#fee2e2; --blue:#2563eb; --bluebg:#dbeafe; --grey:#94a3b8; --greybg:#f1f5f9;
+    --brand:#1e3a8a; --brand2:#0ea5e9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#f1f5f9;color:var(--ink);font-size:14px;line-height:1.45}
+  header.top{background:linear-gradient(120deg,var(--brand),#0c4a6e);color:#fff;padding:18px 24px}
+  header.top h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
+  header.top .sub{opacity:.9;font-size:13px;margin-top:3px}
+  header.top .meta{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;font-size:12px;opacity:.92}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 18px 60px}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:4px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;padding:6px 18px}
+  nav.tabs button{border:0;background:transparent;padding:10px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:8px}
+  nav.tabs button.active{background:var(--bluebg);color:var(--brand)}
+  nav.tabs .spacer{flex:1}
+  .toolbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .toolbtn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .toolbtn.warn{background:var(--amberbg);border-color:#fde68a;color:#92400e}
+  section.tab{display:none;padding-top:18px}
+  section.tab.active{display:block}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  h2.sec{font-size:15px;margin:0 0 4px;font-weight:700}
+  .hint{color:var(--muted);font-size:12px;margin:0 0 14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .pillar{border-radius:14px;padding:16px;border:1px solid var(--line)}
+  .pillar h3{margin:0 0 6px;font-size:14px;display:flex;align-items:center;gap:8px}
+  .pillar p{margin:0;font-size:12.5px;color:#334155}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700}
+  .b-green{background:var(--greenbg);color:#166534}
+  .b-amber{background:var(--amberbg);color:#92400e}
+  .b-red{background:var(--redbg);color:#991b1b}
+  .b-blue{background:var(--bluebg);color:#1e40af}
+  .b-grey{background:var(--greybg);color:#475569}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);position:sticky}
+  tr:hover td{background:#fafcff}
+  .pillcell{white-space:nowrap}
+  .prog{height:8px;background:#eef2f7;border-radius:99px;overflow:hidden;min-width:70px}
+  .prog > i{display:block;height:100%;border-radius:99px}
+  .editable[contenteditable=true]{outline:1px dashed #cbd5e1;border-radius:4px;padding:1px 3px;background:#fffef5}
+  select.st{font:inherit;border:1px solid var(--line);border-radius:6px;padding:3px 6px;background:#fff}
+  .timeline{position:relative;overflow-x:auto;padding:10px 0}
+  .tlrow{display:grid;grid-template-columns:170px 1fr;gap:10px;align-items:center;margin-bottom:8px}
+  .tlbar{position:relative;height:30px;background:#f1f5f9;border-radius:8px}
+  .tlseg{position:absolute;top:3px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10.5px;font-weight:700;padding:0 6px;white-space:nowrap;overflow:hidden}
+  .tlaxis{display:grid;grid-template-columns:170px 1fr;gap:10px;font-size:10px;color:var(--muted);margin-bottom:4px}
+  .tlaxis .ticks{display:flex;justify-content:space-between}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .kpi .n{font-size:24px;font-weight:800}
+  .kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .addrow{margin-top:10px}
+  .news{max-width:760px;margin:0 auto}
+  .news .paper{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px;font-size:13.5px}
+  .news h1{font-size:19px;margin:0 0 2px;color:var(--brand)}
+  .news h3{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--brand2);border-bottom:2px solid var(--line);padding-bottom:4px;margin:20px 0 8px}
+  .news ul{margin:6px 0;padding-left:18px}
+  .footer{color:var(--muted);font-size:11px;text-align:center;margin-top:30px}
+  .row-actions{white-space:nowrap}
+  .xbtn{border:0;background:transparent;color:var(--red);cursor:pointer;font-weight:700}
+  @media(max-width:760px){.grid3,.kpis{grid-template-columns:1fr 1fr}.tlrow,.tlaxis{grid-template-columns:110px 1fr}}
+  @media print{nav.tabs,header.top .meta,.no-print{display:none!important}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="h-program">RSR Program Dashboard</h1>
+  <div class="sub" id="h-sub"></div>
+  <div class="meta" id="h-meta"></div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="workpackages">Work Packages</button>
+  <button data-tab="timeline">Timeline</button>
+  <button data-tab="deliverables">Deliverables</button>
+  <button data-tab="ootb">G2/VFN OOTB</button>
+  <button data-tab="gaps">Product Gaps</button>
+  <button data-tab="catalog">Product Catalog</button>
+  <button data-tab="payments">Payments</button>
+  <button data-tab="resources">Resources</button>
+  <button data-tab="newsletter">Newsletter</button>
+  <span class="spacer"></span>
+  <button class="toolbtn" id="editToggle" title="Toggle edit mode">✎ Edit: Off</button>
+  <button class="toolbtn primary no-print" id="download" title="Download data.json to commit to Git">⬇ Save data.json</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- OVERVIEW -->
+  <section class="tab active" id="overview">
+    <div class="kpis" id="kpis"></div>
+    <div class="card">
+      <h2 class="sec">Program Health — Scope · Timeline · Quality</h2>
+      <p class="hint">Top-level RAG against the three reporting pillars. Edit mode lets you change status and narrative; click <b>Save data.json</b> to publish to Git.</p>
+      <div class="grid3" id="pillars"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Executive Summary</h2>
+      <p class="editable" data-bind="meta.overallNarrative" style="margin:0"></p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--brand2)">
+      <h2 class="sec">Weekly Update — <span class="editable" data-bind="meta.reportWeek"></span></h2>
+      <p class="hint">Update these three lists each week, then Save data.json. They flow straight into the Newsletter. Use Edit mode, then the + buttons to add lines.</p>
+      <div class="grid3">
+        <div class="pillar" style="background:#f0fdf4">
+          <h3>✓ Accomplished this week</h3>
+          <ul id="wkAcc" style="margin:6px 0 0;padding-left:18px;font-size:12.5px"></ul>
+          <div class="addrow no-print"><button class="toolbtn" data-addlist="weekly.accomplishments">+ Add</button></div>
+        </div>
+        <div class="pillar" style="background:#eff6ff">
+          <h3>→ Planned next week</h3>
+          <ul id="wkPlan" style="margin:6px 0 0;padding-left:18px;font-size:12.5px"></ul>
+          <div class="addrow no-print"><button class="toolbtn" data-addlist="weekly.planned">+ Add</button></div>
+        </div>
+        <div class="pillar" style="background:#fef2f2">
+          <h3>⚠ Blockers / Issues</h3>
+          <ul id="wkBlock" style="margin:6px 0 0;padding-left:18px;font-size:12.5px"></ul>
+          <div class="addrow no-print"><button class="toolbtn" data-addlist="weekly.blockers">+ Add</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Weekly History Log</h2>
+      <p class="hint">A short record of each week's status. Add a row before you Save each week to keep a running history.</p>
+      <table id="logTable"><thead><tr><th>Week</th><th class="pillcell">Status</th><th>Summary</th><th class="no-print"></th></tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="weeklyLog">+ Add week</button></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Top Risks &amp; Watch Items</h2>
+      <table id="risks"><thead><tr><th>ID</th><th>Risk</th><th>Impact</th><th class="pillcell">RAG</th><th>Mitigation</th><th class="no-print"></th></tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="risks">+ Add risk</button></div>
+    </div>
+  </section>
+
+  <!-- WORK PACKAGES -->
+  <section class="tab" id="workpackages">
+    <div class="card">
+      <h2 class="sec">Work Packages (Scope)</h2>
+      <p class="hint">The 11 SOW work packages that move the program forward. % complete and RAG roll up into the Overview KPIs.</p>
+      <table id="wpTable"><thead><tr>
+        <th>WP</th><th>Name</th><th>Owner</th><th>Phase</th><th class="pillcell">Status</th><th>Progress</th><th class="pillcell">RAG</th><th>Note</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="workPackages">+ Add work package</button></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Scope Detail</h2>
+      <p class="hint">Scope and deliverables per work package (from SOW).</p>
+      <div id="wpDetail"></div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="tab" id="timeline">
+    <div class="card">
+      <h2 class="sec">Milestone Timeline (DM0 → DM16)</h2>
+      <p class="hint">Payment / delivery milestones PM1–PM9 across the 16-month delivery window. Bars position by delivery month.</p>
+      <div class="tlaxis"><div>Milestone</div><div class="ticks" id="tlticks"></div></div>
+      <div class="timeline" id="timelineBars"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--green)"></span>Complete</span>
+        <span><span class="dot" style="background:var(--blue)"></span>In Progress</span>
+        <span><span class="dot" style="background:var(--grey)"></span>Not Started</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Milestone Schedule</h2>
+      <table id="msTable"><thead><tr>
+        <th>PM</th><th>Del Month</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section class="tab" id="deliverables">
+    <div class="card">
+      <h2 class="sec">Deliverables Register</h2>
+      <p class="hint">Acceptance-tracked deliverables with draft/final target months (SOW Part F / acceptance schedule).</p>
+      <table id="delTable"><thead><tr>
+        <th style="width:18px"></th><th>Phase</th><th>Deliverable</th><th>Acceptance Criteria</th><th class="pillcell">Draft</th><th class="pillcell">Final</th><th class="pillcell">Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="deliverables">+ Add deliverable</button></div>
+    </div>
+  </section>
+
+  <!-- OOTB -->
+  <section class="tab" id="ootb">
+    <div class="card">
+      <h2 class="sec">G2 / VFN Execution — Building the OOTB Solution</h2>
+      <p class="hint">Out-of-the-box build status by functional area. Approach reflects the SOW "Adopt first, Adapt when needed" principle.</p>
+      <table id="ootbTable"><thead><tr>
+        <th>Functional Area</th><th class="pillcell">Platform</th><th class="pillcell">Approach</th><th class="pillcell">Build Status</th><th class="pillcell">RAG</th><th>Note</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="ootb">+ Add area</button></div>
+    </div>
+  </section>
+
+  <!-- GAPS -->
+  <section class="tab" id="gaps">
+    <div class="card">
+      <h2 class="sec">Product Gaps Register</h2>
+      <p class="hint">Where OOTB does not meet a requirement — with disposition (Adopt / Configure / Adapt / Customise) and owner.</p>
+      <table id="gapTable"><thead><tr>
+        <th>ID</th><th>Area</th><th>Description</th><th class="pillcell">OOTB?</th><th class="pillcell">Disposition</th><th class="pillcell">Priority</th><th class="pillcell">Status</th><th>Owner</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="gaps">+ Add gap</button></div>
+    </div>
+  </section>
+
+  <!-- CATALOG -->
+  <section class="tab" id="catalog">
+    <div class="card">
+      <h2 class="sec">Product Catalog</h2>
+      <p class="hint">Products, charges and adjustments being configured across G2 and VFN.</p>
+      <table id="catTable"><thead><tr>
+        <th>Catalog Item</th><th class="pillcell">Type</th><th class="pillcell">Platform</th><th class="pillcell">Status</th><th>Note</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="catalog">+ Add item</button></div>
+    </div>
+  </section>
+
+  <!-- PAYMENTS -->
+  <section class="tab" id="payments">
+    <div class="card">
+      <h2 class="sec">Payment Milestones</h2>
+      <p class="hint">Milestone-based payment schedule (SOW Part B). Amounts are blank in the customer SOW — enter values as agreed; the total updates automatically.</p>
+      <table id="payTable"><thead><tr>
+        <th>PM</th><th>Del Month</th><th>Milestone</th><th class="pillcell">% of Total</th><th class="pillcell">Amount (ex GST)</th><th class="pillcell">Invoice Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody><tfoot></tfoot></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="payments">+ Add payment</button></div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section class="tab" id="resources">
+    <div class="card">
+      <h2 class="sec">Resources / Key Personnel</h2>
+      <p class="hint">Program team across Gentrack and Horizon Power (SOW Part G). Track names, roles, allocation and onboarding status.</p>
+      <div class="kpis" id="resKpis" style="grid-template-columns:repeat(4,1fr)"></div>
+      <table id="resTable"><thead><tr>
+        <th>Name</th><th class="pillcell">Org</th><th>Role</th><th>Responsibility</th><th class="pillcell">Location</th><th class="pillcell">Availability</th><th class="pillcell">Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="resources">+ Add resource</button></div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="tab" id="newsletter">
+    <div class="card no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <h2 class="sec" style="margin:0">Management Newsletter</h2>
+      <span class="spacer" style="flex:1"></span>
+      <button class="toolbtn" id="copyNews">📋 Copy (rich)</button>
+      <button class="toolbtn" id="copyNewsText">📋 Copy (plain text)</button>
+      <button class="toolbtn primary" id="mailNews">✉ Open in email</button>
+      <button class="toolbtn" onclick="window.print()">🖨 Print / PDF</button>
+    </div>
+    <p class="hint no-print">Auto-generated from the current dashboard data. Update the dashboard, then copy this into your email or click "Open in email".</p>
+    <div class="news"><div class="paper" id="newsPaper"></div></div>
+  </section>
+
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+/* ---------- Embedded fallback so the file works opened directly (file://) ---------- */
+const DEFAULT_DATA = {
+  "meta": {
+    "program": "Retail Systems Replacement (RSR)",
+    "subtitle": "M2C Upgrade — Velocity for Network (VFN) & g2.0 Billing",
+    "client": "Horizon Power (Regional Power Corporation)",
+    "supplier": "Gentrack Pty Ltd",
+    "sowRef": "HPSR0548 — Implementation SOW (Cust Version Draft V0.15)",
+    "reportOwner": "Ram Raj",
+    "reportDate": "2026-06-16",
+    "reportWeek": "Week ending 2026-06-19",
+    "programStartDate": "2026-06-01",
+    "programStart": "Month 0 (SOW signature)",
+    "programDuration": "16 delivery months (DM0–DM16)",
+    "overallStatus": "Amber",
+    "overallNarrative": "Program in active build. Configure–Build (WP1) and Integration Rebuild (WP4) progressing. Data Migration trial cycles underway. Key watch items: OOTB validation backlog and product gap dispositions."
+  },
+  "pillars": [
+    { "id": "scope", "name": "Scope", "status": "Green", "summary": "11 work packages defined and baselined against SOW. OOTB-first approach holding; customisations controlled via gap register." },
+    { "id": "timeline", "name": "Timeline", "status": "Amber", "summary": "Tracking to DM0–DM16 milestone schedule. Build End (PM3, DM6) is the next critical gate. Some design sign-offs trending late." },
+    { "id": "quality", "name": "Quality", "status": "Green", "summary": "Unit testing evidence captured in Jira. System Test entry criteria being met. Defect management process operational." }
+  ],
+  "workPackages": [
+    { "id": "WP1", "name": "Technical Design Validation – Configure – Build", "owner": "Gentrack", "status": "In Progress", "pct": 55, "rag": "Amber", "phase": "Design & Build", "scopeNote": "Validate/refine approved M2C & VFN user stories; convert to config/build backlog; configure & build standard + approved customisations; unit test each 3-week sprint.", "deliverables": "Detailed implementation schedule; Build & unit-test evidence in Jira; Configuration details on user stories; Config & code management process docs.", "note": "" },
+    { "id": "WP2", "name": "System Testing", "owner": "Gentrack", "status": "Not Started", "pct": 10, "rag": "Green", "phase": "Testing", "scopeNote": "Execute System Test of solution components from approved user stories & RTM; log/triage/resolve defects before SI-led integrated testing.", "deliverables": "Updated implementation schedule; System Test progress in Jira; Test Summary Report.", "note": "" },
+    { "id": "WP3", "name": "Velocity & mData21 Data Migration", "owner": "Gentrack", "status": "In Progress", "pct": 35, "rag": "Amber", "phase": "Data Migration", "scopeNote": "Execute Data Migration Strategy: trial migrations, dry runs, final production migration from Velocity & mData21 into G2/VFN with reconciliation success criteria.", "deliverables": "Data Migration Design Document; per-cycle Migration Reports; Migration Cutover Strategy (draft).", "note": "" },
+    { "id": "WP4", "name": "Integration Rebuild", "owner": "Gentrack", "status": "In Progress", "pct": 40, "rag": "Amber", "phase": "Design & Build", "scopeNote": "Redevelop, configure & validate all approved integration points per Integration Register & ICDs; promote to SIT.", "deliverables": "Integration build progress in Jira; ICD documents per G2/VFN integration.", "note": "" },
+    { "id": "WP5", "name": "End-to-End Testing Cycles (SIT–E2E–BCT–MT–UAT–PT–Regression)", "owner": "SI-led, Gentrack support", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Testing", "scopeNote": "Support SI-led E2E cycles: root-cause on Gentrack-owned components, fixes, retest & regression; daily defect triage.", "deliverables": "Defect resolution updated in Jira.", "note": "" },
+    { "id": "WP6", "name": "Training (Train the Trainer)", "owner": "Gentrack", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Training", "scopeNote": "Classroom-led 2-week Train-the-Trainer on G2 & VFN core functionality and HP workflows; handover materials.", "deliverables": "Train-the-Trainer sessions for TTT leads; Training Materials.", "note": "" },
+    { "id": "WP7", "name": "Production Readiness and Cutover", "owner": "Gentrack-led with SI/TCS", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Cutover", "scopeNote": "Lead production readiness & cutover per Implementation/Cutover Plan; final migration, technical verification, Go-Live.", "deliverables": "Implementation Cutover Strategy; Deployment Runbook (hour-by-hour).", "note": "" },
+    { "id": "WP8", "name": "Hypercare Support & Warranty", "owner": "Gentrack", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Hypercare", "scopeNote": "3-month hypercare: monitor stability, resolve critical/high defects, KT to BAU, post-implementation review.", "deliverables": "Defect progress in Jira; Program Closure Report.", "note": "" },
+    { "id": "WP9", "name": "Inflight Transactions", "owner": "Gentrack + HP business", "status": "In Progress", "pct": 30, "rag": "Amber", "phase": "Plan & Initiation", "scopeNote": "Identify, categorise & define treatment for inflight (open/pending) transactions in legacy systems prior to Go-Live.", "deliverables": "Inflight Strategy / Treatment Document.", "note": "" },
+    { "id": "WP10", "name": "Meter Data Conversion", "owner": "Gentrack", "status": "Not Started", "pct": 15, "rag": "Green", "phase": "Cutover", "scopeNote": "Define & execute Meter Data Conversion Strategy: meter IDs, configs, registers, reads, historical consumption from legacy to G2/VFN.", "deliverables": "Meter Conversion Strategy.", "note": "" },
+    { "id": "WP11", "name": "Legacy System Decommissioning", "owner": "SI-led, Gentrack support", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Post Go-Live", "scopeNote": "Read-only transition then full decommission of Velocity & mData21 after stabilisation. No Gentrack deliverables; supports SI.", "deliverables": "No Gentrack deliverables — supports System Integrator with relevant detail.", "note": "" }
+  ],
+  "milestones": [
+    { "id": "PM1", "delMonth": "DM0", "phase": "Readiness", "name": "Kick Off", "trigger": "SOW Signature", "pct": "—", "status": "Complete", "deliverables": "SOW execution" },
+    { "id": "PM2", "delMonth": "DM1", "phase": "Plan & Initiation", "name": "Build Start", "trigger": "Implementation Schedule, Inflight, Config & Code Mgmt", "pct": "10%", "status": "Complete", "deliverables": "Implementation Schedule; Inflight; Configuration Management & Code Management" },
+    { "id": "PM3", "delMonth": "DM6", "phase": "Design & Build", "name": "Build End", "trigger": "Customisation Solution Design + ICDs", "pct": "15%", "status": "In Progress", "deliverables": "Customisation Solution Design Document; Interface Contract Documents (ICDs)" },
+    { "id": "PM4", "delMonth": "DM7", "phase": "System Testing", "name": "SIT Start", "trigger": "Test Summary Report", "pct": "10%", "status": "Not Started", "deliverables": "Test Summary Report" },
+    { "id": "PM5", "delMonth": "DM10", "phase": "Testing", "name": "SIT End", "trigger": "Final SIT Report (External)", "pct": "10%", "status": "Not Started", "deliverables": "Final SIT Report (External)" },
+    { "id": "PM6", "delMonth": "DM10", "phase": "Data Migration", "name": "Trial Migration End", "trigger": "Data Migration Design + Migration Report", "pct": "10%", "status": "Not Started", "deliverables": "Data Migration Design Document; Migration Report" },
+    { "id": "PM7", "delMonth": "DM12", "phase": "Testing", "name": "UAT End", "trigger": "UAT Report + Migration Cutover Strategy", "pct": "10%", "status": "Not Started", "deliverables": "UAT Report (External); Migration Cutover Strategy" },
+    { "id": "PM8", "delMonth": "DM14", "phase": "Cutover & Hypercare", "name": "Go-Live & Hypercare Start", "trigger": "CAB Report + Deployment Runbook", "pct": "10%", "status": "Not Started", "deliverables": "CAB Report (External); Deployment Runbook" },
+    { "id": "PM9", "delMonth": "DM16", "phase": "Cutover & Hypercare", "name": "Hypercare End", "trigger": "Program Closure Report", "pct": "5%", "status": "Not Started", "deliverables": "Program Closure Report" }
+  ],
+  "deliverables": [
+    { "wp": "WP1", "phase": "Planning & Initiation (M0–M1)", "name": "Implementation Schedule", "criteria": "MS Project schedule with milestones, deliverables, dependencies", "draft": "M1", "final": "M1", "status": "Complete" },
+    { "wp": "WP9", "phase": "Plan & Initiation (M0–M1)", "name": "Inflight", "criteria": "Review/documentation of all inflight customer objects; records in/out of migration + treatment", "draft": "M0", "final": "M0", "status": "Complete" },
+    { "wp": "WP1", "phase": "Plan & Initiation (M0–M1)", "name": "Configuration Management & Code Management", "criteria": "How configuration and code are managed", "draft": "M1", "final": "M1", "status": "Complete" },
+    { "wp": "WP1", "phase": "Design & Build", "name": "Customisation Solution Design Document", "criteria": "Solution design per customisation addressing user-story acceptance criteria", "draft": "M5", "final": "M6", "status": "In Progress" },
+    { "wp": "WP4", "phase": "Design & Build", "name": "Interface Contract Documents (ICDs)", "criteria": "Gentrack ICDs for G2-specific interfaces", "draft": "M5", "final": "M6", "status": "In Progress" },
+    { "wp": "WP2", "phase": "System Test", "name": "Test Summary Report", "criteria": "Execution details of System Test cases, results & summary", "draft": "M4", "final": "M7", "status": "Not Started" },
+    { "wp": "WP3", "phase": "Data Migration", "name": "Data Migration Design Document", "criteria": "Step-by-step migration flow; mapping of source entities/tables/attributes to target", "draft": "M1", "final": "—", "status": "In Progress" },
+    { "wp": "WP3", "phase": "Data Migration", "name": "Migration Report", "criteria": "TM0–TM4 migration reports", "draft": "M1", "final": "M1", "status": "In Progress" },
+    { "wp": "WP3", "phase": "Data Migration", "name": "Migration Cutover Strategy", "criteria": "Execution approach for migrating HP customers & agreed data set", "draft": "M4", "final": "—", "status": "Not Started" },
+    { "wp": "WP6", "phase": "Training", "name": "Training Material", "criteria": "Training material ready for both G2 and VFN", "draft": "M9", "final": "M10", "status": "Not Started" },
+    { "wp": "WP7", "phase": "Cutover", "name": "Implementation Cutover Strategy", "criteria": "Execution approach for rolling G2 & VFN into production", "draft": "M8", "final": "M9", "status": "Not Started" },
+    { "wp": "WP7", "phase": "Cutover", "name": "Deployment Runbook", "criteria": "Hour-by-hour / 30-min block task list for cutover window", "draft": "M13", "final": "M13", "status": "Not Started" },
+    { "wp": "WP10", "phase": "Cutover", "name": "Meter Conversion Strategy", "criteria": "How meter data conversion performed: volumes/batches, duration, approach", "draft": "M2", "final": "M5", "status": "In Progress" },
+    { "wp": "WP8", "phase": "Hypercare", "name": "Program Closure Report", "criteria": "Detailed summary of overall program and outcomes", "draft": "—", "final": "—", "status": "Not Started" }
+  ],
+  "ootb": [
+    { "area": "G2 Billing — Core Bill Calc", "platform": "G2", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Amber", "note": "Validate co-design user stories; configure standard rating." },
+    { "area": "G2 Billing — Invoicing & Statements", "platform": "G2", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Green", "note": "" },
+    { "area": "G2 — Payments & Receipting", "platform": "G2", "approach": "OOTB", "buildStatus": "Not Started", "rag": "Green", "note": "" },
+    { "area": "G2 — Service Orders / Field", "platform": "G2", "approach": "Adapt", "buildStatus": "Not Started", "rag": "Amber", "note": "Workflow mapping vs HP as-is in progress." },
+    { "area": "G2 — Customer & Account Mgmt", "platform": "G2", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Green", "note": "" },
+    { "area": "VFN — Network Billing", "platform": "VFN", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Amber", "note": "" },
+    { "area": "VFN — Metering / Reads", "platform": "VFN", "approach": "OOTB", "buildStatus": "Not Started", "rag": "Green", "note": "Aligns to WP10 meter conversion." },
+    { "area": "Integrations (G2/VFN)", "platform": "Both", "approach": "Adapt", "buildStatus": "In Progress", "rag": "Amber", "note": "Per Integration Register & ICDs (WP4)." }
+  ],
+  "gaps": [
+    { "id": "GAP-001", "area": "G2 — Service Orders", "description": "HP field workflow not fully met by OOTB sequence", "ootb": "No", "disposition": "Adapt", "status": "Open", "owner": "HP Product Owner", "priority": "High" },
+    { "id": "GAP-002", "area": "VFN — Network Billing", "description": "Network tariff variant requires configuration extension", "ootb": "Partial", "disposition": "Configure", "status": "Open", "owner": "Gentrack", "priority": "Medium" },
+    { "id": "GAP-003", "area": "Billing — Statement layout", "description": "Branded statement format beyond standard template", "ootb": "No", "disposition": "Customise", "status": "Under Review", "owner": "HP / Gentrack", "priority": "Medium" },
+    { "id": "GAP-004", "area": "Payments", "description": "Legacy payment file format integration", "ootb": "No", "disposition": "Adapt", "status": "Open", "owner": "SI / Gentrack", "priority": "Low" }
+  ],
+  "catalog": [
+    { "item": "Residential Electricity — Standard", "type": "Product", "platform": "G2", "status": "Configured", "note": "" },
+    { "item": "Residential Electricity — Time-of-Use", "type": "Product", "platform": "G2", "status": "In Progress", "note": "" },
+    { "item": "Business / C&I Electricity", "type": "Product", "platform": "G2", "status": "In Progress", "note": "" },
+    { "item": "Network Use of System (NUOS)", "type": "Network Charge", "platform": "VFN", "status": "In Progress", "note": "" },
+    { "item": "Feed-in Tariff (Solar)", "type": "Product", "platform": "G2", "status": "Not Started", "note": "" },
+    { "item": "Concessions & Rebates", "type": "Adjustment", "platform": "G2", "status": "Not Started", "note": "" },
+    { "item": "Connection / Service Fees", "type": "Fee", "platform": "G2", "status": "Not Started", "note": "" }
+  ],
+  "risks": [
+    { "id": "R1", "title": "Design sign-off slippage", "impact": "Build End (PM3, DM6) at risk", "rag": "Amber", "mitigation": "Daily design clinics; escalate late approvals to SteerCo." },
+    { "id": "R2", "title": "Data quality in legacy (Velocity/mData21)", "impact": "Migration reconciliation failures", "rag": "Amber", "mitigation": "Early trial cycles + cleansing; exclusion list agreed in writing." },
+    { "id": "R3", "title": "Integration dependency on SI endpoints", "impact": "ICD validation delays", "rag": "Green", "mitigation": "Integration Register baselined; joint test windows." }
+  ],
+  "weekly": {
+    "accomplishments": [
+      "WP1 Configure–Build: completed sprint configuration for core billing user stories.",
+      "WP3 Data Migration: trial migration cycle TM1 executed; reconciliation review underway.",
+      "WP4 Integration Rebuild: 3 ICDs drafted and circulated for review."
+    ],
+    "planned": [
+      "Close out Customisation Solution Design (PM3 / DM6) review comments.",
+      "Run TM2 trial migration cycle.",
+      "Finalise remaining ICDs and promote validated integrations to test."
+    ],
+    "blockers": [
+      "Awaiting HP sign-off on 2 design decisions — at risk of slipping Build End.",
+      "Legacy data quality issues in mData21 sample set under investigation."
+    ]
+  },
+  "weeklyLog": [
+    { "week": "Week ending 2026-06-12", "status": "Amber", "summary": "Build progressing; design sign-offs trending late. TM1 prepared." }
+  ],
+  "payments": [
+    { "id": "PM1", "delMonth": "DM0", "milestone": "Kick Off (SOW Signature)", "pct": "—", "amount": "", "status": "Invoiced" },
+    { "id": "PM2", "delMonth": "DM1", "milestone": "Build Start", "pct": "10%", "amount": "", "status": "Invoiced" },
+    { "id": "PM3", "delMonth": "DM6", "milestone": "Build End", "pct": "15%", "amount": "", "status": "Not Due" },
+    { "id": "PM4", "delMonth": "DM7", "milestone": "SIT Start", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM5", "delMonth": "DM10", "milestone": "SIT End", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM6", "delMonth": "DM10", "milestone": "Trial Migration End", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM7", "delMonth": "DM12", "milestone": "UAT End", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM8", "delMonth": "DM14", "milestone": "Go-Live & Hypercare Start", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM9", "delMonth": "DM16", "milestone": "Hypercare End", "pct": "5%", "amount": "", "status": "Not Due" }
+  ],
+  "resources": [
+    { "name": "Ram Raj", "org": "Gentrack", "role": "Program Director", "responsibility": "Head of Program", "location": "Melbourne", "availability": "Full Time", "status": "Active" },
+    { "name": "TBC", "org": "Gentrack", "role": "Program Manager", "responsibility": "Gentrack Program Owner", "location": "Perth", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "Vijay Srinivasan", "org": "Gentrack", "role": "Solution Architect", "responsibility": "Overall Technical Solution Owner", "location": "Melbourne", "availability": "Full Time", "status": "Active" },
+    { "name": "Akshatha Shivanna", "org": "Gentrack", "role": "Snr BA – G2 Billing Edition", "responsibility": "Billing Business Analyst", "location": "Melbourne", "availability": "Full Time", "status": "Active" },
+    { "name": "TBC", "org": "Gentrack", "role": "Snr BA – Network Operations", "responsibility": "Network Billing Analyst", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "TBC", "org": "Gentrack", "role": "Snr Engineer Lead – G2 Billing", "responsibility": "Solution Engineer Lead", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "TBC", "org": "Gentrack", "role": "Snr Engineer Lead – Network Ops", "responsibility": "Solution Engineer Lead", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "TBC", "org": "Gentrack", "role": "Test Lead", "responsibility": "Testing Lead", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "Suresh Parimi", "org": "Horizon Power", "role": "Snr Manager – Digital Transformation", "responsibility": "Contract Manager", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Liam Lynch", "org": "Horizon Power", "role": "Program Manager", "responsibility": "SOW Manager", "location": "Perth", "availability": "Full Time", "status": "Active" },
+    { "name": "Peter Dearlove", "org": "Horizon Power", "role": "Snr Manager Retail Project Enablement", "responsibility": "Business Lead", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Matt De Pinto", "org": "Horizon Power", "role": "Product Owner", "responsibility": "M2C Product Owner", "location": "Perth", "availability": "Full Time", "status": "Active" },
+    { "name": "Ronny Flendt", "org": "Horizon Power", "role": "Product Owner", "responsibility": "ECS Owner", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Kathleen Temby", "org": "Horizon Power", "role": "Product Owner", "responsibility": "Meter Data Management", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Ricky Gush", "org": "Horizon Power", "role": "Solution Architect", "responsibility": "Solution Architect", "location": "Perth", "availability": "Part Time", "status": "Active" }
+  ]
+};
+
+let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let EDIT = false;
+
+const RAGS = ["Green","Amber","Red"];
+const WP_STATUS = ["Not Started","In Progress","Complete","At Risk","On Hold"];
+const ragClass = s => ({Green:'b-green',Amber:'b-amber',Red:'b-red'}[s]||'b-grey');
+const stClass = s => ({"Complete":'b-green',"In Progress":'b-blue',"At Risk":'b-red',"On Hold":'b-amber',"Not Started":'b-grey',"Under Review":'b-amber','Configured':'b-green','Open':'b-amber'}[s]||'b-grey');
+const ragColor = s => ({Green:'var(--green)',Amber:'var(--amber)',Red:'var(--red)'}[s]||'var(--grey)');
+const payClass = s => ({Paid:'b-green',Invoiced:'b-blue','Not Due':'b-grey',Overdue:'b-red'}[s]||'b-grey');
+const orgClass = s => (s==='Gentrack'?'b-blue':'b-amber');
+function dmToDate(dm){ // DM number -> "Mon YYYY" using programStartDate as DM0
+  const start=DATA.meta.programStartDate; if(!start) return '';
+  const n=parseInt(String(dm).replace(/\D/g,''))||0;
+  const d=new Date(start+'T00:00:00'); if(isNaN(d)) return '';
+  d.setMonth(d.getMonth()+n);
+  return d.toLocaleDateString('en-AU',{month:'short',year:'numeric'});
+}
+
+function loadData(){
+  // On GitHub Pages / a web server, prefer the committed data.json so everyone sees the latest.
+  if(typeof fetch==='undefined') return Promise.resolve();
+  return fetch('data.json?_='+Date.now()).then(r=>{ if(!r.ok) throw 0; return r.json(); })
+    .then(d=>{ DATA=d; })
+    .catch(()=>{ /* file:// or no data.json — use embedded default */ });
+}
+
+/* ---------- helpers ---------- */
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function ce(bind,val){ // editable text cell
+  return `<span class="editable" data-bind="${bind}">${esc(val)}</span>`;
+}
+function ragSelect(bind,val){
+  if(!EDIT) return `<span class="badge ${ragClass(val)}">${esc(val)}</span>`;
+  return `<select class="st" data-bind="${bind}">`+RAGS.map(r=>`<option ${r===val?'selected':''}>${r}</option>`).join('')+`</select>`;
+}
+function statusSelect(bind,val,opts){
+  opts=opts||WP_STATUS;
+  if(!opts.includes(val)) opts=[val,...opts];
+  if(!EDIT) return `<span class="badge ${stClass(val)}">${esc(val)}</span>`;
+  return `<select class="st" data-bind="${bind}">`+opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')+`</select>`;
+}
+function delBtn(arr,i){ return EDIT?`<td class="row-actions"><button class="xbtn" data-del="${arr}:${i}" title="Delete row">✕</button></td>`:'<td class="no-print"></td>'; }
+
+/* ---------- renderers ---------- */
+function renderHeader(){
+  const m=DATA.meta;
+  document.getElementById('h-program').textContent=m.program+' — Program Dashboard';
+  document.getElementById('h-sub').textContent=m.subtitle;
+  document.getElementById('h-meta').innerHTML=[
+    ['Client',m.client],['Supplier',m.supplier],['Owner',m.reportOwner],
+    ['Reporting',m.reportWeek],['Program start',dmToDate('DM0')],['Duration',m.programDuration]
+  ].map(([k,v])=>`<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('');
+  document.getElementById('footer').textContent=`${m.program} · ${m.sowRef} · generated from data.json · ${m.reportDate}`;
+}
+
+function renderKpis(){
+  const wp=DATA.workPackages;
+  const avg=Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length);
+  const done=wp.filter(w=>w.status==='Complete').length;
+  const inprog=wp.filter(w=>w.status==='In Progress').length;
+  const ms=DATA.milestones, msDone=ms.filter(x=>x.status==='Complete').length;
+  document.getElementById('kpis').innerHTML=[
+    ['Overall Complete',avg+'%'],['Work Packages',`${done}/${wp.length} done`],
+    ['In Progress',inprog+' WPs'],['Milestones',`${msDone}/${ms.length} met`]
+  ].map(([l,n])=>`<div class="kpi"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('');
+}
+
+function renderPillars(){
+  document.getElementById('pillars').innerHTML=DATA.pillars.map((p,i)=>`
+    <div class="pillar" style="background:${p.status==='Green'?'#f0fdf4':p.status==='Amber'?'#fffbeb':'#fef2f2'}">
+      <h3>${esc(p.name)} ${ragSelect('pillars.'+i+'.status',p.status)}</h3>
+      <p class="editable" data-bind="pillars.${i}.summary">${esc(p.summary)}</p>
+    </div>`).join('');
+}
+
+function renderRisks(){
+  const tb=document.querySelector('#risks tbody');
+  tb.innerHTML=DATA.risks.map((r,i)=>`<tr>
+    <td>${ce('risks.'+i+'.id',r.id)}</td>
+    <td>${ce('risks.'+i+'.title',r.title)}</td>
+    <td>${ce('risks.'+i+'.impact',r.impact)}</td>
+    <td class="pillcell">${ragSelect('risks.'+i+'.rag',r.rag)}</td>
+    <td>${ce('risks.'+i+'.mitigation',r.mitigation)}</td>
+    ${delBtn('risks',i)}
+  </tr>`).join('');
+}
+
+function renderList(elId,arrPath){
+  const arr=arrPath.split('.').reduce((o,k)=>o[k],DATA);
+  document.getElementById(elId).innerHTML=arr.map((t,i)=>
+    `<li><span class="editable" data-bind="${arrPath}.${i}">${esc(t)}</span>${EDIT?` <button class="xbtn" data-dellist="${arrPath}:${i}" title="Remove">✕</button>`:''}</li>`
+  ).join('')||'<li style="color:#94a3b8">—</li>';
+}
+function renderWeekly(){
+  renderList('wkAcc','weekly.accomplishments');
+  renderList('wkPlan','weekly.planned');
+  renderList('wkBlock','weekly.blockers');
+}
+function renderLog(){
+  const tb=document.querySelector('#logTable tbody');
+  tb.innerHTML=DATA.weeklyLog.map((w,i)=>`<tr>
+    <td>${ce('weeklyLog.'+i+'.week',w.week)}</td>
+    <td class="pillcell">${ragSelect('weeklyLog.'+i+'.status',w.status)}</td>
+    <td>${ce('weeklyLog.'+i+'.summary',w.summary)}</td>
+    ${delBtn('weeklyLog',i)}
+  </tr>`).join('');
+}
+function renderPayments(){
+  const tb=document.querySelector('#payTable tbody');
+  tb.innerHTML=DATA.payments.map((p,i)=>`<tr>
+    <td><b>${ce('payments.'+i+'.id',p.id)}</b></td>
+    <td>${ce('payments.'+i+'.delMonth',p.delMonth)} <small style="color:#94a3b8">${esc(dmToDate(p.delMonth))}</small></td>
+    <td>${ce('payments.'+i+'.milestone',p.milestone)}</td>
+    <td class="pillcell">${ce('payments.'+i+'.pct',p.pct)}</td>
+    <td class="pillcell">${ce('payments.'+i+'.amount',p.amount)}</td>
+    <td class="pillcell">${statusSelect('payments.'+i+'.status',p.status,["Not Due","Invoiced","Paid","Overdue"])}</td>
+    ${delBtn('payments',i)}
+  </tr>`).join('');
+  const sum=DATA.payments.reduce((a,p)=>a+(parseFloat(String(p.amount).replace(/[^0-9.]/g,''))||0),0);
+  const paid=DATA.payments.filter(p=>p.status==='Paid').reduce((a,p)=>a+(parseFloat(String(p.amount).replace(/[^0-9.]/g,''))||0),0);
+  document.querySelector('#payTable tfoot').innerHTML=`<tr style="font-weight:700;background:#f8fafc">
+    <td colspan="4">Total</td><td class="pillcell">${sum?('$'+sum.toLocaleString()):'—'}</td>
+    <td class="pillcell">${paid?('Paid $'+paid.toLocaleString()):''}</td><td class="no-print"></td></tr>`;
+}
+function renderResources(){
+  const tb=document.querySelector('#resTable tbody');
+  tb.innerHTML=DATA.resources.map((r,i)=>`<tr>
+    <td><b>${ce('resources.'+i+'.name',r.name)}</b></td>
+    <td class="pillcell"><span class="badge ${orgClass(r.org)}">${esc(r.org)}</span></td>
+    <td>${ce('resources.'+i+'.role',r.role)}</td>
+    <td>${ce('resources.'+i+'.responsibility',r.responsibility)}</td>
+    <td class="pillcell">${ce('resources.'+i+'.location',r.location)}</td>
+    <td class="pillcell">${ce('resources.'+i+'.availability',r.availability)}</td>
+    <td class="pillcell">${statusSelect('resources.'+i+'.status',r.status,["Active","To Be Confirmed","Rolled Off","On Leave"])}</td>
+    ${delBtn('resources',i)}
+  </tr>`).join('');
+  const total=DATA.resources.length;
+  const gt=DATA.resources.filter(r=>r.org==='Gentrack').length;
+  const hp=DATA.resources.filter(r=>r.org==='Horizon Power').length;
+  const tbc=DATA.resources.filter(r=>r.status==='To Be Confirmed').length;
+  document.getElementById('resKpis').innerHTML=[
+    ['Total',total],['Gentrack',gt],['Horizon Power',hp],['To Be Confirmed',tbc]
+  ].map(([l,n])=>`<div class="kpi"><div class="n">${n}</div><div class="l">${esc(l)}</div></div>`).join('');
+}
+
+function renderWP(){
+  const tb=document.querySelector('#wpTable tbody');
+  tb.innerHTML=DATA.workPackages.map((w,i)=>`<tr>
+    <td><b>${ce('workPackages.'+i+'.id',w.id)}</b></td>
+    <td>${ce('workPackages.'+i+'.name',w.name)}</td>
+    <td>${ce('workPackages.'+i+'.owner',w.owner)}</td>
+    <td>${ce('workPackages.'+i+'.phase',w.phase)}</td>
+    <td class="pillcell">${statusSelect('workPackages.'+i+'.status',w.status)}</td>
+    <td><div class="prog"><i style="width:${+w.pct||0}%;background:${ragColor(w.rag)}"></i></div>
+        <small>${EDIT?`<span class="editable" data-bind="workPackages.${i}.pct">${esc(w.pct)}</span>`:esc(w.pct)}%</small></td>
+    <td class="pillcell">${ragSelect('workPackages.'+i+'.rag',w.rag)}</td>
+    <td>${ce('workPackages.'+i+'.note',w.note)}</td>
+    ${delBtn('workPackages',i)}
+  </tr>`).join('');
+  document.getElementById('wpDetail').innerHTML=DATA.workPackages.map(w=>`
+    <div style="border-left:3px solid ${ragColor(w.rag)};padding:6px 0 6px 12px;margin-bottom:12px">
+      <div style="font-weight:700">${esc(w.id)} · ${esc(w.name)} <span class="badge ${stClass(w.status)}">${esc(w.status)}</span></div>
+      <div style="color:#334155;margin:3px 0"><b>Scope:</b> ${esc(w.scopeNote)}</div>
+      <div style="color:#64748b"><b>Deliverables:</b> ${esc(w.deliverables)}</div>
+    </div>`).join('');
+}
+
+function renderTimeline(){
+  const ms=DATA.milestones;
+  const nums=ms.map(m=>parseInt(String(m.delMonth).replace(/\D/g,''))||0);
+  const maxM=Math.max(16,...nums);
+  const ticksEl=document.getElementById('tlticks');
+  ticksEl.innerHTML='';
+  for(let i=0;i<=maxM;i+=2){const s=document.createElement('span');s.innerHTML='DM'+i+(dmToDate('DM'+i)?'<br><span style="opacity:.7">'+esc(dmToDate('DM'+i))+'</span>':'');ticksEl.appendChild(s);}
+  document.getElementById('timelineBars').innerHTML=ms.map(m=>{
+    const n=parseInt(String(m.delMonth).replace(/\D/g,''))||0;
+    const left=(n/maxM)*100;
+    const col=m.status==='Complete'?'var(--green)':m.status==='In Progress'?'var(--blue)':'var(--grey)';
+    const lp=Math.min(left,86);
+    return `<div class="tlrow"><div style="font-size:11.5px"><b>${esc(m.id)}</b> ${esc(m.name)}</div>
+      <div class="tlbar"><div class="tlseg" style="left:${lp}%;background:${col}">${esc(m.delMonth)}${dmToDate(m.delMonth)?' · '+esc(dmToDate(m.delMonth)):''} · ${esc(m.pct)}</div></div></div>`;
+  }).join('');
+  const tb=document.querySelector('#msTable tbody');
+  tb.innerHTML=ms.map((m,i)=>`<tr>
+    <td><b>${ce('milestones.'+i+'.id',m.id)}</b></td>
+    <td>${ce('milestones.'+i+'.delMonth',m.delMonth)}</td>
+    <td>${ce('milestones.'+i+'.phase',m.phase)}</td>
+    <td>${ce('milestones.'+i+'.name',m.name)}</td>
+    <td>${ce('milestones.'+i+'.deliverables',m.deliverables)}</td>
+    <td class="pillcell">${ce('milestones.'+i+'.pct',m.pct)}</td>
+    <td class="pillcell">${statusSelect('milestones.'+i+'.status',m.status,["Not Started","In Progress","Complete","At Risk"])}</td>
+    ${delBtn('milestones',i)}
+  </tr>`).join('');
+}
+
+function renderDeliverables(){
+  const tb=document.querySelector('#delTable tbody');
+  // group by work package, ordered by WP number
+  const wpName={}; DATA.workPackages.forEach(w=>wpName[w.id]=w.name);
+  const groups={};
+  DATA.deliverables.forEach((d,i)=>{ (groups[d.wp]=groups[d.wp]||[]).push({d,i}); });
+  const order=Object.keys(groups).sort((a,b)=>(parseInt(a.replace(/\D/g,''))||0)-(parseInt(b.replace(/\D/g,''))||0));
+  let html='';
+  order.forEach(wp=>{
+    const done=groups[wp].filter(x=>x.d.status==='Complete').length;
+    html+=`<tr style="background:#eef2ff"><td colspan="7" style="font-weight:700;color:var(--brand)">
+      ${esc(wp)} — ${esc(wpName[wp]||'')} <span class="badge b-grey">${done}/${groups[wp].length} done</span></td><td class="no-print"></td></tr>`;
+    groups[wp].forEach(({d,i})=>{
+      html+=`<tr>
+        <td></td>
+        <td>${ce('deliverables.'+i+'.phase',d.phase)}</td>
+        <td>${ce('deliverables.'+i+'.name',d.name)}</td>
+        <td>${ce('deliverables.'+i+'.criteria',d.criteria)}</td>
+        <td class="pillcell">${ce('deliverables.'+i+'.draft',d.draft)}</td>
+        <td class="pillcell">${ce('deliverables.'+i+'.final',d.final)}</td>
+        <td class="pillcell">${statusSelect('deliverables.'+i+'.status',d.status,["Not Started","In Progress","Complete","At Risk"])}</td>
+        ${delBtn('deliverables',i)}
+      </tr>`;
+    });
+  });
+  tb.innerHTML=html;
+}
+
+function renderOOTB(){
+  const tb=document.querySelector('#ootbTable tbody');
+  tb.innerHTML=DATA.ootb.map((o,i)=>`<tr>
+    <td>${ce('ootb.'+i+'.area',o.area)}</td>
+    <td class="pillcell">${ce('ootb.'+i+'.platform',o.platform)}</td>
+    <td class="pillcell">${ce('ootb.'+i+'.approach',o.approach)}</td>
+    <td class="pillcell">${statusSelect('ootb.'+i+'.buildStatus',o.buildStatus,["Not Started","In Progress","Complete","At Risk"])}</td>
+    <td class="pillcell">${ragSelect('ootb.'+i+'.rag',o.rag)}</td>
+    <td>${ce('ootb.'+i+'.note',o.note)}</td>
+    ${delBtn('ootb',i)}
+  </tr>`).join('');
+}
+
+function renderGaps(){
+  const tb=document.querySelector('#gapTable tbody');
+  tb.innerHTML=DATA.gaps.map((g,i)=>`<tr>
+    <td><b>${ce('gaps.'+i+'.id',g.id)}</b></td>
+    <td>${ce('gaps.'+i+'.area',g.area)}</td>
+    <td>${ce('gaps.'+i+'.description',g.description)}</td>
+    <td class="pillcell">${ce('gaps.'+i+'.ootb',g.ootb)}</td>
+    <td class="pillcell">${ce('gaps.'+i+'.disposition',g.disposition)}</td>
+    <td class="pillcell">${ce('gaps.'+i+'.priority',g.priority)}</td>
+    <td class="pillcell">${statusSelect('gaps.'+i+'.status',g.status,["Open","Under Review","Complete","On Hold"])}</td>
+    <td>${ce('gaps.'+i+'.owner',g.owner)}</td>
+    ${delBtn('gaps',i)}
+  </tr>`).join('');
+}
+
+function renderCatalog(){
+  const tb=document.querySelector('#catTable tbody');
+  tb.innerHTML=DATA.catalog.map((c,i)=>`<tr>
+    <td>${ce('catalog.'+i+'.item',c.item)}</td>
+    <td class="pillcell">${ce('catalog.'+i+'.type',c.type)}</td>
+    <td class="pillcell">${ce('catalog.'+i+'.platform',c.platform)}</td>
+    <td class="pillcell">${statusSelect('catalog.'+i+'.status',c.status,["Not Started","In Progress","Configured","Complete"])}</td>
+    <td>${ce('catalog.'+i+'.note',c.note)}</td>
+    ${delBtn('catalog',i)}
+  </tr>`).join('');
+}
+
+function renderNewsletter(){
+  const m=DATA.meta, wp=DATA.workPackages;
+  const avg=Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length);
+  const ragChip=s=>`<span class="badge ${ragClass(s)}">${s}</span>`;
+  const inFocus=wp.filter(w=>w.status==='In Progress');
+  const next=DATA.milestones.find(x=>x.status!=='Complete');
+  const openGaps=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review');
+  const html=`
+    <h1>${esc(m.program)} — Program Update</h1>
+    <div style="color:#64748b;font-size:12px">${esc(m.subtitle)} · Reporting period as at ${esc(m.reportDate)} · ${esc(m.reportOwner)}</div>
+    <div style="margin:14px 0;padding:12px 14px;background:#f8fafc;border-radius:10px">
+      <b>Overall status:</b> ${ragChip(m.overallStatus)} &nbsp; <b>Completion:</b> ${avg}% &nbsp;
+      <b>Next milestone:</b> ${next?esc(next.id+' '+next.name+' ('+next.delMonth+')'):'—'}
+      <div style="margin-top:6px">${esc(m.overallNarrative)}</div>
+    </div>
+    <h3>Health — Scope · Timeline · Quality</h3>
+    <ul>${DATA.pillars.map(p=>`<li><b>${esc(p.name)}</b> ${ragChip(p.status)} — ${esc(p.summary)}</li>`).join('')}</ul>
+    <h3>Accomplished This Week</h3>
+    <ul>${(DATA.weekly.accomplishments||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul>
+    <h3>Planned Next Week</h3>
+    <ul>${(DATA.weekly.planned||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul>
+    ${(DATA.weekly.blockers&&DATA.weekly.blockers.length)?`<h3>Blockers / Issues</h3><ul>${DATA.weekly.blockers.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+    <h3>In Focus This Period</h3>
+    <ul>${inFocus.length?inFocus.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}${w.note?' · '+esc(w.note):''}</li>`).join(''):'<li>No work packages currently in progress.</li>'}</ul>
+    <h3>Upcoming Milestones</h3>
+    <ul>${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,4).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)}) · ${esc(x.deliverables)}</li>`).join('')}</ul>
+    <h3>Product Gaps — Open</h3>
+    <ul>${openGaps.length?openGaps.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · ${esc(g.priority)} priority · owner ${esc(g.owner)}</li>`).join(''):'<li>No open gaps.</li>'}</ul>
+    <h3>Risks &amp; Watch Items</h3>
+    <ul>${DATA.risks.map(r=>`<li>${ragChip(r.rag)} <b>${esc(r.title)}</b> — ${esc(r.impact)}. <i>Mitigation:</i> ${esc(r.mitigation)}</li>`).join('')}</ul>
+    <div style="margin-top:18px;color:#94a3b8;font-size:11px">Generated from the RSR Program Dashboard · ${esc(m.sowRef)}</div>`;
+  document.getElementById('newsPaper').innerHTML=html;
+}
+
+function renderAll(){
+  renderHeader();renderKpis();renderPillars();renderWeekly();renderLog();renderRisks();renderWP();
+  renderTimeline();renderDeliverables();renderOOTB();renderGaps();renderCatalog();
+  renderPayments();renderResources();renderNewsletter();
+  bindEditables();
+}
+
+/* ---------- editing ---------- */
+function setByPath(path,val){
+  const parts=path.split('.');let o=DATA;
+  for(let i=0;i<parts.length-1;i++){o=o[parts[i]];}
+  o[parts[parts.length-1]]=val;
+}
+function bindEditables(){
+  document.querySelectorAll('.editable').forEach(el=>{
+    el.setAttribute('contenteditable',EDIT?'true':'false');
+    el.onblur=()=>{ setByPath(el.dataset.bind, el.textContent.trim()); softRefresh(); };
+  });
+  document.querySelectorAll('select[data-bind]').forEach(s=>{
+    s.onchange=()=>{ setByPath(s.dataset.bind,s.value); renderAll(); };
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick=()=>{ const [arr,idx]=b.dataset.del.split(':'); DATA[arr].splice(+idx,1); renderAll(); };
+  });
+  document.querySelectorAll('[data-add]').forEach(b=>{
+    b.onclick=()=>{ addRow(b.dataset.add); };
+  });
+  document.querySelectorAll('[data-dellist]').forEach(b=>{
+    b.onclick=()=>{ const [path,idx]=b.dataset.dellist.split(':');
+      const parts=path.split('.');let o=DATA;for(let i=0;i<parts.length-1;i++)o=o[parts[i]];
+      o[parts[parts.length-1]].splice(+idx,1); renderAll(); };
+  });
+  document.querySelectorAll('[data-addlist]').forEach(b=>{
+    b.onclick=()=>{ if(!EDIT){alert('Turn on Edit mode first (✎ button, top right).');return;}
+      const parts=b.dataset.addlist.split('.');let o=DATA;for(let i=0;i<parts.length-1;i++)o=o[parts[i]];
+      o[parts[parts.length-1]].push('New item'); renderAll(); };
+  });
+}
+function softRefresh(){ renderKpis();renderPillars();renderWeekly();renderNewsletter(); }
+
+const TEMPLATES={
+  risks:{id:'R?',title:'New risk',impact:'',rag:'Amber',mitigation:''},
+  workPackages:{id:'WP?',name:'New work package',owner:'Gentrack',status:'Not Started',pct:0,rag:'Green',phase:'',scopeNote:'',deliverables:'',note:''},
+  milestones:{id:'PM?',delMonth:'DM0',phase:'',name:'New milestone',trigger:'',pct:'0%',status:'Not Started',deliverables:''},
+  deliverables:{wp:'WP?',phase:'',name:'New deliverable',criteria:'',draft:'—',final:'—',status:'Not Started'},
+  ootb:{area:'New area',platform:'G2',approach:'OOTB',buildStatus:'Not Started',rag:'Green',note:''},
+  gaps:{id:'GAP-???',area:'',description:'',ootb:'No',disposition:'Adapt',status:'Open',owner:'',priority:'Medium'},
+  catalog:{item:'New item',type:'Product',platform:'G2',status:'Not Started',note:''},
+  payments:{id:'PM?',delMonth:'DM0',milestone:'New milestone',pct:'0%',amount:'',status:'Not Due'},
+  resources:{name:'TBC',org:'Gentrack',role:'',responsibility:'',location:'Melbourne',availability:'Full Time',status:'To Be Confirmed'},
+  weeklyLog:{week:'Week ending '+new Date().toISOString().slice(0,10),status:'Amber',summary:''}
+};
+function addRow(arr){
+  if(!EDIT){ alert('Turn on Edit mode first (✎ button, top right).'); return; }
+  DATA[arr].push(JSON.parse(JSON.stringify(TEMPLATES[arr])));
+  renderAll();
+}
+
+/* ---------- tabs ---------- */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-tab]'); if(!b)return;
+  document.querySelectorAll('nav.tabs button[data-tab]').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('section.tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById(b.dataset.tab).classList.add('active');
+});
+
+document.getElementById('editToggle').onclick=function(){
+  EDIT=!EDIT;
+  this.textContent='✎ Edit: '+(EDIT?'On':'Off');
+  this.style.background=EDIT?'var(--amberbg)':'#fff';
+  renderAll();
+};
+
+document.getElementById('download').onclick=function(){
+  DATA.meta.reportDate=new Date().toISOString().slice(0,10);
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='data.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+
+/* ---------- newsletter actions ---------- */
+document.getElementById('copyNews').onclick=async function(){
+  const html=document.getElementById('newsPaper').innerHTML;
+  try{ await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([document.getElementById('newsPaper').innerText],{type:'text/plain'})})]);
+    this.textContent='✓ Copied'; }catch(e){ this.textContent='Press Ctrl/Cmd+C'; }
+  setTimeout(()=>this.textContent='📋 Copy (rich)',1500);
+};
+document.getElementById('copyNewsText').onclick=async function(){
+  try{ await navigator.clipboard.writeText(document.getElementById('newsPaper').innerText); this.textContent='✓ Copied'; }
+  catch(e){ this.textContent='Failed'; } setTimeout(()=>this.textContent='📋 Copy (plain text)',1500);
+};
+document.getElementById('mailNews').onclick=function(){
+  const m=DATA.meta;
+  const subject=`${m.program} — Program Update (${m.reportDate})`;
+  const body=document.getElementById('newsPaper').innerText;
+  window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+};
+
+/* ---------- boot ---------- */
+loadData().then(renderAll);
+</script>
+</body>
+</html>

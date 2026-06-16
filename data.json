@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "program": "Retail Systems Replacement (RSR)",
+    "subtitle": "M2C Upgrade — Velocity for Network (VFN) & g2.0 Billing",
+    "client": "Horizon Power (Regional Power Corporation)",
+    "supplier": "Gentrack Pty Ltd",
+    "sowRef": "HPSR0548 — Implementation SOW (Cust Version Draft V0.15)",
+    "reportOwner": "Ram Raj",
+    "reportDate": "2026-06-16",
+    "reportWeek": "Week ending 2026-06-19",
+    "programStartDate": "2026-06-01",
+    "programStart": "Month 0 (SOW signature)",
+    "programDuration": "16 delivery months (DM0–DM16)",
+    "overallStatus": "Amber",
+    "overallNarrative": "Program in active build. Configure–Build (WP1) and Integration Rebuild (WP4) progressing. Data Migration trial cycles underway. Key watch items: OOTB validation backlog and product gap dispositions."
+  },
+  "pillars": [
+    { "id": "scope", "name": "Scope", "status": "Green", "summary": "11 work packages defined and baselined against SOW. OOTB-first approach holding; customisations controlled via gap register." },
+    { "id": "timeline", "name": "Timeline", "status": "Amber", "summary": "Tracking to DM0–DM16 milestone schedule. Build End (PM3, DM6) is the next critical gate. Some design sign-offs trending late." },
+    { "id": "quality", "name": "Quality", "status": "Green", "summary": "Unit testing evidence captured in Jira. System Test entry criteria being met. Defect management process operational." }
+  ],
+  "workPackages": [
+    { "id": "WP1", "name": "Technical Design Validation – Configure – Build", "owner": "Gentrack", "status": "In Progress", "pct": 55, "rag": "Amber", "phase": "Design & Build", "scopeNote": "Validate/refine approved M2C & VFN user stories; convert to config/build backlog; configure & build standard + approved customisations; unit test each 3-week sprint.", "deliverables": "Detailed implementation schedule; Build & unit-test evidence in Jira; Configuration details on user stories; Config & code management process docs.", "note": "" },
+    { "id": "WP2", "name": "System Testing", "owner": "Gentrack", "status": "Not Started", "pct": 10, "rag": "Green", "phase": "Testing", "scopeNote": "Execute System Test of solution components from approved user stories & RTM; log/triage/resolve defects before SI-led integrated testing.", "deliverables": "Updated implementation schedule; System Test progress in Jira; Test Summary Report.", "note": "" },
+    { "id": "WP3", "name": "Velocity & mData21 Data Migration", "owner": "Gentrack", "status": "In Progress", "pct": 35, "rag": "Amber", "phase": "Data Migration", "scopeNote": "Execute Data Migration Strategy: trial migrations, dry runs, final production migration from Velocity & mData21 into G2/VFN with reconciliation success criteria.", "deliverables": "Data Migration Design Document; per-cycle Migration Reports; Migration Cutover Strategy (draft).", "note": "" },
+    { "id": "WP4", "name": "Integration Rebuild", "owner": "Gentrack", "status": "In Progress", "pct": 40, "rag": "Amber", "phase": "Design & Build", "scopeNote": "Redevelop, configure & validate all approved integration points per Integration Register & ICDs; promote to SIT.", "deliverables": "Integration build progress in Jira; ICD documents per G2/VFN integration.", "note": "" },
+    { "id": "WP5", "name": "End-to-End Testing Cycles (SIT–E2E–BCT–MT–UAT–PT–Regression)", "owner": "SI-led, Gentrack support", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Testing", "scopeNote": "Support SI-led E2E cycles: root-cause on Gentrack-owned components, fixes, retest & regression; daily defect triage.", "deliverables": "Defect resolution updated in Jira.", "note": "" },
+    { "id": "WP6", "name": "Training (Train the Trainer)", "owner": "Gentrack", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Training", "scopeNote": "Classroom-led 2-week Train-the-Trainer on G2 & VFN core functionality and HP workflows; handover materials.", "deliverables": "Train-the-Trainer sessions for TTT leads; Training Materials.", "note": "" },
+    { "id": "WP7", "name": "Production Readiness and Cutover", "owner": "Gentrack-led with SI/TCS", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Cutover", "scopeNote": "Lead production readiness & cutover per Implementation/Cutover Plan; final migration, technical verification, Go-Live.", "deliverables": "Implementation Cutover Strategy; Deployment Runbook (hour-by-hour).", "note": "" },
+    { "id": "WP8", "name": "Hypercare Support & Warranty", "owner": "Gentrack", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Hypercare", "scopeNote": "3-month hypercare: monitor stability, resolve critical/high defects, KT to BAU, post-implementation review.", "deliverables": "Defect progress in Jira; Program Closure Report.", "note": "" },
+    { "id": "WP9", "name": "Inflight Transactions", "owner": "Gentrack + HP business", "status": "In Progress", "pct": 30, "rag": "Amber", "phase": "Plan & Initiation", "scopeNote": "Identify, categorise & define treatment for inflight (open/pending) transactions in legacy systems prior to Go-Live.", "deliverables": "Inflight Strategy / Treatment Document.", "note": "" },
+    { "id": "WP10", "name": "Meter Data Conversion", "owner": "Gentrack", "status": "Not Started", "pct": 15, "rag": "Green", "phase": "Cutover", "scopeNote": "Define & execute Meter Data Conversion Strategy: meter IDs, configs, registers, reads, historical consumption from legacy to G2/VFN.", "deliverables": "Meter Conversion Strategy.", "note": "" },
+    { "id": "WP11", "name": "Legacy System Decommissioning", "owner": "SI-led, Gentrack support", "status": "Not Started", "pct": 0, "rag": "Green", "phase": "Post Go-Live", "scopeNote": "Read-only transition then full decommission of Velocity & mData21 after stabilisation. No Gentrack deliverables; supports SI.", "deliverables": "No Gentrack deliverables — supports System Integrator with relevant detail.", "note": "" }
+  ],
+  "milestones": [
+    { "id": "PM1", "delMonth": "DM0", "phase": "Readiness", "name": "Kick Off", "trigger": "SOW Signature", "pct": "—", "status": "Complete", "deliverables": "SOW execution" },
+    { "id": "PM2", "delMonth": "DM1", "phase": "Plan & Initiation", "name": "Build Start", "trigger": "Implementation Schedule, Inflight, Config & Code Mgmt", "pct": "10%", "status": "Complete", "deliverables": "Implementation Schedule; Inflight; Configuration Management & Code Management" },
+    { "id": "PM3", "delMonth": "DM6", "phase": "Design & Build", "name": "Build End", "trigger": "Customisation Solution Design + ICDs", "pct": "15%", "status": "In Progress", "deliverables": "Customisation Solution Design Document; Interface Contract Documents (ICDs)" },
+    { "id": "PM4", "delMonth": "DM7", "phase": "System Testing", "name": "SIT Start", "trigger": "Test Summary Report", "pct": "10%", "status": "Not Started", "deliverables": "Test Summary Report" },
+    { "id": "PM5", "delMonth": "DM10", "phase": "Testing", "name": "SIT End", "trigger": "Final SIT Report (External)", "pct": "10%", "status": "Not Started", "deliverables": "Final SIT Report (External)" },
+    { "id": "PM6", "delMonth": "DM10", "phase": "Data Migration", "name": "Trial Migration End", "trigger": "Data Migration Design + Migration Report", "pct": "10%", "status": "Not Started", "deliverables": "Data Migration Design Document; Migration Report" },
+    { "id": "PM7", "delMonth": "DM12", "phase": "Testing", "name": "UAT End", "trigger": "UAT Report + Migration Cutover Strategy", "pct": "10%", "status": "Not Started", "deliverables": "UAT Report (External); Migration Cutover Strategy" },
+    { "id": "PM8", "delMonth": "DM14", "phase": "Cutover & Hypercare", "name": "Go-Live & Hypercare Start", "trigger": "CAB Report + Deployment Runbook", "pct": "10%", "status": "Not Started", "deliverables": "CAB Report (External); Deployment Runbook" },
+    { "id": "PM9", "delMonth": "DM16", "phase": "Cutover & Hypercare", "name": "Hypercare End", "trigger": "Program Closure Report", "pct": "5%", "status": "Not Started", "deliverables": "Program Closure Report" }
+  ],
+  "deliverables": [
+    { "wp": "WP1", "phase": "Planning & Initiation (M0–M1)", "name": "Implementation Schedule", "criteria": "MS Project schedule with milestones, deliverables, dependencies", "draft": "M1", "final": "M1", "status": "Complete" },
+    { "wp": "WP9", "phase": "Plan & Initiation (M0–M1)", "name": "Inflight", "criteria": "Review/documentation of all inflight customer objects; records in/out of migration + treatment", "draft": "M0", "final": "M0", "status": "Complete" },
+    { "wp": "WP1", "phase": "Plan & Initiation (M0–M1)", "name": "Configuration Management & Code Management", "criteria": "How configuration and code are managed", "draft": "M1", "final": "M1", "status": "Complete" },
+    { "wp": "WP1", "phase": "Design & Build", "name": "Customisation Solution Design Document", "criteria": "Solution design per customisation addressing user-story acceptance criteria", "draft": "M5", "final": "M6", "status": "In Progress" },
+    { "wp": "WP4", "phase": "Design & Build", "name": "Interface Contract Documents (ICDs)", "criteria": "Gentrack ICDs for G2-specific interfaces", "draft": "M5", "final": "M6", "status": "In Progress" },
+    { "wp": "WP2", "phase": "System Test", "name": "Test Summary Report", "criteria": "Execution details of System Test cases, results & summary", "draft": "M4", "final": "M7", "status": "Not Started" },
+    { "wp": "WP3", "phase": "Data Migration", "name": "Data Migration Design Document", "criteria": "Step-by-step migration flow; mapping of source entities/tables/attributes to target", "draft": "M1", "final": "—", "status": "In Progress" },
+    { "wp": "WP3", "phase": "Data Migration", "name": "Migration Report", "criteria": "TM0–TM4 migration reports", "draft": "M1", "final": "M1", "status": "In Progress" },
+    { "wp": "WP3", "phase": "Data Migration", "name": "Migration Cutover Strategy", "criteria": "Execution approach for migrating HP customers & agreed data set", "draft": "M4", "final": "—", "status": "Not Started" },
+    { "wp": "WP6", "phase": "Training", "name": "Training Material", "criteria": "Training material ready for both G2 and VFN", "draft": "M9", "final": "M10", "status": "Not Started" },
+    { "wp": "WP7", "phase": "Cutover", "name": "Implementation Cutover Strategy", "criteria": "Execution approach for rolling G2 & VFN into production", "draft": "M8", "final": "M9", "status": "Not Started" },
+    { "wp": "WP7", "phase": "Cutover", "name": "Deployment Runbook", "criteria": "Hour-by-hour / 30-min block task list for cutover window", "draft": "M13", "final": "M13", "status": "Not Started" },
+    { "wp": "WP10", "phase": "Cutover", "name": "Meter Conversion Strategy", "criteria": "How meter data conversion performed: volumes/batches, duration, approach", "draft": "M2", "final": "M5", "status": "In Progress" },
+    { "wp": "WP8", "phase": "Hypercare", "name": "Program Closure Report", "criteria": "Detailed summary of overall program and outcomes", "draft": "—", "final": "—", "status": "Not Started" }
+  ],
+  "ootb": [
+    { "area": "G2 Billing — Core Bill Calc", "platform": "G2", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Amber", "note": "Validate co-design user stories; configure standard rating." },
+    { "area": "G2 Billing — Invoicing & Statements", "platform": "G2", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Green", "note": "" },
+    { "area": "G2 — Payments & Receipting", "platform": "G2", "approach": "OOTB", "buildStatus": "Not Started", "rag": "Green", "note": "" },
+    { "area": "G2 — Service Orders / Field", "platform": "G2", "approach": "Adapt", "buildStatus": "Not Started", "rag": "Amber", "note": "Workflow mapping vs HP as-is in progress." },
+    { "area": "G2 — Customer & Account Mgmt", "platform": "G2", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Green", "note": "" },
+    { "area": "VFN — Network Billing", "platform": "VFN", "approach": "OOTB", "buildStatus": "In Progress", "rag": "Amber", "note": "" },
+    { "area": "VFN — Metering / Reads", "platform": "VFN", "approach": "OOTB", "buildStatus": "Not Started", "rag": "Green", "note": "Aligns to WP10 meter conversion." },
+    { "area": "Integrations (G2/VFN)", "platform": "Both", "approach": "Adapt", "buildStatus": "In Progress", "rag": "Amber", "note": "Per Integration Register & ICDs (WP4)." }
+  ],
+  "gaps": [
+    { "id": "GAP-001", "area": "G2 — Service Orders", "description": "HP field workflow not fully met by OOTB sequence", "ootb": "No", "disposition": "Adapt", "status": "Open", "owner": "HP Product Owner", "priority": "High" },
+    { "id": "GAP-002", "area": "VFN — Network Billing", "description": "Network tariff variant requires configuration extension", "ootb": "Partial", "disposition": "Configure", "status": "Open", "owner": "Gentrack", "priority": "Medium" },
+    { "id": "GAP-003", "area": "Billing — Statement layout", "description": "Branded statement format beyond standard template", "ootb": "No", "disposition": "Customise", "status": "Under Review", "owner": "HP / Gentrack", "priority": "Medium" },
+    { "id": "GAP-004", "area": "Payments", "description": "Legacy payment file format integration", "ootb": "No", "disposition": "Adapt", "status": "Open", "owner": "SI / Gentrack", "priority": "Low" }
+  ],
+  "catalog": [
+    { "item": "Residential Electricity — Standard", "type": "Product", "platform": "G2", "status": "Configured", "note": "" },
+    { "item": "Residential Electricity — Time-of-Use", "type": "Product", "platform": "G2", "status": "In Progress", "note": "" },
+    { "item": "Business / C&I Electricity", "type": "Product", "platform": "G2", "status": "In Progress", "note": "" },
+    { "item": "Network Use of System (NUOS)", "type": "Network Charge", "platform": "VFN", "status": "In Progress", "note": "" },
+    { "item": "Feed-in Tariff (Solar)", "type": "Product", "platform": "G2", "status": "Not Started", "note": "" },
+    { "item": "Concessions & Rebates", "type": "Adjustment", "platform": "G2", "status": "Not Started", "note": "" },
+    { "item": "Connection / Service Fees", "type": "Fee", "platform": "G2", "status": "Not Started", "note": "" }
+  ],
+  "risks": [
+    { "id": "R1", "title": "Design sign-off slippage", "impact": "Build End (PM3, DM6) at risk", "rag": "Amber", "mitigation": "Daily design clinics; escalate late approvals to SteerCo." },
+    { "id": "R2", "title": "Data quality in legacy (Velocity/mData21)", "impact": "Migration reconciliation failures", "rag": "Amber", "mitigation": "Early trial cycles + cleansing; exclusion list agreed in writing." },
+    { "id": "R3", "title": "Integration dependency on SI endpoints", "impact": "ICD validation delays", "rag": "Green", "mitigation": "Integration Register baselined; joint test windows." }
+  ],
+  "weekly": {
+    "accomplishments": [
+      "WP1 Configure–Build: completed sprint configuration for core billing user stories.",
+      "WP3 Data Migration: trial migration cycle TM1 executed; reconciliation review underway.",
+      "WP4 Integration Rebuild: 3 ICDs drafted and circulated for review."
+    ],
+    "planned": [
+      "Close out Customisation Solution Design (PM3 / DM6) review comments.",
+      "Run TM2 trial migration cycle.",
+      "Finalise remaining ICDs and promote validated integrations to test."
+    ],
+    "blockers": [
+      "Awaiting HP sign-off on 2 design decisions — at risk of slipping Build End.",
+      "Legacy data quality issues in mData21 sample set under investigation."
+    ]
+  },
+  "weeklyLog": [
+    { "week": "Week ending 2026-06-12", "status": "Amber", "summary": "Build progressing; design sign-offs trending late. TM1 prepared." }
+  ],
+  "payments": [
+    { "id": "PM1", "delMonth": "DM0", "milestone": "Kick Off (SOW Signature)", "pct": "—", "amount": "", "status": "Invoiced" },
+    { "id": "PM2", "delMonth": "DM1", "milestone": "Build Start", "pct": "10%", "amount": "", "status": "Invoiced" },
+    { "id": "PM3", "delMonth": "DM6", "milestone": "Build End", "pct": "15%", "amount": "", "status": "Not Due" },
+    { "id": "PM4", "delMonth": "DM7", "milestone": "SIT Start", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM5", "delMonth": "DM10", "milestone": "SIT End", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM6", "delMonth": "DM10", "milestone": "Trial Migration End", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM7", "delMonth": "DM12", "milestone": "UAT End", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM8", "delMonth": "DM14", "milestone": "Go-Live & Hypercare Start", "pct": "10%", "amount": "", "status": "Not Due" },
+    { "id": "PM9", "delMonth": "DM16", "milestone": "Hypercare End", "pct": "5%", "amount": "", "status": "Not Due" }
+  ],
+  "resources": [
+    { "name": "Ram Raj", "org": "Gentrack", "role": "Program Director", "responsibility": "Head of Program", "location": "Melbourne", "availability": "Full Time", "status": "Active" },
+    { "name": "TBC", "org": "Gentrack", "role": "Program Manager", "responsibility": "Gentrack Program Owner", "location": "Perth", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "Vijay Srinivasan", "org": "Gentrack", "role": "Solution Architect", "responsibility": "Overall Technical Solution Owner", "location": "Melbourne", "availability": "Full Time", "status": "Active" },
+    { "name": "Akshatha Shivanna", "org": "Gentrack", "role": "Snr BA – G2 Billing Edition", "responsibility": "Billing Business Analyst", "location": "Melbourne", "availability": "Full Time", "status": "Active" },
+    { "name": "TBC", "org": "Gentrack", "role": "Snr BA – Network Operations", "responsibility": "Network Billing Analyst", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "TBC", "org": "Gentrack", "role": "Snr Engineer Lead – G2 Billing", "responsibility": "Solution Engineer Lead", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "TBC", "org": "Gentrack", "role": "Snr Engineer Lead – Network Ops", "responsibility": "Solution Engineer Lead", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "TBC", "org": "Gentrack", "role": "Test Lead", "responsibility": "Testing Lead", "location": "Melbourne", "availability": "Full Time", "status": "To Be Confirmed" },
+    { "name": "Suresh Parimi", "org": "Horizon Power", "role": "Snr Manager – Digital Transformation", "responsibility": "Contract Manager", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Liam Lynch", "org": "Horizon Power", "role": "Program Manager", "responsibility": "SOW Manager", "location": "Perth", "availability": "Full Time", "status": "Active" },
+    { "name": "Peter Dearlove", "org": "Horizon Power", "role": "Snr Manager Retail Project Enablement", "responsibility": "Business Lead", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Matt De Pinto", "org": "Horizon Power", "role": "Product Owner", "responsibility": "M2C Product Owner", "location": "Perth", "availability": "Full Time", "status": "Active" },
+    { "name": "Ronny Flendt", "org": "Horizon Power", "role": "Product Owner", "responsibility": "ECS Owner", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Kathleen Temby", "org": "Horizon Power", "role": "Product Owner", "responsibility": "Meter Data Management", "location": "Perth", "availability": "Part Time", "status": "Active" },
+    { "name": "Ricky Gush", "org": "Horizon Power", "role": "Solution Architect", "responsibility": "Solution Architect", "location": "Perth", "availability": "Part Time", "status": "Active" }
+  ]
+}
