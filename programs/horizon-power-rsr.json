@@ -71,7 +71,7 @@
       "name": "System Testing",
       "owner": "Gentrack",
       "status": "Not Started",
-      "pct": 10,
+      "pct": "75",
       "rag": "Green",
       "phase": "Testing",
       "scopeNote": "Execute System Test of solution components from approved user stories & RTM; log/triage/resolve defects before SI-led integrated testing.",
