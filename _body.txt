@@ -1,0 +1,217 @@
+
+<header class="top">
+  <h1 id="h-program">RSR Program Dashboard</h1>
+  <div class="sub" id="h-sub"></div>
+  <div class="meta" id="h-meta"></div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="weekly">Weekly Updates</button>
+  <button data-tab="workpackages">Work Packages</button>
+  <button data-tab="timeline">Timeline</button>
+  <button data-tab="deliverables">Deliverables</button>
+  <button data-tab="ootb">G2/VFN OOTB</button>
+  <button data-tab="gaps">Product Gaps</button>
+  <button data-tab="catalog">Product Catalog</button>
+  <button data-tab="payments">Payments</button>
+  <button data-tab="resources">Resources</button>
+  <button data-tab="newsletter">Newsletter</button>
+  <span class="spacer"></span>
+  <button class="toolbtn" id="editToggle" title="Toggle edit mode">✎ Edit: Off</button>
+  <button class="toolbtn primary no-print" id="download" title="Download data.json to commit to Git">⬇ Save data.json</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- OVERVIEW -->
+  <section class="tab active" id="overview">
+    <div class="kpis" id="kpis"></div>
+    <div class="card">
+      <h2 class="sec">Program Health — Scope · Timeline · Quality</h2>
+      <p class="hint">Top-level RAG against the three reporting pillars. Edit mode lets you change status and narrative; click <b>Save data.json</b> to publish to Git.</p>
+      <div class="grid3" id="pillars"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Executive Summary</h2>
+      <p class="editable" data-bind="meta.overallNarrative" style="margin:0"></p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--brand2)">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2 class="sec" style="margin:0">Weekly Update — <span class="editable" data-bind="meta.reportWeek"></span></h2>
+        <span style="flex:1"></span>
+        <button class="toolbtn warn no-print" id="archiveWeek" title="Save this week as a snapshot in the archive">📌 Archive this week</button>
+      </div>
+      <p class="hint">Update the three lists, set the week label, then click <b>Archive this week</b> to snapshot it into the Weekly Updates archive — and <b>Save data.json</b> + commit so every user can see it. Lists also flow into the Newsletter.</p>
+      <div class="grid3">
+        <div class="pillar" style="background:#f0fdf4">
+          <h3>✓ Accomplished this week</h3>
+          <ul id="wkAcc" style="margin:6px 0 0;padding-left:18px;font-size:12.5px"></ul>
+          <div class="addrow no-print"><button class="toolbtn" data-addlist="weekly.accomplishments">+ Add</button></div>
+        </div>
+        <div class="pillar" style="background:#eff6ff">
+          <h3>→ Planned next week</h3>
+          <ul id="wkPlan" style="margin:6px 0 0;padding-left:18px;font-size:12.5px"></ul>
+          <div class="addrow no-print"><button class="toolbtn" data-addlist="weekly.planned">+ Add</button></div>
+        </div>
+        <div class="pillar" style="background:#fef2f2">
+          <h3>⚠ Blockers / Issues</h3>
+          <ul id="wkBlock" style="margin:6px 0 0;padding-left:18px;font-size:12.5px"></ul>
+          <div class="addrow no-print"><button class="toolbtn" data-addlist="weekly.blockers">+ Add</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Top Risks &amp; Watch Items</h2>
+      <table id="risks"><thead><tr><th>ID</th><th>Risk</th><th>Impact</th><th class="pillcell">RAG</th><th>Mitigation</th><th class="no-print"></th></tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="risks">+ Add risk</button></div>
+    </div>
+  </section>
+
+  <!-- WEEKLY UPDATES ARCHIVE -->
+  <section class="tab" id="weekly">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2 class="sec" style="margin:0">Weekly Updates — Archive</h2>
+        <span style="flex:1"></span>
+        <label style="font-size:12px;color:var(--muted)">View week:</label>
+        <select class="st" id="weekPicker"></select>
+      </div>
+      <p class="hint">Every archived week is saved here and available on demand to all viewers. Newest first. Use the picker to read any past week.</p>
+      <div id="weekSnapshot"></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">All Weeks</h2>
+      <table id="weekTable"><thead><tr><th>Week</th><th class="pillcell">Status</th><th class="pillcell">Complete</th><th>Summary</th><th class="no-print"></th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- WORK PACKAGES -->
+  <section class="tab" id="workpackages">
+    <div class="card">
+      <h2 class="sec">Work Packages (Scope)</h2>
+      <p class="hint">The 11 SOW work packages that move the program forward. % complete and RAG roll up into the Overview KPIs.</p>
+      <table id="wpTable"><thead><tr>
+        <th>WP</th><th>Name</th><th>Owner</th><th>Phase</th><th class="pillcell">Status</th><th>Progress</th><th class="pillcell">RAG</th><th>Note</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="workPackages">+ Add work package</button></div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Scope Detail</h2>
+      <p class="hint">Scope and deliverables per work package (from SOW).</p>
+      <div id="wpDetail"></div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="tab" id="timeline">
+    <div class="card">
+      <h2 class="sec">Milestone Timeline (DM0 → DM16)</h2>
+      <p class="hint">Payment / delivery milestones PM1–PM9 across the 16-month delivery window. Bars position by delivery month.</p>
+      <div class="tlaxis"><div>Milestone</div><div class="ticks" id="tlticks"></div></div>
+      <div class="timeline" id="timelineBars"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--green)"></span>Complete</span>
+        <span><span class="dot" style="background:var(--blue)"></span>In Progress</span>
+        <span><span class="dot" style="background:var(--grey)"></span>Not Started</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="sec">Milestone Schedule</h2>
+      <table id="msTable"><thead><tr>
+        <th>PM</th><th>Del Month</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section class="tab" id="deliverables">
+    <div class="card">
+      <h2 class="sec">Deliverables Register</h2>
+      <p class="hint">Acceptance-tracked deliverables with draft/final target months (SOW Part F / acceptance schedule).</p>
+      <table id="delTable"><thead><tr>
+        <th style="width:18px"></th><th>Phase</th><th>Deliverable</th><th>Acceptance Criteria</th><th class="pillcell">Draft</th><th class="pillcell">Final</th><th class="pillcell">Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="deliverables">+ Add deliverable</button></div>
+    </div>
+  </section>
+
+  <!-- OOTB -->
+  <section class="tab" id="ootb">
+    <div class="card">
+      <h2 class="sec">G2 / VFN Execution — Building the OOTB Solution</h2>
+      <p class="hint">Out-of-the-box build status by functional area. Approach reflects the SOW "Adopt first, Adapt when needed" principle.</p>
+      <table id="ootbTable"><thead><tr>
+        <th>Functional Area</th><th class="pillcell">Platform</th><th class="pillcell">Approach</th><th class="pillcell">Build Status</th><th class="pillcell">RAG</th><th>Note</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="ootb">+ Add area</button></div>
+    </div>
+  </section>
+
+  <!-- GAPS -->
+  <section class="tab" id="gaps">
+    <div class="card">
+      <h2 class="sec">Product Gaps Register</h2>
+      <p class="hint">Where OOTB does not meet a requirement — with disposition (Adopt / Configure / Adapt / Customise) and owner.</p>
+      <table id="gapTable"><thead><tr>
+        <th>ID</th><th>Area</th><th>Description</th><th class="pillcell">OOTB?</th><th class="pillcell">Disposition</th><th class="pillcell">Priority</th><th class="pillcell">Status</th><th>Owner</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="gaps">+ Add gap</button></div>
+    </div>
+  </section>
+
+  <!-- CATALOG -->
+  <section class="tab" id="catalog">
+    <div class="card">
+      <h2 class="sec">Product Catalog</h2>
+      <p class="hint">Products, charges and adjustments being configured across G2 and VFN.</p>
+      <table id="catTable"><thead><tr>
+        <th>Catalog Item</th><th class="pillcell">Type</th><th class="pillcell">Platform</th><th class="pillcell">Status</th><th>Note</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="catalog">+ Add item</button></div>
+    </div>
+  </section>
+
+  <!-- PAYMENTS -->
+  <section class="tab" id="payments">
+    <div class="card">
+      <h2 class="sec">Payment Milestones</h2>
+      <p class="hint">Milestone-based payment schedule (SOW Part B). Amounts are blank in the customer SOW — enter values as agreed; the total updates automatically.</p>
+      <table id="payTable"><thead><tr>
+        <th>PM</th><th>Del Month</th><th>Milestone</th><th class="pillcell">% of Total</th><th class="pillcell">Amount (ex GST)</th><th class="pillcell">Invoice Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody><tfoot></tfoot></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="payments">+ Add payment</button></div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section class="tab" id="resources">
+    <div class="card">
+      <h2 class="sec">Resources / Key Personnel</h2>
+      <p class="hint">Program team across Gentrack and Horizon Power (SOW Part G). Track names, roles, allocation and onboarding status.</p>
+      <div class="kpis" id="resKpis" style="grid-template-columns:repeat(4,1fr)"></div>
+      <table id="resTable"><thead><tr>
+        <th>Name</th><th class="pillcell">Org</th><th>Role</th><th>Responsibility</th><th class="pillcell">Location</th><th class="pillcell">Availability</th><th class="pillcell">Status</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="resources">+ Add resource</button></div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="tab" id="newsletter">
+    <div class="card no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <h2 class="sec" style="margin:0">Management Newsletter</h2>
+      <span class="spacer" style="flex:1"></span>
+      <button class="toolbtn" id="copyNews">📋 Copy (rich)</button>
+      <button class="toolbtn" id="copyNewsText">📋 Copy (plain text)</button>
+      <button class="toolbtn primary" id="mailNews">✉ Open in email</button>
+      <button class="toolbtn" onclick="window.print()">🖨 Print / PDF</button>
+    </div>
+    <p class="hint no-print">Auto-generated from the current dashboard data. Update the dashboard, then copy this into your email or click "Open in email".</p>
+    <div class="news"><div class="paper" id="newsPaper"></div></div>
+  </section>
+
+  <div class="footer" id="footer"></div>
+</div>
+
