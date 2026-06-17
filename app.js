@@ -301,7 +301,7 @@ function renderHeader(){
   const m=DATA.meta;
   document.getElementById('h-program').textContent=m.program+' — Program Dashboard';
   document.getElementById('h-sub').textContent=m.subtitle;
-  const fd=s=>{ if(!s)return '—'; const d=new Date(s+'T00:00:00'); return isNaN(d)?s:d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}); };
+  const fd=s=>{ if(!s)return '—'; const d=new Date(s+'T00:00:00'); return isNaN(d)?s:(String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()); };
   document.getElementById('h-meta').innerHTML=[
     ['Client',m.client],['Supplier',m.supplier],['PM',m.projectManager||'—'],
     ['Start',fd(m.programStartDate)],['End',fd(m.programEndDate)],['Reporting',m.reportWeek]
@@ -522,7 +522,7 @@ const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 function parseD(d){ const p=String(d||'').split('-'); if(p.length<3) return null; const dt=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(dt.getTime())?null:dt; }
 function toYMD(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
 function dDiff(a,b){ return Math.round((b-a)/86400000); }
-function fmtD(d){ const dt=parseD(d); return dt?dt.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'2-digit'}):(d||''); }
+function fmtD(d){ const dt=parseD(d); return dt?(String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+dt.getFullYear()):(d||''); }
 function shiftD(d,days){ const dt=parseD(d); if(!dt) return d; dt.setDate(dt.getDate()+days); return toYMD(dt); }
 function shiftGantt(weeks){
   const g=DATA.gantt; if(!g) return; const days=weeks*7;
