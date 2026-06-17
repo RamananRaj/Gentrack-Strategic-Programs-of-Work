@@ -1032,5 +1032,233 @@
       "sprint": "",
       "note": "Per Integration Register & ICDs (WP4)."
     }
-  ]
+  ],
+  "gantt": {
+    "start": "2026-06",
+    "end": "2028-02",
+    "lanes": [
+      {
+        "id": "onboard",
+        "name": "Onboarding / Program Readiness",
+        "color": "#9ca3af"
+      },
+      {
+        "id": "build",
+        "name": "G2-VFN Build & ST",
+        "color": "#16a34a"
+      },
+      {
+        "id": "retain",
+        "name": "Retain App",
+        "color": "#0ea5e9"
+      },
+      {
+        "id": "test",
+        "name": "Test Stream",
+        "color": "#475569"
+      },
+      {
+        "id": "mig",
+        "name": "Mig Stream",
+        "color": "#7c3aed"
+      },
+      {
+        "id": "change",
+        "name": "Change Mgmt / Training",
+        "color": "#9d4d6b"
+      }
+    ],
+    "milestones": [
+      {
+        "name": "SOW Signoff",
+        "date": "2026-06"
+      },
+      {
+        "name": "Business Ready",
+        "date": "2027-09"
+      },
+      {
+        "name": "M2C/VFN Go-Live",
+        "date": "2027-10"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T1",
+        "lane": "onboard",
+        "name": "Team Onboarding",
+        "start": "2026-07",
+        "end": "2026-08",
+        "color": "#9ca3af"
+      },
+      {
+        "id": "T2",
+        "lane": "onboard",
+        "name": "Env Setup & Readiness",
+        "start": "2026-08",
+        "end": "2026-09",
+        "color": "#16a34a"
+      },
+      {
+        "id": "T3",
+        "lane": "build",
+        "name": "G2 - Tech Design Validation - Build",
+        "start": "2026-09",
+        "end": "2027-01",
+        "color": "#16a34a"
+      },
+      {
+        "id": "T4",
+        "lane": "build",
+        "name": "VFN - Tech Design Validation - Build",
+        "start": "2026-09",
+        "end": "2027-01",
+        "color": "#16a34a"
+      },
+      {
+        "id": "T5",
+        "lane": "build",
+        "name": "Test Plan / System Test (0.1.2)",
+        "start": "2026-12",
+        "end": "2027-02",
+        "color": "#15803d"
+      },
+      {
+        "id": "T6",
+        "lane": "retain",
+        "name": "Retain App Env Readiness",
+        "start": "2026-08",
+        "end": "2026-11",
+        "color": "#0ea5e9"
+      },
+      {
+        "id": "T7",
+        "lane": "retain",
+        "name": "Retain App Tech Design & Build",
+        "start": "2026-12",
+        "end": "2027-03",
+        "color": "#0ea5e9"
+      },
+      {
+        "id": "T8",
+        "lane": "retain",
+        "name": "Retain App Int Build",
+        "start": "2027-01",
+        "end": "2027-03",
+        "color": "#0284c7"
+      },
+      {
+        "id": "T9",
+        "lane": "test",
+        "name": "SIT Test Design",
+        "start": "2026-11",
+        "end": "2027-01",
+        "color": "#475569"
+      },
+      {
+        "id": "T10",
+        "lane": "test",
+        "name": "SIT 0",
+        "start": "2027-02",
+        "end": "2027-03",
+        "color": "#475569"
+      },
+      {
+        "id": "T11",
+        "lane": "test",
+        "name": "SIT 1-2",
+        "start": "2027-03",
+        "end": "2027-06",
+        "color": "#334155"
+      },
+      {
+        "id": "T12",
+        "lane": "test",
+        "name": "BCT & MT 1-2",
+        "start": "2027-03",
+        "end": "2027-05",
+        "color": "#0ea5e9"
+      },
+      {
+        "id": "T13",
+        "lane": "test",
+        "name": "E2E Process Test 1.2",
+        "start": "2027-06",
+        "end": "2027-07",
+        "color": "#475569"
+      },
+      {
+        "id": "T14",
+        "lane": "test",
+        "name": "UAT 1-2",
+        "start": "2027-06",
+        "end": "2027-08",
+        "color": "#0ea5e9"
+      },
+      {
+        "id": "T15",
+        "lane": "test",
+        "name": "PT Testing",
+        "start": "2027-08",
+        "end": "2027-09",
+        "color": "#475569"
+      },
+      {
+        "id": "T16",
+        "lane": "test",
+        "name": "Sec Testing",
+        "start": "2027-08",
+        "end": "2027-09",
+        "color": "#0ea5e9"
+      },
+      {
+        "id": "T17",
+        "lane": "test",
+        "name": "Reg / Auto Testing",
+        "start": "2027-09",
+        "end": "2027-10",
+        "color": "#475569"
+      },
+      {
+        "id": "T18",
+        "lane": "mig",
+        "name": "Trial Migration (TM0-TM4)",
+        "start": "2026-12",
+        "end": "2027-04",
+        "color": "#7c3aed"
+      },
+      {
+        "id": "T19",
+        "lane": "change",
+        "name": "Change Access, Prep, Training Material",
+        "start": "2026-12",
+        "end": "2027-07",
+        "color": "#9d4d6b"
+      },
+      {
+        "id": "T20",
+        "lane": "change",
+        "name": "TTT (Train the Trainer)",
+        "start": "2027-08",
+        "end": "2027-09",
+        "color": "#9d4d6b"
+      },
+      {
+        "id": "T21",
+        "lane": "change",
+        "name": "Ops Trials & Training",
+        "start": "2027-09",
+        "end": "2027-10",
+        "color": "#9d4d6b"
+      },
+      {
+        "id": "T22",
+        "lane": "test",
+        "name": "Hypercare",
+        "start": "2027-10",
+        "end": "2028-01",
+        "color": "#16a34a"
+      }
+    ]
+  }
 }

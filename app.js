@@ -10,6 +10,7 @@ const DASH_HTML = `
   <button data-tab="weekly">Weekly Updates</button>
   <button data-tab="workpackages">Work Packages</button>
   <button data-tab="timeline">Timeline</button>
+  <button data-tab="gantt">Plan on a Page</button>
   <button data-tab="deliverables">Deliverables</button>
   <button data-tab="stories">Functional Build Packages</button>
   <button data-tab="gaps">Product Gaps</button>
@@ -134,6 +135,16 @@ const DASH_HTML = `
       </tr></thead><tbody></tbody></table>
       <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
     </div>
+  </section>
+
+  <!-- PLAN ON A PAGE (GANTT) -->
+  <section class="tab" id="gantt">
+    <div class="card">
+      <h2 class="sec">Plan on a Page — Implementation Timeline</h2>
+      <p class="hint">Swimlane Gantt across the program months. In the admin, edit the tables below the chart to set the date range, add streams, tasks/sub-tasks with start &amp; end months, and milestone flags — the chart updates live.</p>
+      <div style="overflow-x:auto"><div id="ganttChart"></div></div>
+    </div>
+    <div class="card no-print" id="ganttEdit"></div>
   </section>
 
   <!-- DELIVERABLES -->
@@ -270,6 +281,20 @@ function statusSelect(bind,val,opts){
   return `<select class="st" data-bind="${bind}">`+opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')+`</select>`;
 }
 function delBtn(arr,i){ return EDIT?`<td class="row-actions"><button class="xbtn" data-del="${arr}:${i}" title="Delete row">✕</button></td>`:'<td class="no-print"></td>'; }
+function moveCtrls(arr,i,len){
+  if(!EDIT) return '<td class="no-print"></td>';
+  const up=i>0, dn=i<len-1;
+  return `<td class="row-actions" style="white-space:nowrap">`+
+    `<button class="mvbtn" data-move="${arr}:${i}:-1" title="Move up" ${up?'':'disabled'}>▲</button>`+
+    `<button class="mvbtn" data-move="${arr}:${i}:1" title="Move down" ${dn?'':'disabled'}>▼</button>`+
+    `<button class="xbtn" data-del="${arr}:${i}" title="Delete row">✕</button></td>`;
+}
+function moveRow(arr,i,dir){
+  const a=DATA[arr]; const j=i+dir;
+  if(j<0||j>=a.length) return;
+  const t=a[i]; a[i]=a[j]; a[j]=t;
+  renderAll();
+}
 
 /* ---------- renderers ---------- */
 function renderHeader(){
@@ -488,8 +513,94 @@ function renderTimeline(){
     <td>${ce('milestones.'+i+'.deliverables',m.deliverables)}</td>
     <td class="pillcell">${ce('milestones.'+i+'.pct',m.pct)}</td>
     <td class="pillcell">${statusSelect('milestones.'+i+'.status',m.status,["Not Started","In Progress","Complete","At Risk"])}</td>
-    ${delBtn('milestones',i)}
+    ${moveCtrls('milestones',i,ms.length)}
   </tr>`).join('');
+}
+
+/* ---------- Plan on a Page (Gantt) ---------- */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function ymIdx(ym){ const p=String(ym||'').split('-'); const y=+p[0],m=+p[1]; if(!y||!m) return null; return y*12+(m-1); }
+function renderGantt(){
+  const g=DATA.gantt||{lanes:[],tasks:[],milestones:[],start:'',end:''};
+  const chart=document.getElementById('ganttChart'); if(!chart) return;
+  const s=ymIdx(g.start), e=ymIdx(g.end);
+  if(s==null||e==null||e<s){ chart.innerHTML='<p style="color:#94a3b8">Set a valid Start and End month (YYYY-MM) below to draw the timeline.</p>'; }
+  else{
+    const N=e-s+1;
+    // header
+    let head='<div class="glabel ghead">Stream</div><div class="gtrack ghead">';
+    for(let i=0;i<N;i++){ const idx=s+i, mm=idx%12; head+=`<div class="gcell" style="left:${i/N*100}%;width:${100/N}%">${MON[mm]}${mm===0?'<br><b>'+Math.floor(idx/12)+'</b>':''}</div>`; }
+    head+='</div>';
+    // milestone flags row
+    let flags='<div class="glabel"></div><div class="gtrack" style="height:24px">';
+    (g.milestones||[]).forEach(m=>{ const mi=ymIdx(m.date); if(mi==null)return; const L=(mi-s)/N*100; flags+=`<div class="gflag" style="left:${L}%" title="${esc(m.name)} (${esc(m.date)})">⚑ ${esc(m.name)}</div>`; });
+    flags+='</div>';
+    // lanes
+    let rows='';
+    (g.lanes||[]).forEach(lane=>{
+      const tks=(g.tasks||[]).filter(t=>t.lane===lane.id);
+      const h=Math.max(1,tks.length)*24+6;
+      let bars='';
+      tks.forEach((t,ti)=>{
+        const ti0=ymIdx(t.start), ti1=ymIdx(t.end); if(ti0==null||ti1==null)return;
+        const L=(ti0-s)/N*100, W=Math.max((ti1-ti0+1)/N*100, 1.5);
+        bars+=`<div class="gbar" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||lane.color||'#64748b'}" title="${esc(t.name)} (${esc(t.start)}→${esc(t.end)})">${esc(t.name)}</div>`;
+      });
+      // vertical month gridlines
+      let grid=''; for(let i=0;i<=N;i++){ grid+=`<div class="ggrid" style="left:${i/N*100}%"></div>`; }
+      rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${esc(lane.name)}</div><div class="gtrack" style="height:${h}px">${grid}${bars}</div></div>`;
+    });
+    chart.innerHTML=`<div class="gantt"><div class="grow">${head}</div><div class="grow">${flags}</div>${rows||'<p style="padding:10px;color:#94a3b8">No streams yet. Add a stream below.</p>'}</div>`;
+  }
+  // editor (admin)
+  const ed=document.getElementById('ganttEdit');
+  const taskRows=(g.tasks||[]).map((t,i)=>`<tr>
+    <td>${ce('gantt.tasks.'+i+'.name',t.name)}</td>
+    <td class="pillcell">${EDIT?laneSelect('gantt.tasks.'+i+'.lane',t.lane):esc((g.lanes.find(l=>l.id===t.lane)||{}).name||t.lane)}</td>
+    <td class="pillcell">${ce('gantt.tasks.'+i+'.start',t.start)}</td>
+    <td class="pillcell">${ce('gantt.tasks.'+i+'.end',t.end)}</td>
+    <td class="pillcell">${EDIT?`<input type="color" value="${t.color||'#64748b'}" data-color="gantt.tasks.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${t.color||'#64748b'}"></span>`}</td>
+    ${EDIT?`<td class="row-actions" style="white-space:nowrap"><button class="mvbtn" data-gmove="tasks:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="tasks:${i}:1" ${i<g.tasks.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="tasks:${i}">✕</button></td>`:'<td></td>'}
+  </tr>`).join('');
+  const laneRows=(g.lanes||[]).map((l,i)=>`<tr>
+    <td>${ce('gantt.lanes.'+i+'.name',l.name)}</td>
+    <td class="pillcell">${EDIT?`<input type="color" value="${l.color||'#64748b'}" data-color="gantt.lanes.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${l.color||'#64748b'}"></span>`}</td>
+    ${EDIT?`<td class="row-actions"><button class="mvbtn" data-gmove="lanes:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="lanes:${i}:1" ${i<g.lanes.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="lanes:${i}">✕</button></td>`:'<td></td>'}
+  </tr>`).join('');
+  const msRows=(g.milestones||[]).map((m,i)=>`<tr>
+    <td>${ce('gantt.milestones.'+i+'.name',m.name)}</td>
+    <td class="pillcell">${ce('gantt.milestones.'+i+'.date',m.date)}</td>
+    ${EDIT?`<td class="row-actions"><button class="xbtn" data-gdel="milestones:${i}">✕</button></td>`:'<td></td>'}
+  </tr>`).join('');
+  ed.innerHTML=`
+    <h2 class="sec">Timeline Setup</h2>
+    <div class="adminrow"><label>Date range (YYYY-MM):</label> Start ${ce('gantt.start',g.start)} &nbsp; End ${ce('gantt.end',g.end)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="gedit-grid">
+      <div>
+        <h2 class="sec">Tasks / Sub-tasks</h2>
+        <table><thead><tr><th>Task</th><th>Stream</th><th>Start</th><th>End</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${taskRows||'<tr><td colspan="6" style="color:#94a3b8">No tasks yet.</td></tr>'}</tbody></table>
+        ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddTask">+ Add task</button></div>':''}
+      </div>
+      <div>
+        <h2 class="sec">Streams (Lanes)</h2>
+        <table><thead><tr><th>Stream</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${laneRows||'<tr><td colspan="3" style="color:#94a3b8">No streams yet.</td></tr>'}</tbody></table>
+        ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddLane">+ Add stream</button></div>':''}
+        <h2 class="sec" style="margin-top:16px">Milestone Flags</h2>
+        <table><thead><tr><th>Milestone</th><th>Month (YYYY-MM)</th><th class="no-print"></th></tr></thead><tbody>${msRows||'<tr><td colspan="3" style="color:#94a3b8">No milestones yet.</td></tr>'}</tbody></table>
+        ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddMs">+ Add milestone flag</button></div>':''}
+      </div>
+    </div>`;
+  // wire gantt-specific controls
+  ed.querySelectorAll('[data-color]').forEach(inp=>{ inp.oninput=()=>{ setByPath(inp.dataset.color,inp.value); renderGantt(); }; });
+  ed.querySelectorAll('[data-gdel]').forEach(b=>{ b.onclick=()=>{ const [a,i]=b.dataset.gdel.split(':'); DATA.gantt[a].splice(+i,1); renderAll(); }; });
+  ed.querySelectorAll('[data-gmove]').forEach(b=>{ b.onclick=()=>{ if(b.disabled)return; const [a,i,d]=b.dataset.gmove.split(':'); const arr=DATA.gantt[a],j=+i+ +d; if(j<0||j>=arr.length)return; const t=arr[+i];arr[+i]=arr[j];arr[j]=t; renderAll(); }; });
+  const gat=document.getElementById('gAddTask'); if(gat) gat.onclick=()=>{ const lane=(DATA.gantt.lanes[0]||{}).id||''; DATA.gantt.tasks.push({id:'T'+Date.now(),lane,name:'New task',start:DATA.gantt.start,end:DATA.gantt.start,color:'#64748b'}); renderAll(); };
+  const gal=document.getElementById('gAddLane'); if(gal) gal.onclick=()=>{ DATA.gantt.lanes.push({id:'lane'+Date.now(),name:'New stream',color:'#64748b'}); renderAll(); };
+  const gam=document.getElementById('gAddMs'); if(gam) gam.onclick=()=>{ DATA.gantt.milestones.push({name:'New milestone',date:DATA.gantt.start}); renderAll(); };
+}
+function laneSelect(bind,val){
+  const lanes=(DATA.gantt&&DATA.gantt.lanes)||[];
+  return `<select class="st" data-bind="${bind}">`+lanes.map(l=>`<option value="${l.id}" ${l.id===val?'selected':''}>${esc(l.name)}</option>`).join('')+`</select>`;
 }
 
 function renderDeliverables(){
@@ -625,7 +736,7 @@ function renderNewsletter(){
 
 function renderAll(){
   renderHeader();renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderRisks();renderWP();
-  renderTimeline();renderDeliverables();renderStories();renderGaps();renderCatalog();
+  renderTimeline();renderGantt();renderDeliverables();renderStories();renderGaps();renderCatalog();
   renderPayments();renderResources();renderNewsletter();
   fillBinds();
   bindEditables();
@@ -670,6 +781,9 @@ function bindEditables(){
   });
   document.querySelectorAll('[data-del]').forEach(b=>{
     b.onclick=()=>{ const [arr,idx]=b.dataset.del.split(':'); DATA[arr].splice(+idx,1); renderAll(); };
+  });
+  document.querySelectorAll('[data-move]').forEach(b=>{
+    b.onclick=()=>{ if(b.disabled)return; const [arr,idx,dir]=b.dataset.move.split(':'); moveRow(arr,+idx,+dir); };
   });
   document.querySelectorAll('[data-add]').forEach(b=>{
     b.onclick=()=>{ addRow(b.dataset.add); };
@@ -765,6 +879,9 @@ function setData(d){
     {id:'quality',name:'Quality',status:'Green',summary:''}];
   d.weekly=d.weekly||{};
   ['accomplishments','planned','blockers'].forEach(k=>{ if(!Array.isArray(d.weekly[k])) d.weekly[k]=[]; });
+  d.gantt=d.gantt||{};
+  d.gantt.start=d.gantt.start||''; d.gantt.end=d.gantt.end||'';
+  ['lanes','tasks','milestones'].forEach(k=>{ if(!Array.isArray(d.gantt[k])) d.gantt[k]=[]; });
   DATA=d;
 }
 function mountDashboard(containerId){

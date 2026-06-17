@@ -114,3 +114,19 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .modal input,.modal select{width:100%;font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+/* Gantt / Plan on a Page */
+.mvbtn{border:0;background:transparent;color:#475569;cursor:pointer;font-weight:700;padding:0 3px}
+.mvbtn[disabled]{opacity:.25;cursor:default}
+.gantt{min-width:760px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.grow{display:flex;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.glabel{flex:0 0 200px;padding:6px 10px;font-size:12px;font-weight:600;background:#faf7f5;display:flex;align-items:center}
+.gtrack{position:relative;flex:1;min-height:24px}
+.ghead{background:#5b4636;color:#fff;font-weight:700}
+.ghead.glabel{background:#5b4636;color:#fff}
+.gcell{position:absolute;top:0;height:100%;font-size:10px;text-align:center;border-left:1px solid rgba(255,255,255,.15);color:#fff;padding-top:3px;line-height:1.1}
+.ggrid{position:absolute;top:0;bottom:0;width:1px;background:#eef2f7}
+.gbar{position:absolute;height:20px;border-radius:5px;color:#fff;font-size:10.5px;font-weight:600;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.gflag{position:absolute;top:0;font-size:10.5px;font-weight:700;color:#7c2d12;white-space:nowrap;transform:translateX(-2px)}
+input[type=color]{width:36px;height:24px;border:1px solid var(--line);border-radius:5px;padding:0;background:none;cursor:pointer}
+@media(max-width:760px){.gedit-grid{grid-template-columns:1fr!important}}

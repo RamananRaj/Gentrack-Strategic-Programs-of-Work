@@ -50,5 +50,12 @@
   "weeklyUpdates": [],
   "payments": [],
   "resources": [],
-  "stories": []
+  "stories": [],
+  "gantt": {
+    "start": "2026-05",
+    "end": "2026-12",
+    "lanes": [],
+    "milestones": [],
+    "tasks": []
+  }
 }
