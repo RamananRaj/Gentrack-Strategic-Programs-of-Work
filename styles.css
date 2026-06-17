@@ -127,6 +127,7 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gcell{position:absolute;top:0;height:100%;font-size:10px;text-align:center;border-left:1px solid rgba(255,255,255,.15);color:#fff;padding-top:3px;line-height:1.1}
 .ggrid{position:absolute;top:0;bottom:0;width:1px;background:#eef2f7}
 .gbar{position:absolute;height:20px;border-radius:5px;color:#fff;font-size:10.5px;font-weight:600;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 2px rgba(0,0,0,.2)}
-.gflag{position:absolute;top:0;font-size:10.5px;font-weight:700;color:#7c2d12;white-space:nowrap;transform:translateX(-2px)}
+.gflag{position:absolute;top:0;font-size:10.5px;font-weight:700;color:#7c2d12;white-space:nowrap;transform:translateX(-2px);background:rgba(255,255,255,.85);padding:0 3px;border-radius:3px;z-index:3}
+.gmile{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed #b91c1c;opacity:.5;z-index:1}
 input[type=color]{width:36px;height:24px;border:1px solid var(--line);border-radius:5px;padding:0;background:none;cursor:pointer}
 @media(max-width:760px){.gedit-grid{grid-template-columns:1fr!important}}

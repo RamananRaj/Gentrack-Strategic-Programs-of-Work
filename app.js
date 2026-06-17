@@ -550,13 +550,17 @@ function renderGantt(){
       cur=next;
     }
     head+='</div>';
-    // milestone flags row
-    let flags='<div class="glabel"></div><div class="gtrack" style="height:24px">';
-    (g.milestones||[]).forEach(m=>{ if(!parseD(m.date))return; flags+=`<div class="gflag" style="left:${pos(m.date)}%" title="${esc(m.name)} (${esc(fmtD(m.date))})">⚑ ${esc(m.name)}</div>`; });
+    // milestone flags row — stagger labels so they don't overlap
+    const mlist=(g.milestones||[]).filter(m=>parseD(m.date)).sort((a,b)=>parseD(a.date)-parseD(b.date));
+    let flags='<div class="glabel"></div><div class="gtrack" style="height:36px">';
+    let lastL=-99, level=0;
+    mlist.forEach(m=>{ const L=pos(m.date); if(L-lastL<14){ level=(level+1)%3; } else { level=0; } lastL=L;
+      flags+=`<div class="gflag" style="left:${L}%;top:${level*12}px" title="${esc(m.name)} (${esc(fmtD(m.date))})">⚑ ${esc(m.name)}</div>`; });
     flags+='</div>';
-    // month gridlines (reuse boundaries)
+    // month gridlines + milestone guide lines (reuse boundaries)
     let grid=''; let gc=new Date(gs.getFullYear(),gs.getMonth(),1);
     while(gc<=ge){ grid+=`<div class="ggrid" style="left:${dDiff(gs,gc<gs?gs:gc)/total*100}%"></div>`; gc=new Date(gc.getFullYear(),gc.getMonth()+1,1); }
+    let mlines=''; mlist.forEach(m=>{ mlines+=`<div class="gmile" style="left:${pos(m.date)}%"></div>`; });
     // lanes
     let rows='';
     (g.lanes||[]).forEach(lane=>{
@@ -568,7 +572,7 @@ function renderGantt(){
         const L=pos(t.start), W=Math.max(pos(t.end)-L, 0.8);
         bars+=`<div class="gbar" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||lane.color||'#64748b'}" title="${esc(t.name)} (${esc(fmtD(t.start))} → ${esc(fmtD(t.end))})">${esc(t.name)}</div>`;
       });
-      rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${esc(lane.name)}</div><div class="gtrack" style="height:${h}px">${grid}${bars}</div></div>`;
+      rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${esc(lane.name)}</div><div class="gtrack" style="height:${h}px">${grid}${mlines}${bars}</div></div>`;
     });
     chart.innerHTML=`<div class="gantt"><div class="grow">${head}</div><div class="grow">${flags}</div>${rows||'<p style="padding:10px;color:#94a3b8">No streams yet. Add a stream below.</p>'}</div>`;
   }
