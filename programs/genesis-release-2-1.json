@@ -52,8 +52,8 @@
   "resources": [],
   "stories": [],
   "gantt": {
-    "start": "2026-05",
-    "end": "2026-12",
+    "start": "2026-05-01",
+    "end": "2026-12-31",
     "lanes": [],
     "milestones": [],
     "tasks": []

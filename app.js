@@ -519,22 +519,44 @@ function renderTimeline(){
 
 /* ---------- Plan on a Page (Gantt) ---------- */
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function ymIdx(ym){ const p=String(ym||'').split('-'); const y=+p[0],m=+p[1]; if(!y||!m) return null; return y*12+(m-1); }
+function parseD(d){ const p=String(d||'').split('-'); if(p.length<3) return null; const dt=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(dt.getTime())?null:dt; }
+function toYMD(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function dDiff(a,b){ return Math.round((b-a)/86400000); }
+function fmtD(d){ const dt=parseD(d); return dt?dt.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'2-digit'}):(d||''); }
+function shiftD(d,days){ const dt=parseD(d); if(!dt) return d; dt.setDate(dt.getDate()+days); return toYMD(dt); }
+function shiftGantt(weeks){
+  const g=DATA.gantt; if(!g) return; const days=weeks*7;
+  g.start=shiftD(g.start,days); g.end=shiftD(g.end,days);
+  (g.tasks||[]).forEach(t=>{ t.start=shiftD(t.start,days); t.end=shiftD(t.end,days); });
+  (g.milestones||[]).forEach(m=>{ m.date=shiftD(m.date,days); });
+  renderAll();
+}
 function renderGantt(){
   const g=DATA.gantt||{lanes:[],tasks:[],milestones:[],start:'',end:''};
   const chart=document.getElementById('ganttChart'); if(!chart) return;
-  const s=ymIdx(g.start), e=ymIdx(g.end);
-  if(s==null||e==null||e<s){ chart.innerHTML='<p style="color:#94a3b8">Set a valid Start and End month (YYYY-MM) below to draw the timeline.</p>'; }
+  const gs=parseD(g.start), ge=parseD(g.end);
+  if(!gs||!ge||ge<gs){ chart.innerHTML='<p style="color:#94a3b8">Set a valid Start and End date (YYYY-MM-DD) below to draw the timeline.</p>'; }
   else{
-    const N=e-s+1;
-    // header
+    const total=dDiff(gs,ge)||1;
+    const pos=d=>{ const dt=parseD(d); return dt?Math.max(0,Math.min(100,dDiff(gs,dt)/total*100)):0; };
+    // month axis header (variable width per month)
     let head='<div class="glabel ghead">Stream</div><div class="gtrack ghead">';
-    for(let i=0;i<N;i++){ const idx=s+i, mm=idx%12; head+=`<div class="gcell" style="left:${i/N*100}%;width:${100/N}%">${MON[mm]}${mm===0?'<br><b>'+Math.floor(idx/12)+'</b>':''}</div>`; }
+    let cur=new Date(gs.getFullYear(),gs.getMonth(),1);
+    while(cur<=ge){
+      const next=new Date(cur.getFullYear(),cur.getMonth()+1,1);
+      const L=dDiff(gs,cur<gs?gs:cur)/total*100;
+      const R=dDiff(gs,next>ge?ge:next)/total*100;
+      head+=`<div class="gcell" style="left:${L}%;width:${Math.max(R-L,0)}%">${MON[cur.getMonth()]}${cur.getMonth()===0?'<br><b>'+cur.getFullYear()+'</b>':''}</div>`;
+      cur=next;
+    }
     head+='</div>';
     // milestone flags row
     let flags='<div class="glabel"></div><div class="gtrack" style="height:24px">';
-    (g.milestones||[]).forEach(m=>{ const mi=ymIdx(m.date); if(mi==null)return; const L=(mi-s)/N*100; flags+=`<div class="gflag" style="left:${L}%" title="${esc(m.name)} (${esc(m.date)})">⚑ ${esc(m.name)}</div>`; });
+    (g.milestones||[]).forEach(m=>{ if(!parseD(m.date))return; flags+=`<div class="gflag" style="left:${pos(m.date)}%" title="${esc(m.name)} (${esc(fmtD(m.date))})">⚑ ${esc(m.name)}</div>`; });
     flags+='</div>';
+    // month gridlines (reuse boundaries)
+    let grid=''; let gc=new Date(gs.getFullYear(),gs.getMonth(),1);
+    while(gc<=ge){ grid+=`<div class="ggrid" style="left:${dDiff(gs,gc<gs?gs:gc)/total*100}%"></div>`; gc=new Date(gc.getFullYear(),gc.getMonth()+1,1); }
     // lanes
     let rows='';
     (g.lanes||[]).forEach(lane=>{
@@ -542,23 +564,22 @@ function renderGantt(){
       const h=Math.max(1,tks.length)*24+6;
       let bars='';
       tks.forEach((t,ti)=>{
-        const ti0=ymIdx(t.start), ti1=ymIdx(t.end); if(ti0==null||ti1==null)return;
-        const L=(ti0-s)/N*100, W=Math.max((ti1-ti0+1)/N*100, 1.5);
-        bars+=`<div class="gbar" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||lane.color||'#64748b'}" title="${esc(t.name)} (${esc(t.start)}→${esc(t.end)})">${esc(t.name)}</div>`;
+        if(!parseD(t.start)||!parseD(t.end))return;
+        const L=pos(t.start), W=Math.max(pos(t.end)-L, 0.8);
+        bars+=`<div class="gbar" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||lane.color||'#64748b'}" title="${esc(t.name)} (${esc(fmtD(t.start))} → ${esc(fmtD(t.end))})">${esc(t.name)}</div>`;
       });
-      // vertical month gridlines
-      let grid=''; for(let i=0;i<=N;i++){ grid+=`<div class="ggrid" style="left:${i/N*100}%"></div>`; }
       rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${esc(lane.name)}</div><div class="gtrack" style="height:${h}px">${grid}${bars}</div></div>`;
     });
     chart.innerHTML=`<div class="gantt"><div class="grow">${head}</div><div class="grow">${flags}</div>${rows||'<p style="padding:10px;color:#94a3b8">No streams yet. Add a stream below.</p>'}</div>`;
   }
   // editor (admin)
   const ed=document.getElementById('ganttEdit');
+  const dCell=(path,val)=> EDIT?`<input type="date" value="${esc(val||'')}" data-dval="${path}">`:esc(fmtD(val));
   const taskRows=(g.tasks||[]).map((t,i)=>`<tr>
     <td>${ce('gantt.tasks.'+i+'.name',t.name)}</td>
     <td class="pillcell">${EDIT?laneSelect('gantt.tasks.'+i+'.lane',t.lane):esc((g.lanes.find(l=>l.id===t.lane)||{}).name||t.lane)}</td>
-    <td class="pillcell">${ce('gantt.tasks.'+i+'.start',t.start)}</td>
-    <td class="pillcell">${ce('gantt.tasks.'+i+'.end',t.end)}</td>
+    <td class="pillcell">${dCell('gantt.tasks.'+i+'.start',t.start)}</td>
+    <td class="pillcell">${dCell('gantt.tasks.'+i+'.end',t.end)}</td>
     <td class="pillcell">${EDIT?`<input type="color" value="${t.color||'#64748b'}" data-color="gantt.tasks.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${t.color||'#64748b'}"></span>`}</td>
     ${EDIT?`<td class="row-actions" style="white-space:nowrap"><button class="mvbtn" data-gmove="tasks:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="tasks:${i}:1" ${i<g.tasks.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="tasks:${i}">✕</button></td>`:'<td></td>'}
   </tr>`).join('');
@@ -569,12 +590,13 @@ function renderGantt(){
   </tr>`).join('');
   const msRows=(g.milestones||[]).map((m,i)=>`<tr>
     <td>${ce('gantt.milestones.'+i+'.name',m.name)}</td>
-    <td class="pillcell">${ce('gantt.milestones.'+i+'.date',m.date)}</td>
+    <td class="pillcell">${dCell('gantt.milestones.'+i+'.date',m.date)}</td>
     ${EDIT?`<td class="row-actions"><button class="xbtn" data-gdel="milestones:${i}">✕</button></td>`:'<td></td>'}
   </tr>`).join('');
   ed.innerHTML=`
     <h2 class="sec">Timeline Setup</h2>
-    <div class="adminrow"><label>Date range (YYYY-MM):</label> Start ${ce('gantt.start',g.start)} &nbsp; End ${ce('gantt.end',g.end)}</div>
+    <div class="adminrow"><label>Date range:</label> Start ${dCell('gantt.start',g.start)} &nbsp; End ${dCell('gantt.end',g.end)}</div>
+    ${EDIT?`<div class="adminrow"><label>Shift whole plan:</label><button class="toolbtn" id="gShiftBack">◀ −1 week</button><button class="toolbtn" id="gShiftFwd">+1 week ▶</button><button class="toolbtn" id="gShiftBack4">◀ −4 wks</button><button class="toolbtn" id="gShiftFwd4">+4 wks ▶</button><span class="pill-note">Moves the range, every task and every milestone together (by week).</span></div>`:''}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="gedit-grid">
       <div>
         <h2 class="sec">Tasks / Sub-tasks</h2>
@@ -586,17 +608,22 @@ function renderGantt(){
         <table><thead><tr><th>Stream</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${laneRows||'<tr><td colspan="3" style="color:#94a3b8">No streams yet.</td></tr>'}</tbody></table>
         ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddLane">+ Add stream</button></div>':''}
         <h2 class="sec" style="margin-top:16px">Milestone Flags</h2>
-        <table><thead><tr><th>Milestone</th><th>Month (YYYY-MM)</th><th class="no-print"></th></tr></thead><tbody>${msRows||'<tr><td colspan="3" style="color:#94a3b8">No milestones yet.</td></tr>'}</tbody></table>
+        <table><thead><tr><th>Milestone</th><th>Date</th><th class="no-print"></th></tr></thead><tbody>${msRows||'<tr><td colspan="3" style="color:#94a3b8">No milestones yet.</td></tr>'}</tbody></table>
         ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddMs">+ Add milestone flag</button></div>':''}
       </div>
     </div>`;
   // wire gantt-specific controls
   ed.querySelectorAll('[data-color]').forEach(inp=>{ inp.oninput=()=>{ setByPath(inp.dataset.color,inp.value); renderGantt(); }; });
+  ed.querySelectorAll('[data-dval]').forEach(inp=>{ inp.onchange=()=>{ setByPath(inp.dataset.dval,inp.value); renderGantt(); }; });
   ed.querySelectorAll('[data-gdel]').forEach(b=>{ b.onclick=()=>{ const [a,i]=b.dataset.gdel.split(':'); DATA.gantt[a].splice(+i,1); renderAll(); }; });
   ed.querySelectorAll('[data-gmove]').forEach(b=>{ b.onclick=()=>{ if(b.disabled)return; const [a,i,d]=b.dataset.gmove.split(':'); const arr=DATA.gantt[a],j=+i+ +d; if(j<0||j>=arr.length)return; const t=arr[+i];arr[+i]=arr[j];arr[j]=t; renderAll(); }; });
   const gat=document.getElementById('gAddTask'); if(gat) gat.onclick=()=>{ const lane=(DATA.gantt.lanes[0]||{}).id||''; DATA.gantt.tasks.push({id:'T'+Date.now(),lane,name:'New task',start:DATA.gantt.start,end:DATA.gantt.start,color:'#64748b'}); renderAll(); };
   const gal=document.getElementById('gAddLane'); if(gal) gal.onclick=()=>{ DATA.gantt.lanes.push({id:'lane'+Date.now(),name:'New stream',color:'#64748b'}); renderAll(); };
   const gam=document.getElementById('gAddMs'); if(gam) gam.onclick=()=>{ DATA.gantt.milestones.push({name:'New milestone',date:DATA.gantt.start}); renderAll(); };
+  const gsb=document.getElementById('gShiftBack'); if(gsb) gsb.onclick=()=>shiftGantt(-1);
+  const gsf=document.getElementById('gShiftFwd'); if(gsf) gsf.onclick=()=>shiftGantt(1);
+  const gsb4=document.getElementById('gShiftBack4'); if(gsb4) gsb4.onclick=()=>shiftGantt(-4);
+  const gsf4=document.getElementById('gShiftFwd4'); if(gsf4) gsf4.onclick=()=>shiftGantt(4);
 }
 function laneSelect(bind,val){
   const lanes=(DATA.gantt&&DATA.gantt.lanes)||[];
