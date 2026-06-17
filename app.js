@@ -286,7 +286,7 @@ function renderHeader(){
 
 function renderKpis(){
   const wp=DATA.workPackages;
-  const avg=Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length);
+  const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
   const done=wp.filter(w=>w.status==='Complete').length;
   const inprog=wp.filter(w=>w.status==='In Progress').length;
   const ms=DATA.milestones, msDone=ms.filter(x=>x.status==='Complete').length;
@@ -366,7 +366,7 @@ function renderWeeklyArchive(){
 }
 function archiveWeek(){
   const wp=DATA.workPackages;
-  const avg=Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length);
+  const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
   const next=DATA.milestones.find(x=>x.status!=='Complete');
   const snap={
     week:DATA.meta.reportWeek||('Week ending '+new Date().toISOString().slice(0,10)),
@@ -591,7 +591,7 @@ function renderCatalog(){
 
 function renderNewsletter(){
   const m=DATA.meta, wp=DATA.workPackages;
-  const avg=Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length);
+  const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
   const ragChip=s=>`<span class="badge ${ragClass(s)}">${s}</span>`;
   const inFocus=wp.filter(w=>w.status==='In Progress');
   const next=DATA.milestones.find(x=>x.status!=='Complete');
@@ -754,7 +754,19 @@ document.getElementById('mailNews').onclick=function(){
 
 }
 
-function setData(d){ DATA=d; }
+function setData(d){
+  // Normalise so a program file missing any field can never break rendering.
+  d=d||{};
+  d.meta=d.meta||{};
+  ['workPackages','milestones','deliverables','stories','gaps','catalog','risks','weeklyUpdates','payments','resources'].forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
+  if(!Array.isArray(d.pillars)||!d.pillars.length) d.pillars=[
+    {id:'scope',name:'Scope',status:'Green',summary:''},
+    {id:'timeline',name:'Timeline',status:'Green',summary:''},
+    {id:'quality',name:'Quality',status:'Green',summary:''}];
+  d.weekly=d.weekly||{};
+  ['accomplishments','planned','blockers'].forEach(k=>{ if(!Array.isArray(d.weekly[k])) d.weekly[k]=[]; });
+  DATA=d;
+}
 function mountDashboard(containerId){
   document.getElementById(containerId).innerHTML = DASH_HTML;
   wireDashboard();
