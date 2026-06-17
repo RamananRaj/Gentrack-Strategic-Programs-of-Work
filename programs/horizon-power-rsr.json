@@ -1112,7 +1112,7 @@
         "lane": "build",
         "name": "VFN - Tech Design Validation - Build",
         "start": "2026-10-01",
-        "end": "2027-02-28",
+        "end": "2027-04-09",
         "color": "#16a34a"
       },
       {
@@ -1120,7 +1120,7 @@
         "lane": "build",
         "name": "Test Plan / System Test (0.1.2)",
         "start": "2027-01-01",
-        "end": "2027-03-31",
+        "end": "2027-05-07",
         "color": "#15803d"
       },
       {
