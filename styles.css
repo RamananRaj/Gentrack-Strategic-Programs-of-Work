@@ -145,5 +145,10 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gh-l{left:0;border-left:2px solid rgba(255,255,255,.6)}
 .gh-r{right:0;border-right:2px solid rgba(255,255,255,.6)}
 .drag-tip{position:fixed;display:none;z-index:200;background:#0f172a;color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.exp-wrap{position:relative;display:inline-block}
+.exp-menu{position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.18);display:none;flex-direction:column;min-width:200px;z-index:50;overflow:hidden}
+.exp-menu.open{display:flex}
+.exp-menu button{border:0;background:#fff;text-align:left;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--ink)}
+.exp-menu button:hover{background:var(--bluebg)}
 input[type=color]{width:36px;height:24px;border:1px solid var(--line);border-radius:5px;padding:0;background:none;cursor:pointer}
 .gedit-grid{display:grid;grid-template-columns:1fr;gap:18px}

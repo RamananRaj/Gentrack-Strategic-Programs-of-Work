@@ -18,6 +18,15 @@ const DASH_HTML = `
   <button data-tab="resources">Resources</button>
   <button data-tab="newsletter">Newsletter</button>
   <span class="spacer"></span>
+  <span class="exp-wrap no-print">
+    <button class="toolbtn" id="exportBtn" title="Export / print this program update">⤓ Export ▾</button>
+    <div class="exp-menu" id="exportMenu">
+      <button data-export="email">✉ Email update</button>
+      <button data-export="slack">💬 Copy for Slack</button>
+      <button data-export="ppt">📊 PowerPoint (.pptx)</button>
+      <button data-export="print">🖨 Print / PDF</button>
+    </div>
+  </span>
   <button class="toolbtn" id="editToggle" title="Toggle edit mode">✎ Edit: Off</button>
   <button class="toolbtn primary no-print" id="download" title="Download data.json to commit to Git">⬇ Save data.json</button>
 </nav>
@@ -1067,7 +1076,92 @@ document.getElementById('mailNews').onclick=function(){
   window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
 };
 
+/* ---------- export menu (Email / Slack / PPT / Print) ---------- */
+const expBtn=document.getElementById('exportBtn'), expMenu=document.getElementById('exportMenu');
+if(expBtn&&expMenu){
+  expBtn.onclick=(e)=>{ e.stopPropagation(); expMenu.classList.toggle('open'); };
+  document.addEventListener('click',()=>expMenu.classList.remove('open'));
+  expMenu.querySelectorAll('[data-export]').forEach(b=>{ b.onclick=()=>{ expMenu.classList.remove('open'); doExport(b.dataset.export); }; });
+}
 
+}
+
+function programSummary(){
+  const m=DATA.meta||{}, wp=DATA.workPackages||[];
+  const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
+  const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
+  return {m, completion:avg, next, pillars:DATA.pillars||[], weekly:DATA.weekly||{}, milestones:DATA.milestones||[], risks:DATA.risks||[]};
+}
+function summaryText(){
+  const s=programSummary(), m=s.m, L=[];
+  L.push(`${m.program} — Program Update`);
+  if(m.subtitle) L.push(m.subtitle);
+  L.push(`As at ${m.reportWeek||m.reportDate||''}  ·  PM: ${m.projectManager||m.reportOwner||''}`);
+  L.push('');
+  L.push(`Overall: ${m.overallStatus}   Completion: ${s.completion}%   Next: ${s.next?(s.next.id+' '+s.next.name):'—'}`);
+  if(m.overallNarrative) L.push(m.overallNarrative);
+  L.push('');
+  L.push('Health (Scope / Timeline / Quality):');
+  s.pillars.forEach(p=>L.push(`- ${p.name} [${p.status}] ${p.summary||''}`));
+  const blk=(t,a)=>{ if(a&&a.length){ L.push(''); L.push(t+':'); a.forEach(x=>L.push('- '+x)); } };
+  blk('Accomplished this week',s.weekly.accomplishments);
+  blk('Planned next week',s.weekly.planned);
+  blk('Blockers',s.weekly.blockers);
+  if(s.risks.length){ L.push(''); L.push('Risks:'); s.risks.forEach(r=>L.push(`- [${r.rag}] ${r.title}: ${r.impact}`)); }
+  return L.join('\n');
+}
+function slackText(){
+  const s=programSummary(), m=s.m;
+  let t=`*${m.program} — Program Update*\n${m.subtitle||''}\n_As at ${m.reportWeek||m.reportDate||''} · PM ${m.projectManager||''}_\n\n`;
+  t+=`*Overall:* ${m.overallStatus}  |  *Completion:* ${s.completion}%  |  *Next:* ${s.next?(s.next.id+' '+s.next.name):'—'}\n`;
+  if(m.overallNarrative) t+=m.overallNarrative+'\n';
+  t+=`\n*Health*\n`+s.pillars.map(p=>`• *${p.name}* [${p.status}] ${p.summary||''}`).join('\n')+'\n';
+  const blk=(title,a)=>{ if(a&&a.length) t+=`\n*${title}*\n`+a.map(x=>`• ${x}`).join('\n')+'\n'; };
+  blk('Accomplished',s.weekly.accomplishments); blk('Planned next',s.weekly.planned); blk('Blockers',s.weekly.blockers);
+  if(s.risks.length) t+=`\n*Risks*\n`+s.risks.map(r=>`• [${r.rag}] ${r.title}: ${r.impact}`).join('\n')+'\n';
+  return t;
+}
+function doExport(kind){
+  const m=DATA.meta||{};
+  if(kind==='print'){ window.print(); return; }
+  if(kind==='email'){
+    const subject=`${m.program} — Program Update (${m.reportWeek||m.reportDate||''})`;
+    window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(summaryText());
+    return;
+  }
+  if(kind==='slack'){
+    const t=slackText();
+    navigator.clipboard.writeText(t).then(()=>alert('Slack-formatted update copied — paste it into your Slack channel.'),
+      ()=>{ window.prompt('Copy this Slack update:',t); });
+    return;
+  }
+  if(kind==='ppt'){ exportPPT(); return; }
+}
+function loadScript(src,cb){ if(window.PptxGenJS){cb();return;} const sc=document.createElement('script'); sc.src=src; sc.onload=cb; sc.onerror=()=>alert('Could not load the PowerPoint library (need internet access).'); document.head.appendChild(sc); }
+function exportPPT(){
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js',()=>{
+    try{
+      const s=programSummary(), m=s.m, P=new PptxGenJS();
+      P.defineLayout&&P.defineLayout({name:'W',width:10,height:5.63}); P.layout='LAYOUT_WIDE';
+      let sl=P.addSlide(); sl.background={color:'0B2545'};
+      sl.addText(m.program||'Program',{x:0.6,y:1.7,w:11.5,h:1,fontSize:34,bold:true,color:'FFFFFF'});
+      sl.addText((m.subtitle||'')+'\nPM: '+(m.projectManager||'')+'   ·   As at '+(m.reportWeek||m.reportDate||''),{x:0.6,y:2.9,w:11.5,h:1,fontSize:15,color:'9EC5FF'});
+      sl=P.addSlide(); sl.addText('Program Status',{x:0.5,y:0.3,w:12,h:0.6,fontSize:26,bold:true,color:'1E3A8A'});
+      sl.addText(`Overall: ${m.overallStatus}     Completion: ${s.completion}%     Next: ${s.next?(s.next.id+' '+s.next.name):'—'}`,{x:0.5,y:1.0,w:12,h:0.5,fontSize:15,bold:true});
+      if(m.overallNarrative) sl.addText(m.overallNarrative,{x:0.5,y:1.5,w:12,h:0.9,fontSize:12,color:'333333'});
+      const pr=[[{text:'Pillar',options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}},{text:'RAG',options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}},{text:'Summary',options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}}]];
+      s.pillars.forEach(p=>pr.push([p.name,p.status,p.summary||'']));
+      sl.addTable(pr,{x:0.5,y:2.5,w:12,fontSize:11,border:{pt:0.5,color:'D9D9D9'},colW:[2.2,1.3,8.5]});
+      sl=P.addSlide(); sl.addText('Weekly Update',{x:0.5,y:0.3,w:12,h:0.6,fontSize:26,bold:true,color:'1E3A8A'});
+      let y=1.1; const blk=(t,a)=>{ if(!a||!a.length)return; sl.addText(t,{x:0.5,y,w:12,h:0.35,fontSize:14,bold:true,color:'0E7490'}); y+=0.4; a.forEach(x=>{ sl.addText('• '+x,{x:0.7,y,w:11.6,h:0.3,fontSize:11}); y+=0.3; }); y+=0.15; };
+      blk('Accomplished',s.weekly.accomplishments); blk('Planned next',s.weekly.planned); blk('Blockers',s.weekly.blockers);
+      sl=P.addSlide(); sl.addText('Milestones',{x:0.5,y:0.3,w:12,h:0.6,fontSize:26,bold:true,color:'1E3A8A'});
+      const mr=[['PM','Month','Milestone','%','Status'].map(h=>({text:h,options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}}))];
+      (s.milestones||[]).forEach(x=>mr.push([x.id||'',x.delMonth||'',x.name||'',x.pct||'',x.status||'']));
+      sl.addTable(mr,{x:0.5,y:1.0,w:12,fontSize:10,border:{pt:0.5,color:'D9D9D9'},colW:[1.2,1.2,6,1.1,2.5]});
+      P.writeFile({fileName:(m.program||'Program')+' — Update.pptx'});
+    }catch(e){ alert('PPT export failed: '+e.message); }
+  });
 }
 
 function setData(d){
