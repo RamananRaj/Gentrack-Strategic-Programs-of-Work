@@ -149,7 +149,7 @@ const DASH_HTML = `
         <h2 class="sec">Milestone Schedule</h2>
         <table id="msTable"><thead><tr>
           <th>PM</th><th>Del Month</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
-        </tr></thead><tbody></tbody></table>
+        </tr></thead><tbody></tbody><tfoot></tfoot></table>
         <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
       </div>
     </div>
@@ -572,6 +572,13 @@ function renderTimeline(){
     <td class="pillcell">${statusSelect('milestones.'+i+'.status',m.status,["Not Started","In Progress","Complete","At Risk"])}</td>
     ${moveCtrls('milestones',i,ms.length)}
   </tr>`).join('');
+  const pctTotal=ms.reduce((a,m)=>a+(parseFloat(String(m.pct||'').replace(/[^0-9.]/g,''))||0),0);
+  const tf=document.querySelector('#msTable tfoot');
+  if(tf) tf.innerHTML=`<tr style="font-weight:700;background:#f8fafc">
+    <td colspan="5">Total</td>
+    <td class="pillcell">${Math.round(pctTotal*100)/100}%</td>
+    <td class="pillcell">${pctTotal===100?'<span class="badge b-green">100%</span>':'<span class="badge b-amber">≠100%</span>'}</td>
+    <td class="no-print"></td></tr>`;
 }
 
 /* ---------- Plan on a Page (Gantt) ---------- */
