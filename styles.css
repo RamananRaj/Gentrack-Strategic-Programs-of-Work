@@ -146,4 +146,4 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gh-r{right:0;border-right:2px solid rgba(255,255,255,.6)}
 .drag-tip{position:fixed;display:none;z-index:200;background:#0f172a;color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 input[type=color]{width:36px;height:24px;border:1px solid var(--line);border-radius:5px;padding:0;background:none;cursor:pointer}
-@media(max-width:760px){.gedit-grid{grid-template-columns:1fr!important}}
+.gedit-grid{display:grid;grid-template-columns:1fr;gap:18px}

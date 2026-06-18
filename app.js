@@ -660,15 +660,15 @@ function renderGantt(){
     <h2 class="sec">Timeline Setup</h2>
     <div class="adminrow"><label>Date range:</label> Start ${dCell('gantt.start',g.start)} &nbsp; End ${dCell('gantt.end',g.end)}</div>
     ${EDIT?`<div class="adminrow"><label>Shift whole plan:</label><button class="toolbtn" id="gShiftBack">◀ −1 week</button><button class="toolbtn" id="gShiftFwd">+1 week ▶</button><button class="toolbtn" id="gShiftBack4">◀ −4 wks</button><button class="toolbtn" id="gShiftFwd4">+4 wks ▶</button><span class="pill-note">Moves the range, every task and every milestone together (by week).</span></div>`:''}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="gedit-grid">
+    <div class="gedit-grid">
       <div>
         <h2 class="sec">Tasks / Sub-tasks</h2>
-        <table><thead><tr><th>Task</th><th>Stream</th><th>Sub-stream</th><th>Start</th><th>End</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${taskRows||'<tr><td colspan="7" style="color:#94a3b8">No tasks yet.</td></tr>'}</tbody></table>
+        <div style="overflow-x:auto"><table><thead><tr><th>Task</th><th>Stream</th><th>Sub-stream</th><th>Start</th><th>End</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${taskRows||'<tr><td colspan="7" style="color:#94a3b8">No tasks yet.</td></tr>'}</tbody></table></div>
         ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddTask">+ Add task</button></div>':''}
       </div>
       <div>
         <h2 class="sec">Streams (Lanes)</h2>
-        <table><thead><tr><th>Stream</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${laneRows||'<tr><td colspan="3" style="color:#94a3b8">No streams yet.</td></tr>'}</tbody></table>
+        <div style="overflow-x:auto"><table><thead><tr><th>Stream</th><th>Colour</th><th class="no-print" style="width:130px"></th></tr></thead><tbody>${laneRows||'<tr><td colspan="3" style="color:#94a3b8">No streams yet.</td></tr>'}</tbody></table></div>
         ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddLane">+ Add stream</button></div>':''}
         <p class="pill-note" style="margin-top:14px">🏁 Milestone flags on the chart come from the <b>Milestones</b> view (PM1–PM9). Edit them there and they update here automatically.</p>
       </div>
