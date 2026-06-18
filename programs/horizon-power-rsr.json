@@ -1091,7 +1091,12 @@
         "id": "mig",
         "name": "Mig Stream",
         "color": "#7c3aed",
-        "sublanes": []
+        "sublanes": [
+          {
+            "id": "sub1781784255178",
+            "name": "Trial Migrations"
+          }
+        ]
       },
       {
         "id": "change",
@@ -1287,6 +1292,15 @@
         "sublane": ""
       },
       {
+        "id": "T1781784158444",
+        "lane": "mig",
+        "name": "Migration Readiness",
+        "start": "2026-07-01",
+        "end": "2026-07-01",
+        "color": "#64748b",
+        "sublane": ""
+      },
+      {
         "id": "T19",
         "lane": "change",
         "name": "Change Access, Prep, Training Material",
@@ -1320,6 +1334,15 @@
         "start": "2027-12-01",
         "end": "2028-03-05",
         "color": "#16a34a",
+        "sublane": ""
+      },
+      {
+        "id": "T1781784236706",
+        "lane": "mig",
+        "name": "TM0",
+        "start": "2026-07-01",
+        "end": "2026-07-01",
+        "color": "#64748b",
         "sublane": ""
       }
     ]
