@@ -1040,38 +1040,32 @@
       {
         "id": "onboard",
         "name": "Onboarding / Program Readiness",
-        "color": "#9ca3af",
-        "sublanes": []
+        "color": "#9ca3af"
       },
       {
         "id": "build",
         "name": "G2-VFN Build & ST",
-        "color": "#16a34a",
-        "sublanes": []
+        "color": "#16a34a"
       },
       {
         "id": "retain",
         "name": "Retain App",
-        "color": "#0ea5e9",
-        "sublanes": []
+        "color": "#0ea5e9"
       },
       {
         "id": "test",
         "name": "Test Stream",
-        "color": "#475569",
-        "sublanes": []
+        "color": "#475569"
       },
       {
         "id": "mig",
         "name": "Mig Stream",
-        "color": "#7c3aed",
-        "sublanes": []
+        "color": "#7c3aed"
       },
       {
         "id": "change",
         "name": "Change Mgmt / Training",
-        "color": "#9d4d6b",
-        "sublanes": []
+        "color": "#9d4d6b"
       }
     ],
     "milestones": [
@@ -1094,45 +1088,40 @@
         "lane": "onboard",
         "name": "Team Onboarding",
         "start": "2026-08-01",
-        "end": "2026-09-30",
-        "color": "#9ca3af",
-        "sublane": ""
+        "end": "2026-08-31",
+        "color": "#9ca3af"
       },
       {
         "id": "T2",
         "lane": "onboard",
         "name": "Env Setup & Readiness",
         "start": "2026-09-01",
-        "end": "2026-10-31",
-        "color": "#16a34a",
-        "sublane": ""
+        "end": "2026-10-02",
+        "color": "#16a34a"
       },
       {
         "id": "T3",
         "lane": "build",
         "name": "G2 - Tech Design Validation - Build",
         "start": "2026-10-01",
-        "end": "2027-02-28",
-        "color": "#16a34a",
-        "sublane": ""
+        "end": "2027-04-09",
+        "color": "#16a34a"
       },
       {
         "id": "T4",
         "lane": "build",
         "name": "VFN - Tech Design Validation - Build",
         "start": "2026-10-01",
-        "end": "2027-02-28",
-        "color": "#16a34a",
-        "sublane": ""
+        "end": "2027-04-09",
+        "color": "#16a34a"
       },
       {
         "id": "T5",
         "lane": "build",
         "name": "Test Plan / System Test (0.1.2)",
         "start": "2027-01-01",
-        "end": "2027-03-31",
-        "color": "#15803d",
-        "sublane": ""
+        "end": "2027-05-07",
+        "color": "#15803d"
       },
       {
         "id": "T6",
@@ -1140,8 +1129,7 @@
         "name": "Retain App Env Readiness",
         "start": "2026-09-01",
         "end": "2026-12-31",
-        "color": "#0ea5e9",
-        "sublane": ""
+        "color": "#0ea5e9"
       },
       {
         "id": "T7",
@@ -1149,8 +1137,7 @@
         "name": "Retain App Tech Design & Build",
         "start": "2027-01-01",
         "end": "2027-04-30",
-        "color": "#0ea5e9",
-        "sublane": ""
+        "color": "#0ea5e9"
       },
       {
         "id": "T8",
@@ -1158,8 +1145,7 @@
         "name": "Retain App Int Build",
         "start": "2027-02-01",
         "end": "2027-04-30",
-        "color": "#0284c7",
-        "sublane": ""
+        "color": "#0284c7"
       },
       {
         "id": "T9",
@@ -1167,8 +1153,7 @@
         "name": "SIT Test Design",
         "start": "2026-12-01",
         "end": "2027-02-28",
-        "color": "#475569",
-        "sublane": ""
+        "color": "#475569"
       },
       {
         "id": "T10",
@@ -1176,8 +1161,7 @@
         "name": "SIT 0",
         "start": "2027-03-01",
         "end": "2027-04-30",
-        "color": "#475569",
-        "sublane": ""
+        "color": "#475569"
       },
       {
         "id": "T11",
@@ -1185,8 +1169,7 @@
         "name": "SIT 1-2",
         "start": "2027-04-01",
         "end": "2027-07-31",
-        "color": "#334155",
-        "sublane": ""
+        "color": "#334155"
       },
       {
         "id": "T12",
@@ -1194,8 +1177,7 @@
         "name": "BCT & MT 1-2",
         "start": "2027-04-01",
         "end": "2027-06-30",
-        "color": "#0ea5e9",
-        "sublane": ""
+        "color": "#0ea5e9"
       },
       {
         "id": "T13",
@@ -1203,8 +1185,7 @@
         "name": "E2E Process Test 1.2",
         "start": "2027-07-01",
         "end": "2027-08-31",
-        "color": "#475569",
-        "sublane": ""
+        "color": "#475569"
       },
       {
         "id": "T14",
@@ -1212,8 +1193,7 @@
         "name": "UAT 1-2",
         "start": "2027-07-01",
         "end": "2027-09-30",
-        "color": "#0ea5e9",
-        "sublane": ""
+        "color": "#0ea5e9"
       },
       {
         "id": "T15",
@@ -1221,8 +1201,7 @@
         "name": "PT Testing",
         "start": "2027-09-01",
         "end": "2027-10-31",
-        "color": "#475569",
-        "sublane": ""
+        "color": "#475569"
       },
       {
         "id": "T16",
@@ -1230,8 +1209,7 @@
         "name": "Sec Testing",
         "start": "2027-09-01",
         "end": "2027-10-31",
-        "color": "#0ea5e9",
-        "sublane": ""
+        "color": "#0ea5e9"
       },
       {
         "id": "T17",
@@ -1239,8 +1217,7 @@
         "name": "Reg / Auto Testing",
         "start": "2027-10-01",
         "end": "2027-11-30",
-        "color": "#475569",
-        "sublane": ""
+        "color": "#475569"
       },
       {
         "id": "T18",
@@ -1248,8 +1225,7 @@
         "name": "Trial Migration (TM0-TM4)",
         "start": "2027-01-01",
         "end": "2027-05-31",
-        "color": "#7c3aed",
-        "sublane": ""
+        "color": "#7c3aed"
       },
       {
         "id": "T19",
@@ -1257,8 +1233,7 @@
         "name": "Change Access, Prep, Training Material",
         "start": "2027-01-01",
         "end": "2027-08-31",
-        "color": "#9d4d6b",
-        "sublane": ""
+        "color": "#9d4d6b"
       },
       {
         "id": "T20",
@@ -1266,8 +1241,7 @@
         "name": "TTT (Train the Trainer)",
         "start": "2027-09-01",
         "end": "2027-10-31",
-        "color": "#9d4d6b",
-        "sublane": ""
+        "color": "#9d4d6b"
       },
       {
         "id": "T21",
@@ -1275,8 +1249,7 @@
         "name": "Ops Trials & Training",
         "start": "2027-10-01",
         "end": "2027-11-30",
-        "color": "#9d4d6b",
-        "sublane": ""
+        "color": "#9d4d6b"
       },
       {
         "id": "T22",
@@ -1284,8 +1257,7 @@
         "name": "Hypercare",
         "start": "2027-11-01",
         "end": "2028-02-29",
-        "color": "#16a34a",
-        "sublane": ""
+        "color": "#16a34a"
       }
     ]
   }
