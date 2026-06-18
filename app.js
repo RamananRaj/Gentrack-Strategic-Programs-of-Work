@@ -650,7 +650,7 @@ function renderGantt(){
     laneRows+=`<tr>
       <td>${ce('gantt.lanes.'+i+'.name',l.name)}</td>
       <td class="pillcell">${EDIT?`<input type="color" value="${l.color||'#64748b'}" data-color="gantt.lanes.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${l.color||'#64748b'}"></span>`}</td>
-      ${EDIT?`<td class="row-actions" style="white-space:nowrap"><button class="mvbtn" data-gsubadd="${i}" title="Add sub-stream">+sub</button><button class="mvbtn" data-gmove="lanes:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="lanes:${i}:1" ${i<g.lanes.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="lanes:${i}">✕</button></td>`:'<td></td>'}
+      ${EDIT?`<td class="row-actions"><button class="subbtn" data-gsubadd="${i}" title="Add sub-stream">+ sub</button><button class="mvbtn" data-gmove="lanes:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="lanes:${i}:1" ${i<g.lanes.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="lanes:${i}">✕</button></td>`:'<td></td>'}
     </tr>`;
     (l.sublanes||[]).forEach((s,si)=>{
       laneRows+=`<tr><td style="padding-left:22px;color:#64748b">↳ ${ce('gantt.lanes.'+i+'.sublanes.'+si+'.name',s.name)}</td><td></td>${EDIT?`<td class="row-actions"><button class="xbtn" data-gsubdel="${i}:${si}">✕</button></td>`:'<td></td>'}</tr>`;

@@ -115,7 +115,11 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .modal .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .modal .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
 /* Gantt / Plan on a Page */
-.mvbtn{border:0;background:transparent;color:#475569;cursor:pointer;font-weight:700;padding:0 3px}
+.mvbtn{border:0;background:transparent;color:#475569;cursor:pointer;font-weight:700;padding:2px 5px;vertical-align:middle}
+.row-actions{white-space:nowrap;text-align:right}
+.row-actions>button{vertical-align:middle}
+.subbtn{border:1px solid var(--line);background:#fff;color:var(--brand);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;margin-right:8px;vertical-align:middle}
+.subbtn:hover{background:var(--bluebg)}
 .mvbtn[disabled]{opacity:.25;cursor:default}
 .gantt{min-width:760px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .grow{display:flex;border-bottom:1px solid var(--line)}
