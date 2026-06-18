@@ -991,7 +991,7 @@ function bindEditables(){
       o[parts[parts.length-1]].push('New item'); renderAll(); };
   });
 }
-function softRefresh(){ renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderPayments();renderNewsletter(); }
+function softRefresh(){ renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderTimeline();renderPayments();renderNewsletter(); fillBinds(); bindEditables(); }
 
 const TEMPLATES={
   risks:{id:'R?',title:'New risk',impact:'',rag:'Amber',mitigation:''},
