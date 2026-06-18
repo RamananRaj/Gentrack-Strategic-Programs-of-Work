@@ -665,13 +665,15 @@ function renderGantt(){
     while(gc<=ge){ grid+=`<div class="ggrid" style="left:${dDiff(gs,gc<gs?gs:gc)/total*100}%"></div>`; gc=new Date(gc.getFullYear(),gc.getMonth()+1,1); }
     let mlines=''; mlist.forEach(m=>{ mlines+=`<div class="gmile" style="left:${pos(m.date)}%"></div>`; });
     // lanes (swimlanes) + sub-lanes
+    const rowOf=(t,idx)=> (typeof t.row==='number'&&t.row>=0)? t.row : idx;
     const trackInner=(tks)=>{
       let bars='';
       tks.forEach((t,ti)=>{
         if(!parseD(t.start)||!parseD(t.end))return;
+        const r=rowOf(t,ti);
         const L=pos(t.start), W=Math.max(pos(t.end)-L, 0.8);
         const gi=g.tasks.indexOf(t);
-        bars+=`<div class="gbar${EDIT?' gbar-edit':''}" data-ti="${gi}" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||'#64748b'}" title="${esc(t.name)} (${esc(fmtD(t.start))} → ${esc(fmtD(t.end))})">${EDIT?'<span class="gh-l"></span>':''}<span class="gbar-lbl">${esc(t.name)}</span>${EDIT?'<span class="gh-r"></span>':''}</div>`;
+        bars+=`<div class="gbar${EDIT?' gbar-edit':''}" data-ti="${gi}" style="left:${L}%;width:${W}%;top:${r*24+3}px;background:${t.color||'#64748b'}" title="${esc(t.name)} (${esc(fmtD(t.start))} → ${esc(fmtD(t.end))})">${EDIT?'<span class="gh-l"></span>':''}<span class="gbar-lbl">${esc(t.name)}</span>${EDIT?'<span class="gh-r"></span>':''}</div>`;
       });
       return grid+mlines+bars;
     };
@@ -685,10 +687,11 @@ function renderGantt(){
       const hasSubs = subs.length>1 || (subs[0]&&subs[0].name);
       subs.forEach((sub,si)=>{
         const tks=(g.tasks||[]).filter(t=> t.lane===lane.id && ( String(t.sublane||'')===String(sub.id||'') || (String(sub.id||'')==='' && !subIds.has(String(t.sublane||''))) ));
-        const h=Math.max(1,tks.length)*24+6;
-        const laneName= si===0? `<div class="glane-name">${esc(lane.name)}</div>` : '';
-        const subName= sub.name? `<div class="gsub-name">↳ ${esc(sub.name)}</div>` : (hasSubs?'<div class="gsub-name" style="color:#cbd5e1">↳ —</div>':'');
-        rows+=`<div class="grow${si===0?' glane-top':''}${hasSubs?' has-sub':''}"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${laneName}${subName}</div><div class="gtrack gdrop${hasSubs&&si%2?' gsub-alt':''}" data-lane="${esc(lane.id)}" data-sublane="${esc(sub.id||'')}" style="height:${h}px">${trackInner(tks)}</div></div>`;
+        let maxRow=0; tks.forEach((t,ti)=>{ const r=rowOf(t,ti); if(r>maxRow)maxRow=r; });
+        const h=(maxRow+1)*24+6;
+        const streamCol=`<div class="glabel-stream">${si===0?esc(lane.name):''}</div>`;
+        const subCol=`<div class="glabel-sub">${sub.name?esc(sub.name):(hasSubs?'—':'')}</div>`;
+        rows+=`<div class="grow${si===0?' glane-top':''}${hasSubs?' has-sub':''}"><div class="glabel two-col" style="border-left:4px solid ${lane.color||'#64748b'}">${streamCol}${subCol}</div><div class="gtrack gdrop${hasSubs&&si%2?' gsub-alt':''}" data-lane="${esc(lane.id)}" data-sublane="${esc(sub.id||'')}" style="height:${h}px">${trackInner(tks)}</div></div>`;
       });
     });
     chart.innerHTML=`<div class="gantt"><div class="grow">${head}</div><div class="grow">${flags}</div>${rows||'<p style="padding:10px;color:#94a3b8">No streams yet. Add a stream below.</p>'}</div>`;
@@ -776,10 +779,10 @@ function attachGanttDrag(){
   const tip=document.getElementById('dragTip');
   document.querySelectorAll('#ganttChart .gbar-edit').forEach(bar=>{
     const ti=+bar.dataset.ti; if(isNaN(ti)||!DATA.gantt.tasks[ti]) return;
-    let mode=null,startX=0,trackW=1,os=null,oe=null;
+    let mode=null,startX=0,trackW=1,trackTop=0,os=null,oe=null;
     function down(e,m){
       mode=m; startX=e.clientX;
-      trackW=bar.parentElement.getBoundingClientRect().width||1;
+      const tr=bar.parentElement.getBoundingClientRect(); trackW=tr.width||1; trackTop=tr.top;
       os=parseD(DATA.gantt.tasks[ti].start); oe=parseD(DATA.gantt.tasks[ti].end);
       window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
       e.preventDefault(); e.stopPropagation();
@@ -794,19 +797,29 @@ function attachGanttDrag(){
       const L=Math.max(0,Math.min(100,dDiff(gs,ns)/total*100));
       const W=Math.max(dDiff(gs,ne)/total*100-L,0.6);
       bar.style.left=L+'%'; bar.style.width=W+'%';
+      let rowTxt='';
+      if(mode==='move'){ // also set the line (row) from vertical position so two bars can share a line
+        const row=Math.max(0,Math.round((e.clientY-trackTop-3)/24));
+        t.row=row; bar.style.top=(row*24+3)+'px'; rowTxt='  ·  line '+(row+1);
+      }
       if(tip){ tip.style.display='block'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY+12)+'px';
-        tip.textContent=fmtD(t.start)+'  →  '+fmtD(t.end); }
+        tip.textContent=fmtD(t.start)+'  →  '+fmtD(t.end)+rowTxt; }
     }
     function up(e){
       window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up);
       if(tip) tip.style.display='none';
-      // vertical drag-drop: if moved onto another swimlane/sub-lane, reassign it
+      // vertical drag-drop onto another swimlane/sub-lane → reassign lane/sublane + set line
       if(mode==='move' && e){
         bar.style.pointerEvents='none';
         const el=document.elementFromPoint(e.clientX,e.clientY);
         bar.style.pointerEvents='';
         const track=el&&el.closest&&el.closest('.gtrack.gdrop');
-        if(track){ const t=DATA.gantt.tasks[ti]; t.lane=track.dataset.lane; t.sublane=track.dataset.sublane||''; }
+        if(track){ const t=DATA.gantt.tasks[ti];
+          if(track.dataset.lane!==t.lane || (track.dataset.sublane||'')!==(t.sublane||'')){
+            t.lane=track.dataset.lane; t.sublane=track.dataset.sublane||'';
+            t.row=Math.max(0,Math.round((e.clientY-track.getBoundingClientRect().top-3)/24));
+          }
+        }
       }
       renderGantt();
     }
