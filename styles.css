@@ -133,6 +133,8 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gbar{position:absolute;height:20px;border-radius:5px;color:#fff;font-size:10.5px;font-weight:600;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .gflag{position:absolute;top:0;font-size:10.5px;font-weight:700;color:#7c2d12;white-space:nowrap;transform:translateX(-2px);background:rgba(255,255,255,.85);padding:0 3px;border-radius:3px;z-index:3}
 .gmile{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed #b91c1c;opacity:.5;z-index:1}
+.gflag-edit{cursor:ew-resize}
+.gflag-edit:hover{text-decoration:underline}
 .seg-toggle{display:inline-flex;gap:0;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
 .seg-toggle button{border:0;background:#fff;padding:9px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
 .seg-toggle button.active{background:var(--brand);color:#fff}

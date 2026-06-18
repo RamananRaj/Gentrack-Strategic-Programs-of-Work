@@ -157,7 +157,7 @@ const DASH_HTML = `
       <div class="card">
         <h2 class="sec">Milestone Schedule</h2>
         <table id="msTable"><thead><tr>
-          <th>PM</th><th>Del Month</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
+          <th>PM</th><th>Del Month</th><th class="pillcell">Target Date</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
         </tr></thead><tbody></tbody><tfoot></tfoot></table>
         <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
       </div>
@@ -582,6 +582,7 @@ function renderTimeline(){
   tb.innerHTML=ms.map((m,i)=>`<tr>
     <td><b>${ce('milestones.'+i+'.id',m.id)}</b></td>
     <td>${ce('milestones.'+i+'.delMonth',m.delMonth)}</td>
+    <td class="pillcell">${EDIT?`<input type="date" value="${esc(m.date||'')}" data-dval="milestones.${i}.date">`:(m.date?esc(fmtD(m.date)):'<span style="color:#94a3b8" title="positioned by Del Month">DM</span>')}</td>
     <td>${ce('milestones.'+i+'.phase',m.phase)}</td>
     <td>${ce('milestones.'+i+'.name',m.name)}</td>
     <td>${ce('milestones.'+i+'.deliverables',m.deliverables)}</td>
@@ -592,7 +593,7 @@ function renderTimeline(){
   const pctTotal=ms.reduce((a,m)=>a+(parseFloat(String(m.pct||'').replace(/[^0-9.]/g,''))||0),0);
   const tf=document.querySelector('#msTable tfoot');
   if(tf) tf.innerHTML=`<tr style="font-weight:700;background:#f8fafc">
-    <td colspan="5">Total</td>
+    <td colspan="6">Total</td>
     <td class="pillcell">${Math.round(pctTotal*100)/100}%</td>
     <td class="pillcell">${pctTotal===100?'<span class="badge b-green">100%</span>':'<span class="badge b-amber">≠100%</span>'}</td>
     <td class="no-print"></td></tr>`;
@@ -640,13 +641,13 @@ function renderGantt(){
       cur=next;
     }
     head+='</div>';
-    // milestone flags row — sourced from the program's PM milestones (single source of truth)
-    const mlist=(DATA.milestones||[]).map(m=>({name:(m.id?m.id+' ':'')+m.name, date:dmToYMD(m.delMonth)}))
+    // milestone flags row — sourced from PM milestones; use explicit date if set, else DM-derived
+    const mlist=(DATA.milestones||[]).map((mm,mi)=>({mi, name:(mm.id?mm.id+' ':'')+mm.name, date:(mm.date&&parseD(mm.date))?mm.date:dmToYMD(mm.delMonth)}))
       .filter(m=>parseD(m.date)).sort((a,b)=>parseD(a.date)-parseD(b.date));
-    let flags='<div class="glabel"></div><div class="gtrack" style="height:36px">';
+    let flags='<div class="glabel"></div><div class="gtrack gmflags" style="height:36px">';
     let lastL=-99, level=0;
     mlist.forEach(m=>{ const L=pos(m.date); if(L-lastL<14){ level=(level+1)%3; } else { level=0; } lastL=L;
-      flags+=`<div class="gflag" style="left:${L}%;top:${level*12}px" title="${esc(m.name)} (${esc(fmtD(m.date))})">⚑ ${esc(m.name)}</div>`; });
+      flags+=`<div class="gflag${EDIT?' gflag-edit':''}" data-mi="${m.mi}" style="left:${L}%;top:${level*12}px" title="${esc(m.name)} (${esc(fmtD(m.date))})">⚑ ${esc(m.name)}</div>`; });
     flags+='</div>';
     // month gridlines + milestone guide lines (reuse boundaries)
     let grid=''; let gc=new Date(gs.getFullYear(),gs.getMonth(),1);
@@ -795,6 +796,19 @@ function attachGanttDrag(){
     if(hl) hl.addEventListener('pointerdown',e=>down(e,'start'));
     if(hr) hr.addEventListener('pointerdown',e=>down(e,'end'));
     bar.addEventListener('pointerdown',e=>{ if(e.target.classList.contains('gh-l')||e.target.classList.contains('gh-r'))return; down(e,'move'); });
+  });
+  // draggable milestone flags — drag horizontally to set the milestone's date
+  document.querySelectorAll('#ganttChart .gflag-edit').forEach(fl=>{
+    const mi=+fl.dataset.mi; if(isNaN(mi)||!DATA.milestones[mi]) return;
+    fl.addEventListener('pointerdown',e=>{
+      const track=fl.parentElement; const rect=track.getBoundingClientRect();
+      function mv(ev){ let frac=(ev.clientX-rect.left)/rect.width; frac=Math.max(0,Math.min(1,frac));
+        const nd=new Date(gs); nd.setDate(nd.getDate()+Math.round(frac*total));
+        DATA.milestones[mi].date=toYMD(nd); fl.style.left=(frac*100)+'%';
+        if(tip){ tip.style.display='block'; tip.style.left=(ev.clientX+12)+'px'; tip.style.top=(ev.clientY+12)+'px'; tip.textContent=(DATA.milestones[mi].id||'')+'  '+fmtD(DATA.milestones[mi].date); } }
+      function up(){ window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); if(tip) tip.style.display='none'; renderAll(); }
+      window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); e.preventDefault(); e.stopPropagation();
+    });
   });
 }
 function laneSelect(bind,val){
@@ -985,6 +999,9 @@ function bindEditables(){
   });
   document.querySelectorAll('[data-move]').forEach(b=>{
     b.onclick=()=>{ if(b.disabled)return; const [arr,idx,dir]=b.dataset.move.split(':'); moveRow(arr,+idx,+dir); };
+  });
+  document.querySelectorAll('[data-dval]').forEach(inp=>{
+    inp.onchange=()=>{ setByPath(inp.dataset.dval,inp.value); renderAll(); };
   });
   document.querySelectorAll('[data-add]').forEach(b=>{
     b.onclick=()=>{ addRow(b.dataset.add); };
