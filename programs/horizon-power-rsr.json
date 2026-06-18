@@ -27,7 +27,7 @@
     {
       "id": "timeline",
       "name": "Timeline",
-      "status": "Amber",
+      "status": "Green",
       "summary": "Tracking to DM0–DM16 milestone schedule. Build End (PM3, DM6) is the next critical gate. Some design sign-offs trending late."
     },
     {
@@ -369,7 +369,7 @@
       "phase": "Team Onboarding",
       "name": "Team Onboarding",
       "trigger": "",
-      "pct": "15%",
+      "pct": "10%",
       "status": "Not Started",
       "deliverables": "SOW+ 1 MOnth"
     },
@@ -838,7 +838,7 @@
       "status": "Active"
     },
     {
-      "name": "Akshatha Shivanna",
+      "name": "TBC",
       "org": "Gentrack",
       "role": "Snr BA – G2 Billing Edition",
       "responsibility": "Billing Business Analyst",
@@ -1299,5 +1299,16 @@
         "sublane": ""
       }
     ]
+  },
+  "paymentStatus": {
+    "PM1": "Invoiced",
+    "PM2": "Invoiced",
+    "PM3": "Not Due",
+    "PM4": "Not Due",
+    "PM5": "Not Due",
+    "PM6": "Not Due",
+    "PM7": "Not Due",
+    "PM8": "Not Due",
+    "PM9": "Not Due"
   }
 }
