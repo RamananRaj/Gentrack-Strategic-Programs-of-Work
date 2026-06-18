@@ -361,7 +361,8 @@
       "trigger": "SOW Signature",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "SOW execution"
+      "deliverables": "SOW execution",
+      "date": "2026-07-23"
     },
     {
       "id": "PM1.2",
@@ -371,7 +372,8 @@
       "trigger": "",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "SOW+ 1 MOnth"
+      "deliverables": "SOW+ 1 MOnth",
+      "date": "2026-07-31"
     },
     {
       "id": "PM2",
@@ -381,7 +383,8 @@
       "trigger": "Implementation Schedule, Inflight, Config & Code Mgmt",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "Implementation Schedule; Inflight; Configuration Management & Code Management"
+      "deliverables": "Implementation Schedule; Inflight; Configuration Management & Code Management",
+      "date": "2026-09-29"
     },
     {
       "id": "PM3",
@@ -441,7 +444,8 @@
       "trigger": "",
       "pct": "0%",
       "status": "Not Started",
-      "deliverables": "Go No Go Decision"
+      "deliverables": "Go No Go Decision",
+      "date": "2028-01-08"
     },
     {
       "id": "PM8",
@@ -451,7 +455,8 @@
       "trigger": "CAB Report + Deployment Runbook",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "CAB Report (External); Deployment Runbook"
+      "deliverables": "CAB Report (External); Deployment Runbook",
+      "date": "2027-11-29"
     },
     {
       "id": "PM9",
