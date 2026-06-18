@@ -1281,8 +1281,8 @@
         "id": "T18",
         "lane": "mig",
         "name": "Trial Migration (TM0-TM4)",
-        "start": "2027-01-01",
-        "end": "2027-05-31",
+        "start": "2027-04-04",
+        "end": "2027-08-03",
         "color": "#7c3aed",
         "sublane": ""
       },
@@ -1290,8 +1290,8 @@
         "id": "T19",
         "lane": "change",
         "name": "Change Access, Prep, Training Material",
-        "start": "2027-01-01",
-        "end": "2027-08-31",
+        "start": "2026-12-02",
+        "end": "2027-07-20",
         "color": "#9d4d6b",
         "sublane": ""
       },
@@ -1299,8 +1299,8 @@
         "id": "T20",
         "lane": "change",
         "name": "TTT (Train the Trainer)",
-        "start": "2027-09-01",
-        "end": "2027-10-31",
+        "start": "2027-08-01",
+        "end": "2027-09-03",
         "color": "#9d4d6b",
         "sublane": ""
       },
@@ -1308,8 +1308,8 @@
         "id": "T21",
         "lane": "change",
         "name": "Ops Trials & Training",
-        "start": "2027-10-01",
-        "end": "2027-11-30",
+        "start": "2027-09-02",
+        "end": "2027-10-22",
         "color": "#9d4d6b",
         "sublane": ""
       },
