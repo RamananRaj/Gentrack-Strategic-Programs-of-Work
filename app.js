@@ -682,12 +682,13 @@ function renderGantt(){
       let subs=(lane.sublanes&&lane.sublanes.length)? lane.sublanes.slice() : [];
       if(!subs.length) subs=[{id:'',name:''}];
       else if(orphans) subs=[{id:'',name:'(unassigned)'}].concat(subs);
+      const hasSubs = subs.length>1 || (subs[0]&&subs[0].name);
       subs.forEach((sub,si)=>{
         const tks=(g.tasks||[]).filter(t=> t.lane===lane.id && ( String(t.sublane||'')===String(sub.id||'') || (String(sub.id||'')==='' && !subIds.has(String(t.sublane||''))) ));
         const h=Math.max(1,tks.length)*24+6;
-        const laneName= si===0? `<b>${esc(lane.name)}</b>` : '';
-        const subName= sub.name? `<div style="font-size:11px;color:#64748b;padding-left:8px${si===0?';margin-top:2px':''}">${esc(sub.name)}</div>` : '';
-        rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${laneName}${subName}</div><div class="gtrack gdrop" data-lane="${esc(lane.id)}" data-sublane="${esc(sub.id||'')}" style="height:${h}px">${trackInner(tks)}</div></div>`;
+        const laneName= si===0? `<div class="glane-name">${esc(lane.name)}</div>` : '';
+        const subName= sub.name? `<div class="gsub-name">↳ ${esc(sub.name)}</div>` : (hasSubs?'<div class="gsub-name" style="color:#cbd5e1">↳ —</div>':'');
+        rows+=`<div class="grow${si===0?' glane-top':''}${hasSubs?' has-sub':''}"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${laneName}${subName}</div><div class="gtrack gdrop${hasSubs&&si%2?' gsub-alt':''}" data-lane="${esc(lane.id)}" data-sublane="${esc(sub.id||'')}" style="height:${h}px">${trackInner(tks)}</div></div>`;
       });
     });
     chart.innerHTML=`<div class="gantt"><div class="grow">${head}</div><div class="grow">${flags}</div>${rows||'<p style="padding:10px;color:#94a3b8">No streams yet. Add a stream below.</p>'}</div>`;

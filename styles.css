@@ -124,7 +124,12 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gantt{min-width:760px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .grow{display:flex;border-bottom:1px solid var(--line)}
 .grow:last-child{border-bottom:0}
-.glabel{flex:0 0 200px;padding:6px 10px;font-size:12px;font-weight:600;background:#faf7f5;display:flex;align-items:center}
+.glabel{flex:0 0 200px;padding:6px 10px;font-size:12px;font-weight:600;background:#faf7f5;display:flex;flex-direction:column;justify-content:center}
+.glane-name{font-weight:800;font-size:12.5px;color:#0f172a}
+.gsub-name{font-size:11px;color:#475569;padding-left:6px;margin-top:1px;font-style:italic}
+.grow.glane-top{border-top:2px solid #cbd5e1}
+.grow.has-sub .gtrack{background:#fcfbfa}
+.gtrack.gsub-alt{background:#f4f6f8!important}
 .gtrack{position:relative;flex:1;min-height:24px}
 .ghead{background:#5b4636;color:#fff;font-weight:700}
 .ghead.glabel{background:#5b4636;color:#fff}
