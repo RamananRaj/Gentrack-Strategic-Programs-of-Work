@@ -1212,8 +1212,8 @@
         "id": "T13",
         "lane": "test",
         "name": "E2E Process Test 1.2",
-        "start": "2027-06-02",
-        "end": "2027-09-18",
+        "start": "2027-06-01",
+        "end": "2027-07-31",
         "color": "#475569",
         "sublane": ""
       },
@@ -1221,8 +1221,8 @@
         "id": "T14",
         "lane": "test",
         "name": "UAT 1-2",
-        "start": "2027-07-01",
-        "end": "2027-09-30",
+        "start": "2027-08-01",
+        "end": "2027-09-20",
         "color": "#0ea5e9",
         "sublane": ""
       },
@@ -1231,7 +1231,7 @@
         "lane": "test",
         "name": "PT Testing",
         "start": "2027-09-01",
-        "end": "2027-10-31",
+        "end": "2027-10-25",
         "color": "#475569",
         "sublane": ""
       },
@@ -1239,8 +1239,8 @@
         "id": "T16",
         "lane": "test",
         "name": "Sec Testing",
-        "start": "2027-09-01",
-        "end": "2027-10-31",
+        "start": "2027-09-20",
+        "end": "2027-10-25",
         "color": "#0ea5e9",
         "sublane": ""
       },
@@ -1248,9 +1248,18 @@
         "id": "T17",
         "lane": "test",
         "name": "Reg / Auto Testing",
-        "start": "2027-10-01",
-        "end": "2027-11-30",
+        "start": "2027-10-21",
+        "end": "2027-11-03",
         "color": "#475569",
+        "sublane": ""
+      },
+      {
+        "id": "T1781781935680",
+        "lane": "test",
+        "name": "D/R",
+        "start": "2026-07-01",
+        "end": "2026-07-01",
+        "color": "#0ea5e9",
         "sublane": ""
       },
       {
@@ -1293,8 +1302,8 @@
         "id": "T22",
         "lane": "test",
         "name": "Hypercare",
-        "start": "2027-11-01",
-        "end": "2028-02-29",
+        "start": "2027-12-01",
+        "end": "2028-03-30",
         "color": "#16a34a",
         "sublane": ""
       }
