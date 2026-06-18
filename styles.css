@@ -129,5 +129,17 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .gbar{position:absolute;height:20px;border-radius:5px;color:#fff;font-size:10.5px;font-weight:600;line-height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .gflag{position:absolute;top:0;font-size:10.5px;font-weight:700;color:#7c2d12;white-space:nowrap;transform:translateX(-2px);background:rgba(255,255,255,.85);padding:0 3px;border-radius:3px;z-index:3}
 .gmile{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed #b91c1c;opacity:.5;z-index:1}
+.seg-toggle{display:inline-flex;gap:0;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.seg-toggle button{border:0;background:#fff;padding:9px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg-toggle button.active{background:var(--brand);color:#fff}
+.gbar-lbl{pointer-events:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gbar.gbar-out{overflow:visible}
+.gbar.gbar-out .gbar-lbl{position:absolute;left:100%;top:0;padding-left:6px;color:#1e293b;overflow:visible;text-overflow:clip}
+.gbar-edit{cursor:grab}
+.gbar-edit:active{cursor:grabbing}
+.gh-l,.gh-r{position:absolute;top:0;bottom:0;width:8px;cursor:ew-resize;z-index:5}
+.gh-l{left:0;border-left:2px solid rgba(255,255,255,.6)}
+.gh-r{right:0;border-right:2px solid rgba(255,255,255,.6)}
+.drag-tip{position:fixed;display:none;z-index:200;background:#0f172a;color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:6px;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.3)}
 input[type=color]{width:36px;height:24px;border:1px solid var(--line);border-radius:5px;padding:0;background:none;cursor:pointer}
 @media(max-width:760px){.gedit-grid{grid-template-columns:1fr!important}}

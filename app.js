@@ -10,7 +10,6 @@ const DASH_HTML = `
   <button data-tab="weekly">Weekly Updates</button>
   <button data-tab="workpackages">Work Packages</button>
   <button data-tab="timeline">Timeline</button>
-  <button data-tab="gantt">Plan on a Page</button>
   <button data-tab="deliverables">Deliverables</button>
   <button data-tab="stories">Functional Build Packages</button>
   <button data-tab="gaps">Product Gaps</button>
@@ -115,36 +114,44 @@ const DASH_HTML = `
     </div>
   </section>
 
-  <!-- TIMELINE -->
+  <!-- TIMELINE (Gantt + Milestones combined) -->
   <section class="tab" id="timeline">
-    <div class="card">
-      <h2 class="sec">Milestone Timeline (DM0 → DM16)</h2>
-      <p class="hint">Payment / delivery milestones PM1–PM9 across the 16-month delivery window. Bars position by delivery month.</p>
-      <div class="tlaxis"><div>Milestone</div><div class="ticks" id="tlticks"></div></div>
-      <div class="timeline" id="timelineBars"></div>
-      <div class="legend">
-        <span><span class="dot" style="background:var(--green)"></span>Complete</span>
-        <span><span class="dot" style="background:var(--blue)"></span>In Progress</span>
-        <span><span class="dot" style="background:var(--grey)"></span>Not Started</span>
+    <div class="seg-toggle">
+      <button data-tlview="gantt" class="active">📊 Timeline (Plan on a Page)</button>
+      <button data-tlview="milestones">🏁 Milestones</button>
+    </div>
+
+    <div id="tlGantt">
+      <div class="card">
+        <h2 class="sec">Plan on a Page — Implementation Timeline</h2>
+        <p class="hint">Swimlane Gantt across the program. In the admin, edit the tables below the chart to set the date range, add streams, tasks/sub-tasks with start &amp; end dates, and milestone flags — the chart updates live. Milestone flags here are the same milestones shown in the Milestones view.</p>
+        <p class="pill-note no-print">Tip (admin): drag the middle of a bar to move it, or drag its left/right edge to change start/end. Dates show while you drag.</p>
+        <div style="overflow-x:auto"><div id="ganttChart"></div></div>
+      </div>
+      <div id="dragTip" class="drag-tip"></div>
+      <div class="card no-print" id="ganttEdit"></div>
+    </div>
+
+    <div id="tlMilestones" style="display:none">
+      <div class="card">
+        <h2 class="sec">Milestone Timeline (DM0 → DM16)</h2>
+        <p class="hint">Payment / delivery milestones PM1–PM9 across the delivery window. Bars position by delivery month.</p>
+        <div class="tlaxis"><div>Milestone</div><div class="ticks" id="tlticks"></div></div>
+        <div class="timeline" id="timelineBars"></div>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--green)"></span>Complete</span>
+          <span><span class="dot" style="background:var(--blue)"></span>In Progress</span>
+          <span><span class="dot" style="background:var(--grey)"></span>Not Started</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="sec">Milestone Schedule</h2>
+        <table id="msTable"><thead><tr>
+          <th>PM</th><th>Del Month</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
+        </tr></thead><tbody></tbody></table>
+        <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
       </div>
     </div>
-    <div class="card">
-      <h2 class="sec">Milestone Schedule</h2>
-      <table id="msTable"><thead><tr>
-        <th>PM</th><th>Del Month</th><th>Phase</th><th>Milestone</th><th>Trigger / Deliverables</th><th class="pillcell">% Price</th><th class="pillcell">Status</th><th class="no-print"></th>
-      </tr></thead><tbody></tbody></table>
-      <div class="addrow no-print"><button class="toolbtn" data-add="milestones">+ Add milestone</button></div>
-    </div>
-  </section>
-
-  <!-- PLAN ON A PAGE (GANTT) -->
-  <section class="tab" id="gantt">
-    <div class="card">
-      <h2 class="sec">Plan on a Page — Implementation Timeline</h2>
-      <p class="hint">Swimlane Gantt across the program months. In the admin, edit the tables below the chart to set the date range, add streams, tasks/sub-tasks with start &amp; end months, and milestone flags — the chart updates live.</p>
-      <div style="overflow-x:auto"><div id="ganttChart"></div></div>
-    </div>
-    <div class="card no-print" id="ganttEdit"></div>
   </section>
 
   <!-- DELIVERABLES -->
@@ -205,7 +212,12 @@ const DASH_HTML = `
   <section class="tab" id="payments">
     <div class="card">
       <h2 class="sec">Payment Milestones</h2>
-      <p class="hint">Milestone-based payment schedule (SOW Part B). Amounts are blank in the customer SOW — enter values as agreed; the total updates automatically.</p>
+      <p class="hint">Enter the total contract value and a % against each milestone — the Amount column is calculated automatically (Total × %).</p>
+      <div class="adminrow" style="margin-bottom:10px">
+        <label style="font-weight:600">Total Contract Value (ex GST):</label>
+        <span id="cvWrap"></span>
+        <span id="pctCheck" class="pill-note"></span>
+      </div>
       <table id="payTable"><thead><tr>
         <th>PM</th><th>Del Month</th><th>Milestone</th><th class="pillcell">% of Total</th><th class="pillcell">Amount (ex GST)</th><th class="pillcell">Invoice Status</th><th class="no-print"></th>
       </tr></thead><tbody></tbody><tfoot></tfoot></table>
@@ -412,22 +424,40 @@ function archiveWeek(){
   document.querySelector('nav.tabs button[data-tab=weekly]').click();
   alert('Week archived. Click "⬇ Save data.json" and commit to publish it to everyone.');
 }
+function pctNum(p){ return parseFloat(String(p==null?'':p).replace(/[^0-9.]/g,''))||0; }
+function money(n){ return '$'+Math.round(n).toLocaleString(); }
 function renderPayments(){
+  const cv=parseFloat(String((DATA.meta||{}).contractValue||'').replace(/[^0-9.]/g,''))||0;
+  // total contract value input
+  const cvWrap=document.getElementById('cvWrap');
+  if(cvWrap){
+    cvWrap.innerHTML = EDIT
+      ? `<input id="cvInput" type="text" inputmode="decimal" value="${cv?cv:''}" placeholder="e.g. 5000000" style="font:inherit;border:1px solid var(--line);border-radius:7px;padding:6px 9px;min-width:160px">`
+      : `<b>${cv?money(cv):'—'}</b>`;
+    const ci=document.getElementById('cvInput');
+    if(ci) ci.onchange=()=>{ if(!DATA.meta)DATA.meta={}; DATA.meta.contractValue=ci.value.replace(/[^0-9.]/g,''); renderPayments(); };
+  }
   const tb=document.querySelector('#payTable tbody');
-  tb.innerHTML=DATA.payments.map((p,i)=>`<tr>
+  tb.innerHTML=DATA.payments.map((p,i)=>{
+    const amt=cv*pctNum(p.pct)/100;
+    return `<tr>
     <td><b>${ce('payments.'+i+'.id',p.id)}</b></td>
     <td>${ce('payments.'+i+'.delMonth',p.delMonth)} <small style="color:#94a3b8">${esc(dmToDate(p.delMonth))}</small></td>
     <td>${ce('payments.'+i+'.milestone',p.milestone)}</td>
     <td class="pillcell">${ce('payments.'+i+'.pct',p.pct)}</td>
-    <td class="pillcell">${ce('payments.'+i+'.amount',p.amount)}</td>
+    <td class="pillcell">${cv?money(amt):'—'}</td>
     <td class="pillcell">${statusSelect('payments.'+i+'.status',p.status,["Not Due","Invoiced","Paid","Overdue"])}</td>
     ${delBtn('payments',i)}
-  </tr>`).join('');
-  const sum=DATA.payments.reduce((a,p)=>a+(parseFloat(String(p.amount).replace(/[^0-9.]/g,''))||0),0);
-  const paid=DATA.payments.filter(p=>p.status==='Paid').reduce((a,p)=>a+(parseFloat(String(p.amount).replace(/[^0-9.]/g,''))||0),0);
+  </tr>`;}).join('');
+  const pctSum=DATA.payments.reduce((a,p)=>a+pctNum(p.pct),0);
+  const total=cv*pctSum/100;
+  const paid=DATA.payments.filter(p=>p.status==='Paid').reduce((a,p)=>a+cv*pctNum(p.pct)/100,0);
   document.querySelector('#payTable tfoot').innerHTML=`<tr style="font-weight:700;background:#f8fafc">
-    <td colspan="4">Total</td><td class="pillcell">${sum?('$'+sum.toLocaleString()):'—'}</td>
-    <td class="pillcell">${paid?('Paid $'+paid.toLocaleString()):''}</td><td class="no-print"></td></tr>`;
+    <td colspan="3">Total</td><td class="pillcell">${Math.round(pctSum*100)/100}%</td><td class="pillcell">${cv?money(total):'—'}</td>
+    <td class="pillcell">${paid?('Paid '+money(paid)):''}</td><td class="no-print"></td></tr>`;
+  const pc=document.getElementById('pctCheck');
+  if(pc){ pc.textContent = pctSum===100?'✓ percentages add up to 100%' : ('⚠ percentages add up to '+(Math.round(pctSum*100)/100)+'% (should be 100%)');
+    pc.className='pill-note '+(pctSum===100?'gh-ok':'gh-bad'); }
 }
 function renderResources(){
   const tb=document.querySelector('#resTable tbody');
@@ -524,11 +554,20 @@ function toYMD(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart
 function dDiff(a,b){ return Math.round((b-a)/86400000); }
 function fmtD(d){ const dt=parseD(d); return dt?(String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0')+'/'+dt.getFullYear()):(d||''); }
 function shiftD(d,days){ const dt=parseD(d); if(!dt) return d; dt.setDate(dt.getDate()+days); return toYMD(dt); }
+function dmToYMD(dm){ // Delivery month "DMn" -> a real date using meta.programStartDate
+  const start=parseD((DATA.meta||{}).programStartDate); if(!start) return null;
+  const n=parseInt(String(dm).replace(/\D/g,''))||0;
+  const d=new Date(start.getFullYear(),start.getMonth()+n,start.getDate()); return toYMD(d);
+}
 function shiftGantt(weeks){
   const g=DATA.gantt; if(!g) return; const days=weeks*7;
   g.start=shiftD(g.start,days); g.end=shiftD(g.end,days);
   (g.tasks||[]).forEach(t=>{ t.start=shiftD(t.start,days); t.end=shiftD(t.end,days); });
-  (g.milestones||[]).forEach(m=>{ m.date=shiftD(m.date,days); });
+  // move the program start/end too, so PM milestone flags shift with the plan
+  if(DATA.meta){
+    if(DATA.meta.programStartDate) DATA.meta.programStartDate=shiftD(DATA.meta.programStartDate,days);
+    if(DATA.meta.programEndDate) DATA.meta.programEndDate=shiftD(DATA.meta.programEndDate,days);
+  }
   renderAll();
 }
 function renderGantt(){
@@ -550,8 +589,9 @@ function renderGantt(){
       cur=next;
     }
     head+='</div>';
-    // milestone flags row — stagger labels so they don't overlap
-    const mlist=(g.milestones||[]).filter(m=>parseD(m.date)).sort((a,b)=>parseD(a.date)-parseD(b.date));
+    // milestone flags row — sourced from the program's PM milestones (single source of truth)
+    const mlist=(DATA.milestones||[]).map(m=>({name:(m.id?m.id+' ':'')+m.name, date:dmToYMD(m.delMonth)}))
+      .filter(m=>parseD(m.date)).sort((a,b)=>parseD(a.date)-parseD(b.date));
     let flags='<div class="glabel"></div><div class="gtrack" style="height:36px">';
     let lastL=-99, level=0;
     mlist.forEach(m=>{ const L=pos(m.date); if(L-lastL<14){ level=(level+1)%3; } else { level=0; } lastL=L;
@@ -561,42 +601,61 @@ function renderGantt(){
     let grid=''; let gc=new Date(gs.getFullYear(),gs.getMonth(),1);
     while(gc<=ge){ grid+=`<div class="ggrid" style="left:${dDiff(gs,gc<gs?gs:gc)/total*100}%"></div>`; gc=new Date(gc.getFullYear(),gc.getMonth()+1,1); }
     let mlines=''; mlist.forEach(m=>{ mlines+=`<div class="gmile" style="left:${pos(m.date)}%"></div>`; });
-    // lanes
-    let rows='';
-    (g.lanes||[]).forEach(lane=>{
-      const tks=(g.tasks||[]).filter(t=>t.lane===lane.id);
-      const h=Math.max(1,tks.length)*24+6;
+    // lanes (swimlanes) + sub-lanes
+    const trackInner=(tks)=>{
       let bars='';
       tks.forEach((t,ti)=>{
         if(!parseD(t.start)||!parseD(t.end))return;
         const L=pos(t.start), W=Math.max(pos(t.end)-L, 0.8);
-        bars+=`<div class="gbar" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||lane.color||'#64748b'}" title="${esc(t.name)} (${esc(fmtD(t.start))} → ${esc(fmtD(t.end))})">${esc(t.name)}</div>`;
+        const gi=g.tasks.indexOf(t);
+        bars+=`<div class="gbar${EDIT?' gbar-edit':''}" data-ti="${gi}" style="left:${L}%;width:${W}%;top:${ti*24+3}px;background:${t.color||'#64748b'}" title="${esc(t.name)} (${esc(fmtD(t.start))} → ${esc(fmtD(t.end))})">${EDIT?'<span class="gh-l"></span>':''}<span class="gbar-lbl">${esc(t.name)}</span>${EDIT?'<span class="gh-r"></span>':''}</div>`;
       });
-      rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${esc(lane.name)}</div><div class="gtrack" style="height:${h}px">${grid}${mlines}${bars}</div></div>`;
+      return grid+mlines+bars;
+    };
+    let rows='';
+    (g.lanes||[]).forEach(lane=>{
+      const subIds=new Set((lane.sublanes||[]).map(s=>s.id));
+      const orphans=(g.tasks||[]).some(t=>t.lane===lane.id && !subIds.has(String(t.sublane||'')));
+      let subs=(lane.sublanes&&lane.sublanes.length)? lane.sublanes.slice() : [];
+      if(!subs.length) subs=[{id:'',name:''}];
+      else if(orphans) subs=[{id:'',name:'(unassigned)'}].concat(subs);
+      subs.forEach((sub,si)=>{
+        const tks=(g.tasks||[]).filter(t=> t.lane===lane.id && ( String(t.sublane||'')===String(sub.id||'') || (String(sub.id||'')==='' && !subIds.has(String(t.sublane||''))) ));
+        const h=Math.max(1,tks.length)*24+6;
+        const laneName= si===0? `<b>${esc(lane.name)}</b>` : '';
+        const subName= sub.name? `<div style="font-size:11px;color:#64748b;padding-left:8px${si===0?';margin-top:2px':''}">${esc(sub.name)}</div>` : '';
+        rows+=`<div class="grow"><div class="glabel" style="border-left:4px solid ${lane.color||'#64748b'}">${laneName}${subName}</div><div class="gtrack gdrop" data-lane="${esc(lane.id)}" data-sublane="${esc(sub.id||'')}" style="height:${h}px">${trackInner(tks)}</div></div>`;
+      });
     });
     chart.innerHTML=`<div class="gantt"><div class="grow">${head}</div><div class="grow">${flags}</div>${rows||'<p style="padding:10px;color:#94a3b8">No streams yet. Add a stream below.</p>'}</div>`;
   }
   // editor (admin)
   const ed=document.getElementById('ganttEdit');
   const dCell=(path,val)=> EDIT?`<input type="date" value="${esc(val||'')}" data-dval="${path}">`:esc(fmtD(val));
+  const sublaneSelect=(bind,val,laneId)=>{
+    const lane=(g.lanes||[]).find(l=>l.id===laneId)||{}; const subs=lane.sublanes||[];
+    return `<select class="st" data-bind="${bind}"><option value="">—</option>`+subs.map(s=>`<option value="${esc(s.id)}" ${s.id===val?'selected':''}>${esc(s.name)}</option>`).join('')+`</select>`;
+  };
   const taskRows=(g.tasks||[]).map((t,i)=>`<tr>
     <td>${ce('gantt.tasks.'+i+'.name',t.name)}</td>
     <td class="pillcell">${EDIT?laneSelect('gantt.tasks.'+i+'.lane',t.lane):esc((g.lanes.find(l=>l.id===t.lane)||{}).name||t.lane)}</td>
+    <td class="pillcell">${EDIT?sublaneSelect('gantt.tasks.'+i+'.sublane',t.sublane,t.lane):esc((((g.lanes.find(l=>l.id===t.lane)||{}).sublanes||[]).find(s=>s.id===t.sublane)||{}).name||'')}</td>
     <td class="pillcell">${dCell('gantt.tasks.'+i+'.start',t.start)}</td>
     <td class="pillcell">${dCell('gantt.tasks.'+i+'.end',t.end)}</td>
     <td class="pillcell">${EDIT?`<input type="color" value="${t.color||'#64748b'}" data-color="gantt.tasks.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${t.color||'#64748b'}"></span>`}</td>
     ${EDIT?`<td class="row-actions" style="white-space:nowrap"><button class="mvbtn" data-gmove="tasks:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="tasks:${i}:1" ${i<g.tasks.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="tasks:${i}">✕</button></td>`:'<td></td>'}
   </tr>`).join('');
-  const laneRows=(g.lanes||[]).map((l,i)=>`<tr>
-    <td>${ce('gantt.lanes.'+i+'.name',l.name)}</td>
-    <td class="pillcell">${EDIT?`<input type="color" value="${l.color||'#64748b'}" data-color="gantt.lanes.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${l.color||'#64748b'}"></span>`}</td>
-    ${EDIT?`<td class="row-actions"><button class="mvbtn" data-gmove="lanes:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="lanes:${i}:1" ${i<g.lanes.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="lanes:${i}">✕</button></td>`:'<td></td>'}
-  </tr>`).join('');
-  const msRows=(g.milestones||[]).map((m,i)=>`<tr>
-    <td>${ce('gantt.milestones.'+i+'.name',m.name)}</td>
-    <td class="pillcell">${dCell('gantt.milestones.'+i+'.date',m.date)}</td>
-    ${EDIT?`<td class="row-actions"><button class="xbtn" data-gdel="milestones:${i}">✕</button></td>`:'<td></td>'}
-  </tr>`).join('');
+  let laneRows='';
+  (g.lanes||[]).forEach((l,i)=>{
+    laneRows+=`<tr>
+      <td>${ce('gantt.lanes.'+i+'.name',l.name)}</td>
+      <td class="pillcell">${EDIT?`<input type="color" value="${l.color||'#64748b'}" data-color="gantt.lanes.${i}.color">`:`<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${l.color||'#64748b'}"></span>`}</td>
+      ${EDIT?`<td class="row-actions" style="white-space:nowrap"><button class="mvbtn" data-gsubadd="${i}" title="Add sub-stream">+sub</button><button class="mvbtn" data-gmove="lanes:${i}:-1" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-gmove="lanes:${i}:1" ${i<g.lanes.length-1?'':'disabled'}>▼</button><button class="xbtn" data-gdel="lanes:${i}">✕</button></td>`:'<td></td>'}
+    </tr>`;
+    (l.sublanes||[]).forEach((s,si)=>{
+      laneRows+=`<tr><td style="padding-left:22px;color:#64748b">↳ ${ce('gantt.lanes.'+i+'.sublanes.'+si+'.name',s.name)}</td><td></td>${EDIT?`<td class="row-actions"><button class="xbtn" data-gsubdel="${i}:${si}">✕</button></td>`:'<td></td>'}</tr>`;
+    });
+  });
   ed.innerHTML=`
     <h2 class="sec">Timeline Setup</h2>
     <div class="adminrow"><label>Date range:</label> Start ${dCell('gantt.start',g.start)} &nbsp; End ${dCell('gantt.end',g.end)}</div>
@@ -604,16 +663,14 @@ function renderGantt(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="gedit-grid">
       <div>
         <h2 class="sec">Tasks / Sub-tasks</h2>
-        <table><thead><tr><th>Task</th><th>Stream</th><th>Start</th><th>End</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${taskRows||'<tr><td colspan="6" style="color:#94a3b8">No tasks yet.</td></tr>'}</tbody></table>
+        <table><thead><tr><th>Task</th><th>Stream</th><th>Sub-stream</th><th>Start</th><th>End</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${taskRows||'<tr><td colspan="7" style="color:#94a3b8">No tasks yet.</td></tr>'}</tbody></table>
         ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddTask">+ Add task</button></div>':''}
       </div>
       <div>
         <h2 class="sec">Streams (Lanes)</h2>
         <table><thead><tr><th>Stream</th><th>Colour</th><th class="no-print"></th></tr></thead><tbody>${laneRows||'<tr><td colspan="3" style="color:#94a3b8">No streams yet.</td></tr>'}</tbody></table>
         ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddLane">+ Add stream</button></div>':''}
-        <h2 class="sec" style="margin-top:16px">Milestone Flags</h2>
-        <table><thead><tr><th>Milestone</th><th>Date</th><th class="no-print"></th></tr></thead><tbody>${msRows||'<tr><td colspan="3" style="color:#94a3b8">No milestones yet.</td></tr>'}</tbody></table>
-        ${EDIT?'<div class="addrow"><button class="toolbtn" id="gAddMs">+ Add milestone flag</button></div>':''}
+        <p class="pill-note" style="margin-top:14px">🏁 Milestone flags on the chart come from the <b>Milestones</b> view (PM1–PM9). Edit them there and they update here automatically.</p>
       </div>
     </div>`;
   // wire gantt-specific controls
@@ -622,12 +679,72 @@ function renderGantt(){
   ed.querySelectorAll('[data-gdel]').forEach(b=>{ b.onclick=()=>{ const [a,i]=b.dataset.gdel.split(':'); DATA.gantt[a].splice(+i,1); renderAll(); }; });
   ed.querySelectorAll('[data-gmove]').forEach(b=>{ b.onclick=()=>{ if(b.disabled)return; const [a,i,d]=b.dataset.gmove.split(':'); const arr=DATA.gantt[a],j=+i+ +d; if(j<0||j>=arr.length)return; const t=arr[+i];arr[+i]=arr[j];arr[j]=t; renderAll(); }; });
   const gat=document.getElementById('gAddTask'); if(gat) gat.onclick=()=>{ const lane=(DATA.gantt.lanes[0]||{}).id||''; DATA.gantt.tasks.push({id:'T'+Date.now(),lane,name:'New task',start:DATA.gantt.start,end:DATA.gantt.start,color:'#64748b'}); renderAll(); };
-  const gal=document.getElementById('gAddLane'); if(gal) gal.onclick=()=>{ DATA.gantt.lanes.push({id:'lane'+Date.now(),name:'New stream',color:'#64748b'}); renderAll(); };
+  const gal=document.getElementById('gAddLane'); if(gal) gal.onclick=()=>{ DATA.gantt.lanes.push({id:'lane'+Date.now(),name:'New stream',color:'#64748b',sublanes:[]}); renderAll(); };
+  ed.querySelectorAll('[data-gsubadd]').forEach(b=>{ b.onclick=()=>{ const i=+b.dataset.gsubadd; const l=DATA.gantt.lanes[i]; l.sublanes=l.sublanes||[]; l.sublanes.push({id:'sub'+Date.now(),name:'New sub-stream'}); renderAll(); }; });
+  ed.querySelectorAll('[data-gsubdel]').forEach(b=>{ b.onclick=()=>{ const [i,si]=b.dataset.gsubdel.split(':').map(Number); const l=DATA.gantt.lanes[i]; const sub=l.sublanes[si]; (DATA.gantt.tasks||[]).forEach(t=>{ if(t.lane===l.id && t.sublane===sub.id) t.sublane=''; }); l.sublanes.splice(si,1); renderAll(); }; });
   const gam=document.getElementById('gAddMs'); if(gam) gam.onclick=()=>{ DATA.gantt.milestones.push({name:'New milestone',date:DATA.gantt.start}); renderAll(); };
   const gsb=document.getElementById('gShiftBack'); if(gsb) gsb.onclick=()=>shiftGantt(-1);
   const gsf=document.getElementById('gShiftFwd'); if(gsf) gsf.onclick=()=>shiftGantt(1);
   const gsb4=document.getElementById('gShiftBack4'); if(gsb4) gsb4.onclick=()=>shiftGantt(-4);
   const gsf4=document.getElementById('gShiftFwd4'); if(gsf4) gsf4.onclick=()=>shiftGantt(4);
+  attachGanttDrag();
+  adjustGanttLabels();
+}
+function adjustGanttLabels(){
+  // Labels that don't fit inside their bar are shown just outside (to the right).
+  document.querySelectorAll('#ganttChart .gbar').forEach(bar=>{
+    const lbl=bar.querySelector('.gbar-lbl'); if(!lbl) return;
+    bar.classList.remove('gbar-out');
+    if(bar.clientWidth===0) return; // hidden (other view) — skip
+    if(lbl.scrollWidth > bar.clientWidth - 8) bar.classList.add('gbar-out');
+  });
+}
+function attachGanttDrag(){
+  if(!EDIT) return;
+  const g=DATA.gantt; const gs=parseD(g.start), ge=parseD(g.end); if(!gs||!ge) return;
+  const total=dDiff(gs,ge)||1;
+  const tip=document.getElementById('dragTip');
+  document.querySelectorAll('#ganttChart .gbar-edit').forEach(bar=>{
+    const ti=+bar.dataset.ti; if(isNaN(ti)||!DATA.gantt.tasks[ti]) return;
+    let mode=null,startX=0,trackW=1,os=null,oe=null;
+    function down(e,m){
+      mode=m; startX=e.clientX;
+      trackW=bar.parentElement.getBoundingClientRect().width||1;
+      os=parseD(DATA.gantt.tasks[ti].start); oe=parseD(DATA.gantt.tasks[ti].end);
+      window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
+      e.preventDefault(); e.stopPropagation();
+    }
+    function mv(e){
+      const dxDays=Math.round((e.clientX-startX)/trackW*total);
+      let ns=new Date(os), ne=new Date(oe);
+      if(mode==='move'){ ns.setDate(ns.getDate()+dxDays); ne.setDate(ne.getDate()+dxDays); }
+      else if(mode==='start'){ ns.setDate(ns.getDate()+dxDays); if(ns>ne) ns=new Date(ne); }
+      else if(mode==='end'){ ne.setDate(ne.getDate()+dxDays); if(ne<ns) ne=new Date(ns); }
+      const t=DATA.gantt.tasks[ti]; t.start=toYMD(ns); t.end=toYMD(ne);
+      const L=Math.max(0,Math.min(100,dDiff(gs,ns)/total*100));
+      const W=Math.max(dDiff(gs,ne)/total*100-L,0.6);
+      bar.style.left=L+'%'; bar.style.width=W+'%';
+      if(tip){ tip.style.display='block'; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY+12)+'px';
+        tip.textContent=fmtD(t.start)+'  →  '+fmtD(t.end); }
+    }
+    function up(e){
+      window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up);
+      if(tip) tip.style.display='none';
+      // vertical drag-drop: if moved onto another swimlane/sub-lane, reassign it
+      if(mode==='move' && e){
+        bar.style.pointerEvents='none';
+        const el=document.elementFromPoint(e.clientX,e.clientY);
+        bar.style.pointerEvents='';
+        const track=el&&el.closest&&el.closest('.gtrack.gdrop');
+        if(track){ const t=DATA.gantt.tasks[ti]; t.lane=track.dataset.lane; t.sublane=track.dataset.sublane||''; }
+      }
+      renderGantt();
+    }
+    const hl=bar.querySelector('.gh-l'), hr=bar.querySelector('.gh-r');
+    if(hl) hl.addEventListener('pointerdown',e=>down(e,'start'));
+    if(hr) hr.addEventListener('pointerdown',e=>down(e,'end'));
+    bar.addEventListener('pointerdown',e=>{ if(e.target.classList.contains('gh-l')||e.target.classList.contains('gh-r'))return; down(e,'move'); });
+  });
 }
 function laneSelect(bind,val){
   const lanes=(DATA.gantt&&DATA.gantt.lanes)||[];
@@ -807,6 +924,8 @@ function bindEditables(){
         if(s.value==='Not Started') st.pct=0;
         else if(s.value==='Complete') st.pct=100;
       }
+      const gl=s.dataset.bind.match(/^gantt\.tasks\.(\d+)\.lane$/);
+      if(gl){ DATA.gantt.tasks[+gl[1]].sublane=''; } // stream changed → clear sub-stream
       renderAll();
     };
   });
@@ -849,6 +968,14 @@ function addRow(arr){
   renderAll();
 }
 
+function setTimelineView(v){
+  document.querySelectorAll('[data-tlview]').forEach(x=>x.classList.toggle('active',x.dataset.tlview===v));
+  const gg=document.getElementById('tlGantt'), mm=document.getElementById('tlMilestones');
+  if(gg) gg.style.display = v==='gantt'?'block':'none';
+  if(mm) mm.style.display = v==='milestones'?'block':'none';
+  try{ localStorage.setItem('tlview',v); }catch(e){}
+  if(v==='gantt' && typeof adjustGanttLabels==='function') setTimeout(adjustGanttLabels,0);
+}
 function wireDashboard(){
 /* ---------- tabs ---------- */
 document.getElementById('tabs').addEventListener('click',e=>{
@@ -858,6 +985,8 @@ document.getElementById('tabs').addEventListener('click',e=>{
   b.classList.add('active');
   document.getElementById(b.dataset.tab).classList.add('active');
 });
+document.querySelectorAll('[data-tlview]').forEach(b=>{ b.onclick=()=>setTimelineView(b.dataset.tlview); });
+setTimelineView((function(){try{return localStorage.getItem('tlview')||'gantt';}catch(e){return 'gantt';}})());
 
 document.getElementById('archiveWeek').onclick=function(){
   if(!EDIT){ alert('Turn on Edit mode first (✎ button, top right).'); return; }
@@ -913,6 +1042,8 @@ function setData(d){
   d.gantt=d.gantt||{};
   d.gantt.start=d.gantt.start||''; d.gantt.end=d.gantt.end||'';
   ['lanes','tasks','milestones'].forEach(k=>{ if(!Array.isArray(d.gantt[k])) d.gantt[k]=[]; });
+  d.gantt.lanes.forEach(l=>{ if(!Array.isArray(l.sublanes)) l.sublanes=[]; });
+  d.gantt.tasks.forEach(t=>{ if(t.sublane==null) t.sublane=''; });
   DATA=d;
 }
 function mountDashboard(containerId){
