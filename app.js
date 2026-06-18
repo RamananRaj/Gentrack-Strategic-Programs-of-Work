@@ -85,10 +85,11 @@ const DASH_HTML = `
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <h2 class="sec" style="margin:0">Weekly Updates — Archive</h2>
         <span style="flex:1"></span>
+        <button class="toolbtn" id="addWeekReport" style="display:none">+ New weekly report</button>
         <label style="font-size:12px;color:var(--muted)">View week:</label>
         <select class="st" id="weekPicker"></select>
       </div>
-      <p class="hint">Every archived week is saved here and available on demand to all viewers. Newest first. Use the picker to read any past week.</p>
+      <p class="hint">Every archived week is saved here and available on demand to all viewers. Newest first. Use the picker to read any past week. In the admin (edit mode) you can add a new report and edit the fields below directly.</p>
       <div id="weekSnapshot"></div>
     </div>
     <div class="card">
@@ -372,22 +373,32 @@ function renderWeeklyArchive(){
   pick.innerHTML=arr.map((w,i)=>`<option value="${i}" ${i===weekView?'selected':''}>${esc(w.week)}</option>`).join('')||'<option>No weeks archived yet</option>';
   pick.onchange=()=>{ weekView=+pick.value; renderWeeklyArchive(); };
   const ragChip=s=>`<span class="badge ${ragClass(s)}">${esc(s)}</span>`;
+  const addBtn=document.getElementById('addWeekReport');
+  if(addBtn){ addBtn.style.display=EDIT?'inline-block':'none'; addBtn.onclick=()=>{ addWeeklyReport(); }; }
   const snap=document.getElementById('weekSnapshot');
-  if(!arr.length){ snap.innerHTML='<p style="color:#94a3b8">No weekly updates archived yet. On the Overview tab, fill in the week then click <b>📌 Archive this week</b>.</p>'; }
+  if(!arr.length){ snap.innerHTML= EDIT
+      ? '<p style="color:#94a3b8">No weekly updates yet. Click <b>+ New weekly report</b> above to create one, or use <b>📌 Archive this week</b> on the Overview tab.</p>'
+      : '<p style="color:#94a3b8">No weekly updates archived yet.</p>'; }
   else{
-    const w=arr[weekView];
-    const lst=a=>(a&&a.length)?`<ul style="margin:4px 0;padding-left:18px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p style="color:#94a3b8;margin:4px 0">—</p>';
+    const w=arr[weekView]; const i=weekView;
+    // editable inline list
+    const elist=(a,path)=>{ a=a||[];
+      const items=a.map((x,j)=>`<li><span class="editable" data-bind="${path}.${j}">${esc(x)}</span>${EDIT?` <button class="xbtn" data-dellist="${path}:${j}">✕</button>`:''}</li>`).join('');
+      return `<ul style="margin:4px 0;padding-left:18px">${items||'<li style="color:#94a3b8">—</li>'}</ul>${EDIT?`<button class="toolbtn" style="font-size:11px;padding:3px 8px" data-addlist="${path}">+ Add</button>`:''}`;
+    };
+    const f=(label,bind,val)=>`<span><b>${label}:</b> ${EDIT?`<span class="editable" data-bind="${bind}">${esc(val||'')}</span>`:esc(val||'—')}</span>`;
     snap.innerHTML=`
       <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:6px 0 12px;padding:10px 12px;background:#f8fafc;border-radius:10px">
-        <span><b>Status:</b> ${ragChip(w.overallStatus)}</span>
-        <span><b>Completion:</b> ${esc(w.completion||'—')}</span>
-        <span><b>Next milestone:</b> ${esc(w.nextMilestone||'—')}</span>
+        <span><b>Week:</b> ${EDIT?`<span class="editable" data-bind="weeklyUpdates.${i}.week">${esc(w.week)}</span>`:esc(w.week)}</span>
+        <span><b>Status:</b> ${EDIT?ragSelect('weeklyUpdates.'+i+'.overallStatus',w.overallStatus):`<span class="badge ${ragClass(w.overallStatus)}">${esc(w.overallStatus)}</span>`}</span>
+        ${f('Completion','weeklyUpdates.'+i+'.completion',w.completion)}
+        ${f('Next milestone','weeklyUpdates.'+i+'.nextMilestone',w.nextMilestone)}
       </div>
-      ${w.summary?`<p style="margin:0 0 12px">${esc(w.summary)}</p>`:''}
+      <p style="margin:0 0 12px"><b>Summary:</b> ${EDIT?`<span class="editable" data-bind="weeklyUpdates.${i}.summary">${esc(w.summary||'')}</span>`:esc(w.summary||'')}</p>
       <div class="grid3">
-        <div class="pillar" style="background:#f0fdf4"><h3>✓ Accomplished</h3>${lst(w.accomplishments)}</div>
-        <div class="pillar" style="background:#eff6ff"><h3>→ Planned next</h3>${lst(w.planned)}</div>
-        <div class="pillar" style="background:#fef2f2"><h3>⚠ Blockers</h3>${lst(w.blockers)}</div>
+        <div class="pillar" style="background:#f0fdf4"><h3>✓ Accomplished</h3>${elist(w.accomplishments,'weeklyUpdates.'+i+'.accomplishments')}</div>
+        <div class="pillar" style="background:#eff6ff"><h3>→ Planned next</h3>${elist(w.planned,'weeklyUpdates.'+i+'.planned')}</div>
+        <div class="pillar" style="background:#fef2f2"><h3>⚠ Blockers</h3>${elist(w.blockers,'weeklyUpdates.'+i+'.blockers')}</div>
       </div>`;
   }
   const tb=document.querySelector('#weekTable tbody');
@@ -400,6 +411,22 @@ function renderWeeklyArchive(){
   </tr>`).join('')||'<tr><td colspan="5" style="color:#94a3b8">No weeks archived yet.</td></tr>';
   tb.querySelectorAll('tr[data-week]').forEach(r=>r.onclick=e=>{ if(e.target.dataset.delweek)return; weekView=+r.dataset.week; renderWeeklyArchive(); document.querySelector('nav.tabs button[data-tab=weekly]').click(); });
   tb.querySelectorAll('[data-delweek]').forEach(b=>b.onclick=()=>{ DATA.weeklyUpdates.splice(+b.dataset.delweek,1); renderAll(); });
+}
+function addWeeklyReport(){
+  const today=new Date().toISOString().slice(0,10);
+  const wp=DATA.workPackages||[];
+  const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
+  const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
+  DATA.weeklyUpdates=DATA.weeklyUpdates||[];
+  DATA.weeklyUpdates.unshift({
+    week:'Week ending '+today,
+    overallStatus:(DATA.meta&&DATA.meta.overallStatus)||'Amber',
+    completion:avg+'%',
+    nextMilestone: next?(next.id+' '+next.name+' ('+next.delMonth+')'):'—',
+    summary:'', accomplishments:[], planned:[], blockers:[]
+  });
+  weekView=0;
+  renderAll();
 }
 function archiveWeek(){
   const wp=DATA.workPackages;
@@ -949,7 +976,7 @@ function bindEditables(){
       o[parts[parts.length-1]].push('New item'); renderAll(); };
   });
 }
-function softRefresh(){ renderKpis();renderPillars();renderWeekly();renderNewsletter(); }
+function softRefresh(){ renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderNewsletter(); }
 
 const TEMPLATES={
   risks:{id:'R?',title:'New risk',impact:'',rag:'Amber',mitigation:''},
