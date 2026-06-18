@@ -1123,7 +1123,7 @@
         "lane": "build",
         "name": "G2 - Tech Design Validation - Build",
         "start": "2026-10-01",
-        "end": "2027-04-09",
+        "end": "2027-04-15",
         "color": "#16a34a",
         "sublane": ""
       },
@@ -1132,7 +1132,7 @@
         "lane": "build",
         "name": "VFN - Tech Design Validation - Build",
         "start": "2026-10-01",
-        "end": "2027-04-09",
+        "end": "2027-04-14",
         "color": "#16a34a",
         "sublane": ""
       },
@@ -1141,7 +1141,7 @@
         "lane": "build",
         "name": "Test Plan / System Test (0.1.2)",
         "start": "2027-01-01",
-        "end": "2027-05-07",
+        "end": "2027-05-19",
         "color": "#15803d",
         "sublane": ""
       },
@@ -1150,7 +1150,7 @@
         "lane": "retain",
         "name": "Retain App Env Readiness",
         "start": "2026-09-01",
-        "end": "2026-12-31",
+        "end": "2026-11-03",
         "color": "#0ea5e9",
         "sublane": ""
       },
@@ -1158,8 +1158,8 @@
         "id": "T7",
         "lane": "retain",
         "name": "Retain App Tech Design & Build",
-        "start": "2027-01-01",
-        "end": "2027-04-30",
+        "start": "2026-11-02",
+        "end": "2027-02-28",
         "color": "#0ea5e9",
         "sublane": ""
       },
@@ -1167,8 +1167,8 @@
         "id": "T8",
         "lane": "retain",
         "name": "Retain App Int Build",
-        "start": "2027-02-01",
-        "end": "2027-04-30",
+        "start": "2027-02-02",
+        "end": "2027-04-10",
         "color": "#0284c7",
         "sublane": ""
       },
@@ -1176,8 +1176,8 @@
         "id": "T9",
         "lane": "test",
         "name": "SIT Test Design",
-        "start": "2026-12-01",
-        "end": "2027-02-28",
+        "start": "2026-11-15",
+        "end": "2027-03-09",
         "color": "#475569",
         "sublane": ""
       },
@@ -1185,8 +1185,8 @@
         "id": "T10",
         "lane": "test",
         "name": "SIT 0",
-        "start": "2027-03-01",
-        "end": "2027-04-30",
+        "start": "2027-03-03",
+        "end": "2027-04-01",
         "color": "#475569",
         "sublane": ""
       },
@@ -1194,8 +1194,8 @@
         "id": "T11",
         "lane": "test",
         "name": "SIT 1-2",
-        "start": "2027-04-01",
-        "end": "2027-07-31",
+        "start": "2027-04-02",
+        "end": "2027-08-01",
         "color": "#334155",
         "sublane": ""
       },
@@ -1204,7 +1204,7 @@
         "lane": "test",
         "name": "BCT & MT 1-2",
         "start": "2027-04-01",
-        "end": "2027-06-30",
+        "end": "2027-07-31",
         "color": "#0ea5e9",
         "sublane": ""
       },
@@ -1212,8 +1212,8 @@
         "id": "T13",
         "lane": "test",
         "name": "E2E Process Test 1.2",
-        "start": "2027-07-01",
-        "end": "2027-08-31",
+        "start": "2027-06-02",
+        "end": "2027-09-18",
         "color": "#475569",
         "sublane": ""
       },
