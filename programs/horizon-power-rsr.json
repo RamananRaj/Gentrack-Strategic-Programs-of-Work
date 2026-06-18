@@ -434,6 +434,16 @@
       "deliverables": "UAT Report (External); Migration Cutover Strategy"
     },
     {
+      "id": "PM?",
+      "delMonth": "DM0",
+      "phase": "Cutover & Hypercare",
+      "name": "Go Live",
+      "trigger": "",
+      "pct": "0%",
+      "status": "Not Started",
+      "deliverables": "Go No Go Decision"
+    },
+    {
       "id": "PM8",
       "delMonth": "DM14",
       "phase": "Cutover & Hypercare",
@@ -1303,7 +1313,7 @@
         "lane": "test",
         "name": "Hypercare",
         "start": "2027-12-01",
-        "end": "2028-03-30",
+        "end": "2028-03-05",
         "color": "#16a34a",
         "sublane": ""
       }
