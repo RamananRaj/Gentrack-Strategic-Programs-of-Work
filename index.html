@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Gentrack Strategic Programs of Work</title>
-<link rel="stylesheet" href="styles.css?v=20260617w">
+<script>document.write('<link rel="stylesheet" href="styles.css?_='+Date.now()+'">');</script>
 </head>
 <body class="view-mode">
 
@@ -26,7 +26,6 @@
 <div id="dash"></div>
 <div id="loadMsg" style="padding:40px;text-align:center;color:#64748b"></div>
 
-<script src="app.js?v=20260617w"></script>
 <script>
 let REG=null;
 function qp(k){return new URLSearchParams(location.search).get(k);}
@@ -73,7 +72,8 @@ async function boot(){
   document.title=REG.portfolio||'Strategic Programs';
   buildPickers();
 }
-boot();
+/* load app.js fresh every visit (defeats stale cache), then boot */
+(function(){var s=document.createElement('script');s.src='app.js?_='+Date.now();s.onload=function(){boot();};document.body.appendChild(s);})();
 </script>
 </body>
 </html>
