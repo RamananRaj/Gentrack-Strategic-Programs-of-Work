@@ -14,7 +14,8 @@
     "overallStatus": "Amber",
     "overallNarrative": "Program in active build. Configure–Build (WP1) and Integration Rebuild (WP4) progressing. Data Migration trial cycles underway. Key watch items: OOTB validation backlog and product gap dispositions.",
     "projectManager": "Ram Raj",
-    "programEndDate": "2027-11-01"
+    "programEndDate": "2027-11-01",
+    "contractValue": "8900000"
   },
   "pillars": [
     {
@@ -353,14 +354,24 @@
   ],
   "milestones": [
     {
-      "id": "PM1",
+      "id": "PM1.1",
       "delMonth": "DM0",
       "phase": "Readiness",
       "name": "Kick Off",
       "trigger": "SOW Signature",
-      "pct": "—",
-      "status": "Complete",
+      "pct": "10%",
+      "status": "Not Started",
       "deliverables": "SOW execution"
+    },
+    {
+      "id": "PM1.2",
+      "delMonth": "DM0",
+      "phase": "Team Onboarding",
+      "name": "Team Onboarding",
+      "trigger": "",
+      "pct": "15%",
+      "status": "Not Started",
+      "deliverables": "SOW+ 1 MOnth"
     },
     {
       "id": "PM2",
@@ -369,7 +380,7 @@
       "name": "Build Start",
       "trigger": "Implementation Schedule, Inflight, Config & Code Mgmt",
       "pct": "10%",
-      "status": "Complete",
+      "status": "Not Started",
       "deliverables": "Implementation Schedule; Inflight; Configuration Management & Code Management"
     },
     {
@@ -379,7 +390,7 @@
       "name": "Build End",
       "trigger": "Customisation Solution Design + ICDs",
       "pct": "15%",
-      "status": "In Progress",
+      "status": "Not Started",
       "deliverables": "Customisation Solution Design Document; Interface Contract Documents (ICDs)"
     },
     {
