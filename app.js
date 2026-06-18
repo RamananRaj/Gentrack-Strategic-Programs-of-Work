@@ -708,9 +708,15 @@ function renderGantt(){
       laneRows+=`<tr><td style="padding-left:22px;color:#64748b">↳ ${ce('gantt.lanes.'+i+'.sublanes.'+si+'.name',s.name)}</td><td></td>${EDIT?`<td class="row-actions"><button class="xbtn" data-gsubdel="${i}:${si}">✕</button></td>`:'<td></td>'}</tr>`;
     });
   });
+  const _gs=parseD(g.start), _ge=parseD(g.end);
+  let lenStr='';
+  if(_gs&&_ge&&_ge>=_gs){ const days=dDiff(_gs,_ge); const wks=Math.round(days/7);
+    let mo=(_ge.getFullYear()-_gs.getFullYear())*12+(_ge.getMonth()-_gs.getMonth()); if(_ge.getDate()<_gs.getDate())mo--;
+    lenStr=`<b>${mo}</b> months · <b>${wks}</b> weeks (${days} days)`; }
   ed.innerHTML=`
     <h2 class="sec">Timeline Setup</h2>
-    <div class="adminrow"><label>Date range:</label> Start ${dCell('gantt.start',g.start)} &nbsp; End ${dCell('gantt.end',g.end)}</div>
+    <div class="adminrow"><label>Date range:</label> Start ${dCell('gantt.start',g.start)} &nbsp; End ${dCell('gantt.end',g.end)}
+      ${lenStr?`&nbsp;&nbsp;<span class="badge b-blue" style="font-size:12px">⏱ Program length: ${lenStr}</span>`:''}</div>
     ${EDIT?`<div class="adminrow"><label>Shift whole plan:</label><button class="toolbtn" id="gShiftBack">◀ −1 week</button><button class="toolbtn" id="gShiftFwd">+1 week ▶</button><button class="toolbtn" id="gShiftBack4">◀ −4 wks</button><button class="toolbtn" id="gShiftFwd4">+4 wks ▶</button><span class="pill-note">Moves the range, every task and every milestone together (by week).</span></div>`:''}
     <div class="gedit-grid">
       <div>
