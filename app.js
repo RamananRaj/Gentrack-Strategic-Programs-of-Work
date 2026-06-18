@@ -133,7 +133,18 @@ const DASH_HTML = `
 
     <div id="tlGantt">
       <div class="card">
-        <h2 class="sec">Plan on a Page — Implementation Timeline</h2>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 class="sec" style="margin:0">Plan on a Page — Implementation Timeline</h2>
+          <span style="flex:1"></span>
+          <span class="exp-wrap no-print">
+            <button class="toolbtn" id="tlExportBtn">⤓ Export timeline ▾</button>
+            <div class="exp-menu" id="tlExportMenu">
+              <button data-tlexport="a4">📄 Fit to A4 (PDF)</button>
+              <button data-tlexport="ppt">📊 PowerPoint slide</button>
+              <button data-tlexport="png">🖼 Image (PNG)</button>
+            </div>
+          </span>
+        </div>
         <p class="hint">Swimlane Gantt across the program. In the admin, edit the tables below the chart to set the date range, add streams, tasks/sub-tasks with start &amp; end dates, and milestone flags — the chart updates live. Milestone flags here are the same milestones shown in the Milestones view.</p>
         <p class="pill-note no-print">Tip (admin): drag the middle of a bar to move it, or drag its left/right edge to change start/end. Dates show while you drag.</p>
         <div style="overflow-x:auto"><div id="ganttChart"></div></div>
@@ -1106,6 +1117,12 @@ if(expBtn&&expMenu){
   document.addEventListener('click',()=>expMenu.classList.remove('open'));
   expMenu.querySelectorAll('[data-export]').forEach(b=>{ b.onclick=()=>{ expMenu.classList.remove('open'); doExport(b.dataset.export); }; });
 }
+const tlExpBtn=document.getElementById('tlExportBtn'), tlExpMenu=document.getElementById('tlExportMenu');
+if(tlExpBtn&&tlExpMenu){
+  tlExpBtn.onclick=(e)=>{ e.stopPropagation(); tlExpMenu.classList.toggle('open'); };
+  document.addEventListener('click',()=>tlExpMenu.classList.remove('open'));
+  tlExpMenu.querySelectorAll('[data-tlexport]').forEach(b=>{ b.onclick=()=>{ tlExpMenu.classList.remove('open'); exportTimeline(b.dataset.tlexport); }; });
+}
 
 }
 
@@ -1184,6 +1201,36 @@ function exportPPT(){
       sl.addTable(mr,{x:0.5,y:1.0,w:12,fontSize:10,border:{pt:0.5,color:'D9D9D9'},colW:[1.2,1.2,6,1.1,2.5]});
       P.writeFile({fileName:(m.program||'Program')+' — Update.pptx'});
     }catch(e){ alert('PPT export failed: '+e.message); }
+  });
+}
+/* ---------- Timeline (Gantt) export — fit to A4 / PPT ---------- */
+function exportTimeline(kind){
+  const el=document.querySelector('#ganttChart .gantt');
+  if(!el){ alert('Open the Timeline (Plan on a Page) view first.'); return; }
+  const title=((DATA.meta&&DATA.meta.program)||'Program')+' — Plan on a Page';
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>{
+    window.html2canvas(el,{scale:2,backgroundColor:'#ffffff',width:el.scrollWidth,height:el.scrollHeight,windowWidth:el.scrollWidth}).then(canvas=>{
+      const dataUrl=canvas.toDataURL('image/png');
+      if(kind==='png'){ const a=document.createElement('a'); a.href=dataUrl; a.download=title+'.png'; a.click(); return; }
+      if(kind==='a4'){
+        const w=window.open('','_tlprint');
+        w.document.write('<html><head><title>'+title+'</title><style>@page{size:A4 landscape;margin:8mm} body{margin:0;font-family:-apple-system,Arial,sans-serif} h3{margin:0 0 6px;font-size:13px;color:#1e3a8a} img{width:100%;height:auto}</style></head><body><h3>'+title+'</h3><img src="'+dataUrl+'" onload="setTimeout(function(){window.focus();window.print();},250)"></body></html>');
+        w.document.close(); return;
+      }
+      if(kind==='ppt'){
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js',()=>{
+          try{
+            const P=new PptxGenJS(); P.layout='LAYOUT_WIDE'; const SW=13.33, SH=7.5;
+            const sl=P.addSlide();
+            sl.addText(title,{x:0.3,y:0.2,w:SW-0.6,h:0.5,fontSize:18,bold:true,color:'1E3A8A'});
+            const ax=0.3, ay=0.85, aw=SW-0.6, ah=SH-1.1, ar=canvas.width/canvas.height;
+            let iw=aw, ih=iw/ar; if(ih>ah){ ih=ah; iw=ih*ar; }
+            sl.addImage({data:dataUrl, x:ax+(aw-iw)/2, y:ay+(ah-ih)/2, w:iw, h:ih});
+            P.writeFile({fileName:title+'.pptx'});
+          }catch(e){ alert('PPT export failed: '+e.message); }
+        });
+      }
+    }).catch(e=>alert('Could not capture the timeline: '+e.message));
   });
 }
 
