@@ -14,7 +14,7 @@ const DASH_HTML = `
   <button data-tab="stories">Functional Build Packages</button>
   <button data-tab="gaps">Product Gaps</button>
   <button data-tab="catalog">Product Catalog</button>
-  <button data-tab="payments">Payments</button>
+  <button data-tab="payments">Finance</button>
   <button data-tab="resources">Resources</button>
   <button data-tab="newsletter">Newsletter</button>
   <span class="spacer"></span>
@@ -232,7 +232,7 @@ const DASH_HTML = `
   <!-- PAYMENTS -->
   <section class="tab" id="payments">
     <div class="card">
-      <h2 class="sec">Payment Milestones</h2>
+      <h2 class="sec">Finance — Payment Milestones</h2>
       <p class="hint">Driven by the <b>Milestone Schedule</b> (Timeline → Milestones). PM, month, milestone and % come from there — edit them once and they reflect here. Enter the total contract value below; each Amount = Total × %. Only the Invoice Status is set here.</p>
       <div class="adminrow" style="margin-bottom:10px">
         <label style="font-weight:600">Total Contract Value (ex GST):</label>
@@ -240,7 +240,7 @@ const DASH_HTML = `
         <span id="pctCheck" class="pill-note"></span>
       </div>
       <table id="payTable"><thead><tr>
-        <th>PM</th><th>Del Month</th><th>Milestone</th><th class="pillcell">% of Total</th><th class="pillcell">Amount (ex GST)</th><th class="pillcell">Invoice Status</th><th class="no-print"></th>
+        <th>PM</th><th>Del Month</th><th>Milestone</th><th class="pillcell">% of Total</th><th class="pillcell">Amount (ex GST)</th><th class="pillcell">Invoice Date</th><th class="pillcell">Invoice Status</th><th class="no-print"></th>
       </tr></thead><tbody></tbody><tfoot></tfoot></table>
       <p class="pill-note">To add or remove a payment line, add/remove a milestone in <b>Timeline → Milestones</b>.</p>
     </div>
@@ -484,32 +484,38 @@ function renderPayments(){
     const ci=document.getElementById('cvInput');
     if(ci) ci.onchange=()=>{ if(!DATA.meta)DATA.meta={}; DATA.meta.contractValue=ci.value.replace(/[^0-9.]/g,''); renderPayments(); };
   }
-  DATA.paymentStatus=DATA.paymentStatus||{};
+  DATA.paymentStatus=DATA.paymentStatus||{}; DATA.paymentDates=DATA.paymentDates||{};
   const ms=DATA.milestones||[];
   const invSel=(id,val)=> EDIT
     ? `<select class="st" data-paystatus="${esc(id)}">`+["Not Due","Invoiced","Paid","Overdue"].map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')+`</select>`
     : `<span class="badge ${payClass(val)}">${esc(val)}</span>`;
+  const dateCell=(id,val)=> EDIT
+    ? `<input type="date" value="${esc(val||'')}" data-paydate="${esc(id)}">`
+    : (val?esc(fmtD(val)):'—');
   const tb=document.querySelector('#payTable tbody');
   tb.innerHTML=ms.map((m)=>{
     const amt=cv*pctNum(m.pct)/100;
     const st=DATA.paymentStatus[m.id]||'Not Due';
+    const dt=DATA.paymentDates[m.id]||'';
     return `<tr>
     <td><b>${esc(m.id)}</b></td>
     <td>${esc(m.delMonth)} <small style="color:#94a3b8">${esc(dmToDate(m.delMonth))}</small></td>
     <td>${esc(m.name)}</td>
     <td class="pillcell">${esc(m.pct||'—')}</td>
     <td class="pillcell">${cv?money(amt):'—'}</td>
+    <td class="pillcell">${dateCell(m.id,dt)}</td>
     <td class="pillcell">${invSel(m.id,st)}</td>
     <td class="no-print"></td>
-  </tr>`;}).join('')||'<tr><td colspan="7" style="color:#94a3b8">No milestones yet — add them in Timeline → Milestones.</td></tr>';
+  </tr>`;}).join('')||'<tr><td colspan="8" style="color:#94a3b8">No milestones yet — add them in Timeline → Milestones.</td></tr>';
   const pctSum=ms.reduce((a,m)=>a+pctNum(m.pct),0);
   const total=cv*pctSum/100;
   const paid=ms.filter(m=>(DATA.paymentStatus[m.id])==='Paid').reduce((a,m)=>a+cv*pctNum(m.pct)/100,0);
   document.querySelector('#payTable tfoot').innerHTML=`<tr style="font-weight:700;background:#f8fafc">
     <td colspan="3">Total</td><td class="pillcell">${Math.round(pctSum*100)/100}%</td><td class="pillcell">${cv?money(total):'—'}</td>
-    <td class="pillcell">${paid?('Paid '+money(paid)):''}</td><td class="no-print"></td></tr>`;
-  // wire invoice-status selects (id may contain dots, so handle directly)
+    <td class="pillcell"></td><td class="pillcell">${paid?('Paid '+money(paid)):''}</td><td class="no-print"></td></tr>`;
+  // wire invoice-status selects + invoice-date inputs (id may contain dots, handle directly)
   document.querySelectorAll('#payTable [data-paystatus]').forEach(s=>{ s.onchange=()=>{ DATA.paymentStatus[s.dataset.paystatus]=s.value; renderPayments(); }; });
+  document.querySelectorAll('#payTable [data-paydate]').forEach(s=>{ s.onchange=()=>{ DATA.paymentDates[s.dataset.paydate]=s.value; }; });
   const pc=document.getElementById('pctCheck');
   if(pc){ pc.textContent = pctSum===100?'✓ percentages add up to 100%' : ('⚠ percentages add up to '+(Math.round(pctSum*100)/100)+'% (should be 100%)');
     pc.className='pill-note '+(pctSum===100?'gh-ok':'gh-bad'); }
@@ -1261,6 +1267,7 @@ function setData(d){
   ['accomplishments','planned','blockers'].forEach(k=>{ if(!Array.isArray(d.weekly[k])) d.weekly[k]=[]; });
   // Payments are derived from milestones; invoice status is kept per-milestone-id here
   d.paymentStatus=(d.paymentStatus&&typeof d.paymentStatus==='object')?d.paymentStatus:{};
+  d.paymentDates=(d.paymentDates&&typeof d.paymentDates==='object')?d.paymentDates:{};
   if(Array.isArray(d.payments)) d.payments.forEach(p=>{ if(p&&p.id && !(p.id in d.paymentStatus)) d.paymentStatus[p.id]=p.status||'Not Due'; });
   d.gantt=d.gantt||{};
   d.gantt.start=d.gantt.start||''; d.gantt.end=d.gantt.end||'';
