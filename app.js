@@ -45,6 +45,11 @@ const DASH_HTML = `
 
   <!-- OVERVIEW -->
   <section class="tab active" id="overview">
+    <div class="overall-bar" id="overallBar">
+      <span class="overall-label">Overall program status</span>
+      <span id="overallControl"></span>
+      <span class="overall-hint no-print">Set this manually — it drives the header, newsletter &amp; exports.</span>
+    </div>
     <div class="kpis" id="kpis"></div>
     <div class="card" id="card-commercial">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -371,8 +376,9 @@ function renderHeader(){
   document.getElementById('h-meta').innerHTML=[
     ['Client',m.client],['Supplier',m.supplier],['PM',m.projectManager||'—'],
     ['Start',fd(m.programStartDate)],['End',fd(m.programEndDate)],['Reporting',m.reportWeek]
-  ].map(([k,v])=>`<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('')
-   +`<span><b>Overall RAG:</b> ${ragSelect('meta.overallStatus',m.overallStatus||'Amber')}</span>`;
+  ].map(([k,v])=>`<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('');
+  const oc=document.getElementById('overallControl');
+  if(oc) oc.innerHTML=ragSelect('meta.overallStatus',m.overallStatus||'Amber');
   document.getElementById('footer').textContent=`${m.program} · ${m.sowRef} · generated from data.json · ${m.reportDate}`;
 }
 
