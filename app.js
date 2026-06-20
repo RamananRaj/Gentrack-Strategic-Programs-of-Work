@@ -371,7 +371,8 @@ function renderHeader(){
   document.getElementById('h-meta').innerHTML=[
     ['Client',m.client],['Supplier',m.supplier],['PM',m.projectManager||'—'],
     ['Start',fd(m.programStartDate)],['End',fd(m.programEndDate)],['Reporting',m.reportWeek]
-  ].map(([k,v])=>`<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('');
+  ].map(([k,v])=>`<span><b>${esc(k)}:</b> ${esc(v)}</span>`).join('')
+   +`<span><b>Overall RAG:</b> ${ragSelect('meta.overallStatus',m.overallStatus||'Amber')}</span>`;
   document.getElementById('footer').textContent=`${m.program} · ${m.sowRef} · generated from data.json · ${m.reportDate}`;
 }
 
@@ -1081,6 +1082,7 @@ const NEWS_SECS=[
   {id:'commercial',label:'Commercial'},
   {id:'weekly',label:'Weekly Update',children:[{id:'weekly.accomplished',label:'Accomplished'},{id:'weekly.planned',label:'Planned next'},{id:'weekly.blockers',label:'Blockers'}]},
   {id:'inFocus',label:'In Focus (WPs)'},
+  {id:'timeline',label:'Plan on a Page (Gantt)'},
   {id:'milestones',label:'Upcoming Milestones'},
   {id:'gaps',label:'Product Gaps'},
   {id:'risks',label:'Risks / RAID'}
@@ -1090,7 +1092,9 @@ function renderNewsletter(){
   const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
   const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
   const inc=DATA.newsletterInclude||{};
-  const on=id=> inc[id]!==false;
+  // most sections default ON; the Gantt snapshot is heavier so it's opt-in (default OFF)
+  const OPT_IN={timeline:true};
+  const on=id=> OPT_IN[id] ? inc[id]===true : inc[id]!==false;
   // section picker (with sub-items)
   const sel=document.getElementById('newsSections');
   if(sel){ sel.innerHTML=NEWS_SECS.map(s=>{
@@ -1106,20 +1110,94 @@ function renderNewsletter(){
   const pillBd=s=>({Green:'#bbf7d0',Amber:'#fde68a',Red:'#fecaca'}[s]||'#e2e8f0');
   const card=(inner,bg,bd)=>`<div style="background:${bg||'#fff'};border:1px solid ${bd||'#e2e8f0'};border-radius:12px;padding:14px 16px;margin:0 0 14px">${inner}</div>`;
   const h3=t=>`<div style="font-size:12.5px;text-transform:uppercase;letter-spacing:.5px;color:#0ea5e9;font-weight:700;margin:0 0 8px">${esc(t)}</div>`;
-  let html=`<h1 style="font-size:20px;margin:0 0 2px;color:#1e3a8a">${esc(m.program)} — Program Update</h1>
+  const head=`<h1 style="font-size:20px;margin:0 0 2px;color:#1e3a8a">${esc(m.program)} — Program Update</h1>
     <div style="color:#64748b;font-size:12px;margin-bottom:12px">${esc(m.subtitle||'')} · As at ${esc(m.reportWeek||m.reportDate||'')} · PM ${esc(m.projectManager||m.reportOwner||'')}</div>
     ${card(`<b>Overall:</b> ${ragChip(m.overallStatus)} &nbsp; <b>Completion:</b> ${avg}% &nbsp; <b>Next:</b> ${next?esc(next.id+' '+next.name+' ('+next.delMonth+')'):'—'}`,'#f8fafc','#e2e8f0')}`;
-  if(on('execSummary')&&m.overallNarrative) html+=card(h3('Executive Summary')+`<div style="font-size:13.5px">${m.overallNarrative}</div>`,'#fffef5','#fde68a');
-  if(on('health')){ const ps=DATA.pillars.filter(p=>on('health.'+p.id)); if(ps.length) html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 14px">${ps.map(p=>`<div style="flex:1;min-width:180px;background:${pillBg(p.status)};border:1px solid ${pillBd(p.status)};border-radius:12px;padding:12px"><div style="font-weight:800;margin-bottom:4px">${esc(p.name)} ${ragChip(p.status)}</div><div style="font-size:12.5px;color:#334155">${p.summary||''}</div></div>`).join('')}</div>`; }
+  const B=[];  // one entry per section → kept together on a single PDF page
+  if(on('execSummary')&&m.overallNarrative) B.push(card(h3('Executive Summary')+`<div style="font-size:13.5px">${m.overallNarrative}</div>`,'#fffef5','#fde68a'));
+  if(on('health')){ const ps=DATA.pillars.filter(p=>on('health.'+p.id)); if(ps.length) B.push(h3('Program Health')+`<div style="display:flex;gap:12px;flex-wrap:wrap">${ps.map(p=>`<div style="flex:1;min-width:180px;background:${pillBg(p.status)};border:1px solid ${pillBd(p.status)};border-radius:12px;padding:12px"><div style="font-weight:800;margin-bottom:4px">${esc(p.name)} ${ragChip(p.status)}</div><div style="font-size:12.5px;color:#334155">${p.summary||''}</div></div>`).join('')}</div>`); }
   if(on('commercial')&&(DATA.commercial||[]).length){ const th='padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#64748b;border-bottom:2px solid #e2e8f0;font-weight:700'; const td='padding:7px 10px;font-size:12.5px;color:#334155;border-bottom:1px solid #eef2f7;vertical-align:top';
-    html+=card(h3('Commercial')+`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%"><thead><tr><th style="${th}">Item</th><th style="${th};white-space:nowrap">Owner</th><th style="${th};white-space:nowrap">Status</th><th style="${th}">Commentary</th></tr></thead><tbody>${DATA.commercial.map(c=>`<tr><td style="${td};font-weight:700;color:#1e293b">${esc(c.item)}</td><td style="${td};white-space:nowrap">${esc(c.owner||'')}</td><td style="${td};white-space:nowrap">${c.status?stChip(c.status):''}</td><td style="${td}">${c.comment||''}</td></tr>`).join('')}</tbody></table>`,'#fff','#e2e8f0'); }
-  if(on('weekly')){ const blk=(t,a,flag)=>(on(flag)&&a&&a.length)?`${h3(t)}<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''; html+=blk('Accomplished This Week',DATA.weekly.accomplishments,'weekly.accomplished')+blk('Planned Next Week',DATA.weekly.planned,'weekly.planned')+blk('Blockers / Issues',DATA.weekly.blockers,'weekly.blockers'); }
-  if(on('inFocus')){ const f=wp.filter(w=>w.status==='In Progress'); html+=h3('In Focus')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${f.length?f.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}</li>`).join(''):'<li>—</li>'}</ul>`; }
-  if(on('milestones')) html+=h3('Upcoming Milestones')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,6).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)})</li>`).join('')||'<li>—</li>'}</ul>`;
-  if(on('gaps')){ const og=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review'); html+=h3('Product Gaps — Open')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${og.length?og.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · owner ${esc(g.owner)}</li>`).join(''):'<li>None.</li>'}</ul>`; }
-  if(on('risks')) html+=h3('Risks &amp; Watch Items')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${DATA.risks.map(r=>`<li>${ragChip(r.rag)} <b>${esc(r.title)}</b> — ${esc(r.impact)}. <i>Mitigation:</i> ${esc(r.mitigation)}</li>`).join('')||'<li>None.</li>'}</ul>`;
-  html+=`<div style="margin-top:16px;color:#94a3b8;font-size:11px">Generated from ${esc(m.program||'')} dashboard · ${esc(m.sowRef||'')}</div>`;
+    B.push(card(h3('Commercial')+`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%"><thead><tr><th style="${th}">Item</th><th style="${th};white-space:nowrap">Owner</th><th style="${th};white-space:nowrap">Status</th><th style="${th}">Commentary</th></tr></thead><tbody>${DATA.commercial.map(c=>`<tr><td style="${td};font-weight:700;color:#1e293b">${esc(c.item)}</td><td style="${td};white-space:nowrap">${esc(c.owner||'')}</td><td style="${td};white-space:nowrap">${c.status?stChip(c.status):''}</td><td style="${td}">${c.comment||''}</td></tr>`).join('')}</tbody></table>`,'#fff','#e2e8f0')); }
+  if(on('weekly')){ const blk=(t,a,flag)=>(on(flag)&&a&&a.length)?`${h3(t)}<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''; const whtml=blk('Accomplished This Week',DATA.weekly.accomplishments,'weekly.accomplished')+blk('Planned Next Week',DATA.weekly.planned,'weekly.planned')+blk('Blockers / Issues',DATA.weekly.blockers,'weekly.blockers'); if(whtml) B.push(whtml); }
+  if(on('inFocus')){ const f=wp.filter(w=>w.status==='In Progress'); B.push(h3('In Focus')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${f.length?f.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}</li>`).join(''):'<li>—</li>'}</ul>`); }
+  if(on('timeline')) B.push(h3('Plan on a Page — Implementation Timeline')+`<div id="nlTimeline" style="margin:4px 0 0"></div>`);
+  if(on('milestones')) B.push(h3('Upcoming Milestones')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,6).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)})</li>`).join('')||'<li>—</li>'}</ul>`);
+  if(on('gaps')){ const og=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review'); B.push(h3('Product Gaps — Open')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${og.length?og.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · owner ${esc(g.owner)}</li>`).join(''):'<li>None.</li>'}</ul>`); }
+  if(on('risks')) B.push(h3('Risks &amp; Watch Items')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${DATA.risks.map(r=>`<li>${ragChip(r.rag)} <b>${esc(r.title)}</b> — ${esc(r.impact)}. <i>Mitigation:</i> ${esc(r.mitigation)}</li>`).join('')||'<li>None.</li>'}</ul>`);
+  const foot=`<div style="margin-top:6px;color:#94a3b8;font-size:11px">Generated from ${esc(m.program||'')} dashboard · ${esc(m.sowRef||'')}</div>`;
+  const html=`<div class="nl-block">${head}</div>`+B.map(b=>`<div class="nl-block">${b}</div>`).join('')+`<div class="nl-block">${foot}</div>`;
   document.getElementById('newsPaper').innerHTML=html;
+  if(on('timeline')) newsletterTimeline();
+}
+
+/* ---- Plan-on-a-Page snapshot embedded in the newsletter (global so renderNewsletter can call it) ---- */
+let NL_GANTT={sig:null,url:null,busy:false};
+function captureGanttImage(cb){
+  const gantt=document.querySelector('#ganttChart .gantt');
+  if(!gantt){ cb(null); return; }
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>{
+    const sec=document.getElementById('timeline'), tlG=document.getElementById('tlGantt');
+    const pSec=sec?sec.getAttribute('style'):null, pG=tlG?tlG.getAttribute('style'):null;
+    // render the (possibly hidden) timeline tab off-screen so it has real dimensions
+    if(sec) sec.style.cssText=(pSec||'')+';display:block;position:absolute;left:-12000px;top:0';
+    if(tlG) tlG.style.display='block';
+    const restore=()=>{ if(sec){pSec===null?sec.removeAttribute('style'):sec.setAttribute('style',pSec);} if(tlG){pG===null?tlG.removeAttribute('style'):tlG.setAttribute('style',pG);} };
+    const raf=window.requestAnimationFrame||(fn=>setTimeout(fn,30));
+    raf(()=>{
+      try{
+        window.html2canvas(gantt,{scale:2,backgroundColor:'#ffffff',windowWidth:gantt.scrollWidth+40}).then(canvas=>{
+          restore(); cb(canvas.toDataURL('image/png'));
+        }).catch(e=>{ restore(); cb(null); });
+      }catch(e){ restore(); cb(null); }
+    });
+  });
+}
+function newsletterTimeline(force){
+  const holder=document.getElementById('nlTimeline'); if(!holder) return;
+  const sig=JSON.stringify(DATA.gantt||{});
+  if(!force && NL_GANTT.url && NL_GANTT.sig===sig){ holder.innerHTML=`<img src="${NL_GANTT.url}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block" alt="Plan on a Page timeline">`; return; }
+  if(NL_GANTT.busy) return;
+  holder.innerHTML=`<div style="padding:14px;color:#94a3b8;font-size:12.5px;border:1px dashed #cbd5e1;border-radius:8px">Rendering Plan-on-a-Page image…</div>`;
+  NL_GANTT.busy=true;
+  captureGanttImage(url=>{ NL_GANTT={sig,url,busy:false}; const h=document.getElementById('nlTimeline'); if(!h) return; h.innerHTML=url?`<img src="${url}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;display:block" alt="Plan on a Page timeline">`:`<div style="padding:10px;color:#ef4444;font-size:12px">Could not render the timeline image — open the Timeline tab once, then come back.</div>`; });
+}
+// make sure the timeline image is ready before building PDF / email
+function ensureNewsletterReady(cb){
+  const need=document.getElementById('nlTimeline');
+  if(!need || (NL_GANTT.url && !NL_GANTT.busy)){ cb(); return; }
+  newsletterTimeline();
+  let tries=0; const t=setInterval(()=>{ tries++; if((NL_GANTT.url&&!NL_GANTT.busy)||tries>40){ clearInterval(t); cb(); } },150);
+}
+function newsletterPDF(cb){
+  ensureNewsletterReady(()=>{
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>{
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>{
+        const jsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+        const pdf=new jsPDF('p','mm','a4');
+        const pw=210, ph=297, mg=10, iw=pw-mg*2, pageH=ph-mg*2;
+        const blocks=[...document.querySelectorAll('#newsPaper .nl-block')];
+        let y=mg, i=0;
+        const finish=()=>{ const name=((DATA.meta&&DATA.meta.program)||'Program')+' — Update.pdf'; if(cb) cb(pdf,name); else pdf.save(name); };
+        const step=()=>{
+          if(i>=blocks.length){ finish(); return; }
+          const el=blocks[i++];
+          window.html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
+            const img=canvas.toDataURL('image/png'), ih=canvas.height*iw/canvas.width;
+            if(ih<=pageH){
+              if(y>mg && y+ih>mg+pageH){ pdf.addPage(); y=mg; }   // whole section won't fit → push to next page
+              pdf.addImage(img,'PNG',mg,y,iw,ih); y+=ih+4;
+            }else{                                                 // section taller than one page → slice it
+              if(y>mg){ pdf.addPage(); y=mg; }
+              let sY=0; while(sY<ih){ pdf.addImage(img,'PNG',mg, mg - sY, iw, ih); sY+=pageH; if(sY<ih) pdf.addPage(); }
+              y=mg+(ih%pageH||pageH)+4; if(y>mg+pageH){ pdf.addPage(); y=mg; }
+            }
+            step();
+          }).catch(e=>{ alert('PDF build failed: '+e.message); });
+        };
+        step();
+      });
+    });
+  });
 }
 
 function normalizeStatusPct(){
@@ -1289,23 +1367,6 @@ document.getElementById('copyNewsText').onclick=async function(){
   try{ await navigator.clipboard.writeText(document.getElementById('newsPaper').innerText); this.textContent='✓ Copied'; }
   catch(e){ this.textContent='Failed'; } setTimeout(()=>this.textContent='📋 Copy (plain)',1500);
 };
-function newsletterPDF(cb){
-  const el=document.getElementById('newsPaper');
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>{
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>{
-      window.html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
-        const jsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
-        const pdf=new jsPDF('p','mm','a4');
-        const pw=210, ph=297, mg=8, iw=pw-mg*2, ih=canvas.height*iw/canvas.width, pageH=ph-mg*2;
-        const img=canvas.toDataURL('image/png');
-        let remaining=ih, sY=0;
-        while(remaining>0){ pdf.addImage(img,'PNG',mg, mg - sY, iw, ih); remaining-=pageH; if(remaining>0){ pdf.addPage(); sY+=pageH; } }
-        const name=((DATA.meta&&DATA.meta.program)||'Program')+' — Update.pdf';
-        if(cb) cb(pdf,name); else pdf.save(name);
-      }).catch(e=>alert('PDF build failed: '+e.message));
-    });
-  });
-}
 document.getElementById('dlNewsPdf').onclick=function(){ const b=this; b.textContent='Building…'; newsletterPDF((pdf,name)=>{ pdf.save(name); b.textContent='📄 Download PDF'; }); };
 document.getElementById('mailNews').onclick=async function(){
   const m=DATA.meta||{};

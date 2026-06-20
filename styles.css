@@ -29,6 +29,8 @@
   .news-pick>summary::-webkit-details-marker{display:none}
   .news-pick>summary::before{content:"\25B8";display:inline-block;margin-right:6px;transition:transform .15s}
   .news-pick[open]>summary::before{transform:rotate(90deg)}
+  .nl-block{margin:0 0 14px;break-inside:avoid;page-break-inside:avoid}
+  .nl-block:last-child{margin-bottom:0}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   .pillar{border-radius:14px;padding:16px;border:1px solid var(--line)}
   .pillar h3{margin:0 0 6px;font-size:14px;display:flex;align-items:center;gap:8px}
