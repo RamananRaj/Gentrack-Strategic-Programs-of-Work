@@ -729,6 +729,7 @@
     "planned": [
       "Once Peter's Suresh's comments received, this will move to Final Legal Review",
       "Focus now turns to Product Schedule formatting and Support SOW Closure",
+      "Internally publish the list of Product Gaps for this program",
       "Reviewing the resource requirements for the Program of Work",
       "Early Start internally is considered - This will help to recognise any bottle necks within the program and recognise revenue earlier"
     ],
@@ -1451,7 +1452,7 @@
     },
     {
       "item": "Imp SoW - Quality Management Framework of GTK to be documented",
-      "owner": "Hp",
+      "owner": "HP",
       "status": "In Progress",
       "comment": "Working internally to define this (we have done for other proposals), need to include that for the program"
     },
