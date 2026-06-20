@@ -12,7 +12,7 @@
     "programStart": "Month 0 (SOW signature)",
     "programDuration": "16 delivery months (DM0–DM16)",
     "overallStatus": "Amber",
-    "overallNarrative": "<ul><li>Program in active build. Configure–Build (WP1) and Integration Rebuild (WP4) progressing. Data Migration trial cycles underway. Key watch items: OOTB validation backlog and product gap dispositions.<br><br></li></ul>",
+    "overallNarrative": "<ul><li>There are only few comments (&lt; than 5) left on Gentrack to address. They key items are around languages where GTK Legal team is assisting to address</li><li>There are similar number of comments where HP has taken internally to review based on GTK input</li><li>All SOW's will be signed around the similar time.</li><li>HP is currently working with Minister in the final presentation and Go Decision - This is anticipated a&nbsp;<br><br></li></ul>",
     "projectManager": "Ram Raj",
     "programEndDate": "2027-11-01",
     "contractValue": "8900000"
@@ -722,11 +722,13 @@
     "planned": [
       "Once Peter's Suresh's comments received, this will move to Final Legal Review",
       "Focus now turns to Product Schedule formatting and Support SOW Closure",
-      "Reviewing the resource requirements for the Program of Work"
+      "Reviewing the resource requirements for the Program of Work",
+      "Early Start internally is considered - This will help to recognise any bottle necks within the program and recognise revenue earlier"
     ],
     "blockers": [
-      "Awaiting HP sign-off on 2 design decisions — at risk of slipping Build End.",
-      "Legacy data quality issues in mData21 sample set under investigation."
+      "Note: TCS wants to include language to create a Back to Back dependencies between TCS and GTK within the HP SOW - Have pushed back on their ask",
+      "Issue: Team currently table to start the program are totally new compared to who we had in Blueprint. This will be an issue for HP and Internally as well",
+      "Note: AI First Adoption is what considered for this program end to end. No manual coding nor configuration nor testing. Working with Engineering to see how we can fast track this for the program"
     ]
   },
   "weeklyUpdates": [
