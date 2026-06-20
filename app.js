@@ -30,6 +30,12 @@ const DASH_HTML = `
   <button class="toolbtn" id="editToggle" title="Toggle edit mode">✎ Edit: Off</button>
   <button class="toolbtn primary no-print" id="download" title="Download data.json to commit to Git">⬇ Save data.json</button>
 </nav>
+<div id="richBar" class="rich-bar no-print">
+  <button data-rcmd="bold" title="Bold (Ctrl/Cmd+B)"><b>B</b></button>
+  <button data-rcmd="italic" title="Italic (Ctrl/Cmd+I)"><i>I</i></button>
+  <button data-rcmd="insertUnorderedList" title="Bullet list">• List</button>
+  <button data-rcmd="removeFormat" title="Clear formatting">⨯</button>
+</div>
 
 <div class="wrap">
 
@@ -54,7 +60,7 @@ const DASH_HTML = `
     </div>
     <div class="card">
       <h2 class="sec">Executive Summary</h2>
-      <p class="editable bindfill" data-bind="meta.overallNarrative" style="margin:0"></p>
+      <p class="editable bindfill rich" data-bind="meta.overallNarrative" style="margin:0"></p>
     </div>
     <div class="card" style="border-left:4px solid var(--brand2)">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -358,7 +364,7 @@ function renderPillars(){
   document.getElementById('pillars').innerHTML=DATA.pillars.map((p,i)=>`
     <div class="pillar" style="background:${p.status==='Green'?'#f0fdf4':p.status==='Amber'?'#fffbeb':'#fef2f2'}">
       <h3>${esc(p.name)} ${ragSelect('pillars.'+i+'.status',p.status)}</h3>
-      <p class="editable" data-bind="pillars.${i}.summary">${esc(p.summary)}</p>
+      <p class="editable rich" data-bind="pillars.${i}.summary">${p.summary||''}</p>
     </div>`).join('');
 }
 
@@ -963,10 +969,10 @@ function renderNewsletter(){
     <div style="margin:14px 0;padding:12px 14px;background:#f8fafc;border-radius:10px">
       <b>Overall status:</b> ${ragChip(m.overallStatus)} &nbsp; <b>Completion:</b> ${avg}% &nbsp;
       <b>Next milestone:</b> ${next?esc(next.id+' '+next.name+' ('+next.delMonth+')'):'—'}
-      <div style="margin-top:6px">${esc(m.overallNarrative)}</div>
+      <div style="margin-top:6px">${m.overallNarrative||''}</div>
     </div>
     <h3>Health — Scope · Timeline · Quality</h3>
-    <ul>${DATA.pillars.map(p=>`<li><b>${esc(p.name)}</b> ${ragChip(p.status)} — ${esc(p.summary)}</li>`).join('')}</ul>
+    <ul>${DATA.pillars.map(p=>`<li><b>${esc(p.name)}</b> ${ragChip(p.status)} — ${p.summary||''}</li>`).join('')}</ul>
     <h3>Accomplished This Week</h3>
     <ul>${(DATA.weekly.accomplishments||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul>
     <h3>Planned Next Week</h3>
@@ -998,10 +1004,14 @@ function getByPath(path){
 }
 function fillBinds(){
   document.querySelectorAll('.bindfill').forEach(el=>{
-    const v=getByPath(el.dataset.bind);
-    el.textContent=(v==null?'':String(v));
+    const v=getByPath(el.dataset.bind); const s=(v==null?'':String(v));
+    if(el.classList.contains('rich')) el.innerHTML=s; else el.textContent=s;
   });
 }
+function showRichBar(el){ const bar=document.getElementById('richBar'); if(!bar)return; const r=el.getBoundingClientRect();
+  bar.style.display='flex'; bar.style.left=Math.max(8,r.left)+'px'; bar.style.top=Math.max(8,r.top-40)+'px'; }
+function hideRichBar(){ const a=document.activeElement; if(a&&a.classList&&a.classList.contains('rich'))return; const bar=document.getElementById('richBar'); if(bar)bar.style.display='none'; }
+function stripHTML(s){ if(s==null)return ''; const d=document.createElement('div'); d.innerHTML=String(s); return d.textContent||d.innerText||''; }
 function setByPath(path,val){
   const parts=path.split('.');let o=DATA;
   for(let i=0;i<parts.length-1;i++){o=o[parts[i]];}
@@ -1010,7 +1020,9 @@ function setByPath(path,val){
 function bindEditables(){
   document.querySelectorAll('.editable').forEach(el=>{
     el.setAttribute('contenteditable',EDIT?'true':'false');
-    el.onblur=()=>{ setByPath(el.dataset.bind, el.textContent.trim()); softRefresh(); };
+    const rich=el.classList.contains('rich');
+    el.onblur=()=>{ setByPath(el.dataset.bind, rich? el.innerHTML : el.textContent.trim()); setTimeout(hideRichBar,200); softRefresh(); };
+    if(rich && EDIT){ el.onfocus=()=>showRichBar(el); }
   });
   document.querySelectorAll('select[data-bind]').forEach(s=>{
     s.onchange=()=>{
@@ -1091,6 +1103,7 @@ document.getElementById('tabs').addEventListener('click',e=>{
   document.getElementById(b.dataset.tab).classList.add('active');
 });
 document.querySelectorAll('[data-tlview]').forEach(b=>{ b.onclick=()=>setTimelineView(b.dataset.tlview); });
+(function(){ const bar=document.getElementById('richBar'); if(bar) bar.querySelectorAll('[data-rcmd]').forEach(b=>{ b.onmousedown=(e)=>{ e.preventDefault(); document.execCommand(b.dataset.rcmd,false,null); }; }); })();
 setTimelineView((function(){try{return localStorage.getItem('tlview')||'gantt';}catch(e){return 'gantt';}})());
 
 document.getElementById('archiveWeek').onclick=function(){
@@ -1159,10 +1172,10 @@ function summaryText(){
   L.push(`As at ${m.reportWeek||m.reportDate||''}  ·  PM: ${m.projectManager||m.reportOwner||''}`);
   L.push('');
   L.push(`Overall: ${m.overallStatus}   Completion: ${s.completion}%   Next: ${s.next?(s.next.id+' '+s.next.name):'—'}`);
-  if(m.overallNarrative) L.push(m.overallNarrative);
+  if(m.overallNarrative) L.push(stripHTML(m.overallNarrative));
   L.push('');
   L.push('Health (Scope / Timeline / Quality):');
-  s.pillars.forEach(p=>L.push(`- ${p.name} [${p.status}] ${p.summary||''}`));
+  s.pillars.forEach(p=>L.push(`- ${p.name} [${p.status}] ${stripHTML(p.summary||'')}`));
   const blk=(t,a)=>{ if(a&&a.length){ L.push(''); L.push(t+':'); a.forEach(x=>L.push('- '+x)); } };
   blk('Accomplished this week',s.weekly.accomplishments);
   blk('Planned next week',s.weekly.planned);
@@ -1174,8 +1187,8 @@ function slackText(){
   const s=programSummary(), m=s.m;
   let t=`*${m.program} — Program Update*\n${m.subtitle||''}\n_As at ${m.reportWeek||m.reportDate||''} · PM ${m.projectManager||''}_\n\n`;
   t+=`*Overall:* ${m.overallStatus}  |  *Completion:* ${s.completion}%  |  *Next:* ${s.next?(s.next.id+' '+s.next.name):'—'}\n`;
-  if(m.overallNarrative) t+=m.overallNarrative+'\n';
-  t+=`\n*Health*\n`+s.pillars.map(p=>`• *${p.name}* [${p.status}] ${p.summary||''}`).join('\n')+'\n';
+  if(m.overallNarrative) t+=stripHTML(m.overallNarrative)+'\n';
+  t+=`\n*Health*\n`+s.pillars.map(p=>`• *${p.name}* [${p.status}] ${stripHTML(p.summary||'')}`).join('\n')+'\n';
   const blk=(title,a)=>{ if(a&&a.length) t+=`\n*${title}*\n`+a.map(x=>`• ${x}`).join('\n')+'\n'; };
   blk('Accomplished',s.weekly.accomplishments); blk('Planned next',s.weekly.planned); blk('Blockers',s.weekly.blockers);
   if(s.risks.length) t+=`\n*Risks*\n`+s.risks.map(r=>`• [${r.rag}] ${r.title}: ${r.impact}`).join('\n')+'\n';
@@ -1208,9 +1221,9 @@ function exportPPT(){
       sl.addText((m.subtitle||'')+'\nPM: '+(m.projectManager||'')+'   ·   As at '+(m.reportWeek||m.reportDate||''),{x:0.6,y:2.9,w:11.5,h:1,fontSize:15,color:'9EC5FF'});
       sl=P.addSlide(); sl.addText('Program Status',{x:0.5,y:0.3,w:12,h:0.6,fontSize:26,bold:true,color:'1E3A8A'});
       sl.addText(`Overall: ${m.overallStatus}     Completion: ${s.completion}%     Next: ${s.next?(s.next.id+' '+s.next.name):'—'}`,{x:0.5,y:1.0,w:12,h:0.5,fontSize:15,bold:true});
-      if(m.overallNarrative) sl.addText(m.overallNarrative,{x:0.5,y:1.5,w:12,h:0.9,fontSize:12,color:'333333'});
+      if(m.overallNarrative) sl.addText(stripHTML(m.overallNarrative),{x:0.5,y:1.5,w:12,h:0.9,fontSize:12,color:'333333'});
       const pr=[[{text:'Pillar',options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}},{text:'RAG',options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}},{text:'Summary',options:{bold:true,color:'FFFFFF',fill:'1E3A8A'}}]];
-      s.pillars.forEach(p=>pr.push([p.name,p.status,p.summary||'']));
+      s.pillars.forEach(p=>pr.push([p.name,p.status,stripHTML(p.summary||'')]));
       sl.addTable(pr,{x:0.5,y:2.5,w:12,fontSize:11,border:{pt:0.5,color:'D9D9D9'},colW:[2.2,1.3,8.5]});
       sl=P.addSlide(); sl.addText('Weekly Update',{x:0.5,y:0.3,w:12,h:0.6,fontSize:26,bold:true,color:'1E3A8A'});
       let y=1.1; const blk=(t,a)=>{ if(!a||!a.length)return; sl.addText(t,{x:0.5,y,w:12,h:0.35,fontSize:14,bold:true,color:'0E7490'}); y+=0.4; a.forEach(x=>{ sl.addText('• '+x,{x:0.7,y,w:11.6,h:0.3,fontSize:11}); y+=0.3; }); y+=0.15; };
