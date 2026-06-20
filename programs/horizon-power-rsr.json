@@ -12,7 +12,7 @@
     "programStart": "Month 0 (SOW signature)",
     "programDuration": "16 delivery months (DM0–DM16)",
     "overallStatus": "Amber",
-    "overallNarrative": "<ul><li>There are only few comments (&lt; than 5) left on Gentrack to address. They key items are around languages where GTK Legal team is assisting to address</li><li>There are similar number of comments where HP has taken internally to review based on GTK input</li><li>All SOW's will be signed around the similar time.</li><li>HP is currently working with Minister in the final presentation and Go Decision - This is anticipated a&nbsp;<br><br></li></ul>",
+    "overallNarrative": "<ul><li>There are only few comments (&lt; than 5) left on Gentrack to address. They key items are around languages where GTK Legal team is assisting to address</li><li>There are similar number of comments where HP has taken internally to review based on GTK input</li><li>All SOW's will be signed around the similar time.</li><li>Early Termination points to finalised with HP. This is an open item we will discuss and close in the coming week.</li><li>HP is currently working with Minister in the final presentation and Go Decision - This is anticipated SoW signoff date now shift to Mid to End July. Working closely with HP on this.&nbsp;</li><li>There is still possibility to pickup closer to 30% of the Milestone payments before Sept 2026.<br><br></li></ul>",
     "projectManager": "Ram Raj",
     "programEndDate": "2027-11-01",
     "contractValue": "8900000"
@@ -707,7 +707,7 @@
     },
     {
       "id": "R3",
-      "title": "Integration dependency on SI endpoints",
+      "title": "Workflow configuration",
       "impact": "ICD validation delays",
       "rag": "Green",
       "mitigation": "Integration Register baselined; joint test windows."
