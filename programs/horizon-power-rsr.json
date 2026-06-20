@@ -1467,6 +1467,12 @@
       "owner": "GTK",
       "status": "Open",
       "comment": "Working internally to define this (we have done for other proposals), need to include that for the program"
+    },
+    {
+      "item": "Imp - SoW - Cost Reimbursement Clause C11 got extended by capping this reimbursement to 10K.",
+      "owner": "GTK",
+      "status": "Open",
+      "comment": "This is moving back and forth between both GTK and HP. Checkign with GTK Legal if they are ok for this to be claimed through Reciprocal Liability Cap.&nbsp;<br>"
     }
   ],
   "hidden": []
