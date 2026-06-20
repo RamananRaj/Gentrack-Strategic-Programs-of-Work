@@ -1485,6 +1485,12 @@
       "owner": "HP",
       "status": "In Progress",
       "comment": "GTK has proposed couple of Legal inclusion to satisfy HP requirement. Working with GTK Legal Team and HP to close this."
+    },
+    {
+      "item": "RACI for Regulatory Obligations",
+      "owner": "GTK",
+      "status": "On Hold",
+      "comment": "Internally decided to put this on hold till MSC is signed"
     }
   ],
   "hidden": [
