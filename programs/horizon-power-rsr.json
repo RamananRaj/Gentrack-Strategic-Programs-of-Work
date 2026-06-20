@@ -42,8 +42,8 @@
       "id": "WP1",
       "name": "Technical Design Validation – Configure – Build",
       "owner": "Gentrack",
-      "status": "In Progress",
-      "pct": 55,
+      "status": "Not Started",
+      "pct": 0,
       "rag": "Amber",
       "phase": "Design & Build",
       "scopeNote": "Validate/refine approved M2C & VFN user stories; convert to config/build backlog; configure & build standard + approved customisations; unit test each 3-week sprint.",
@@ -97,8 +97,8 @@
       "id": "WP3",
       "name": "Velocity & mData21 Data Migration",
       "owner": "Gentrack",
-      "status": "In Progress",
-      "pct": 35,
+      "status": "Not Started",
+      "pct": 0,
       "rag": "Amber",
       "phase": "Data Migration",
       "scopeNote": "Execute Data Migration Strategy: trial migrations, dry runs, final production migration from Velocity & mData21 into G2/VFN with reconciliation success criteria.",
@@ -128,8 +128,8 @@
       "id": "WP4",
       "name": "Integration Rebuild",
       "owner": "Gentrack",
-      "status": "In Progress",
-      "pct": 40,
+      "status": "Not Started",
+      "pct": 0,
       "rag": "Amber",
       "phase": "Design & Build",
       "scopeNote": "Redevelop, configure & validate all approved integration points per Integration Register & ICDs; promote to SIT.",
@@ -270,8 +270,8 @@
       "id": "WP9",
       "name": "Inflight Transactions",
       "owner": "Gentrack + HP business",
-      "status": "In Progress",
-      "pct": 30,
+      "status": "Not Started",
+      "pct": 0,
       "rag": "Amber",
       "phase": "Plan & Initiation",
       "scopeNote": "Identify, categorise & define treatment for inflight (open/pending) transactions in legacy systems prior to Go-Live.",
@@ -1459,25 +1459,25 @@
     {
       "item": "Imp SoW - Hypercare Service Level needs to be included",
       "owner": "GTK",
-      "status": "Open",
+      "status": "In Progress",
       "comment": "Working to define how the Incidents will be addressed during Hypercare. -"
     },
     {
       "item": "Imp SoW - Quality Management Framework of GTK to be documented",
-      "owner": "GTK",
-      "status": "Open",
+      "owner": "Hp",
+      "status": "In Progress",
       "comment": "Working internally to define this (we have done for other proposals), need to include that for the program"
     },
     {
       "item": "Imp - SoW - Cost Reimbursement Clause C11 got extended by capping this reimbursement to 10K.",
       "owner": "GTK",
-      "status": "Open",
+      "status": "In Progress",
       "comment": "This is moving back and forth between both GTK and HP. Checking with GTK Legal if they are ok for this to be claimed through Reciprocal Liability Cap.&nbsp;<br>"
     },
     {
       "item": "Imp - SoW - HP wants key personal named in the SoW, similar to what we did during Blueprint.",
       "owner": "GTK",
-      "status": "Open",
+      "status": "In Progress",
       "comment": "This will be tabled towards closure of the Program. Working internally on the resource names"
     },
     {
@@ -1494,5 +1494,6 @@
     "catalog",
     "resources",
     "newsletter"
-  ]
+  ],
+  "newsletterInclude": {}
 }
