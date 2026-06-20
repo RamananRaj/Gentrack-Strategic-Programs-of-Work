@@ -1061,7 +1061,13 @@ function renderNewsletter(){
   document.getElementById('newsPaper').innerHTML=html;
 }
 
+function normalizeStatusPct(){
+  // Not Started ⇒ 0%, Complete ⇒ 100% (keeps data consistent with the lock rule)
+  (DATA.workPackages||[]).forEach(w=>{ if(w.status==='Not Started') w.pct=0; else if(w.status==='Complete') w.pct=100; });
+  (DATA.stories||[]).forEach(s=>{ if(s.status==='Not Started') s.pct=0; else if(s.status==='Complete') s.pct=100; });
+}
 function renderAll(){
+  normalizeStatusPct();
   renderHeader();renderKpis();renderCommercial();renderPillars();renderWeekly();renderWeeklyArchive();renderRisks();renderWP();
   renderTimeline();renderGantt();renderDeliverables();renderStories();renderGaps();renderCatalog();
   renderPayments();renderResources();renderNewsletter();
