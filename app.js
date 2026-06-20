@@ -18,6 +18,10 @@ const DASH_HTML = `
   <button data-tab="resources">Resources</button>
   <button data-tab="newsletter">Newsletter</button>
   <span class="spacer"></span>
+  <span class="exp-wrap no-print" id="sectionsWrap">
+    <button class="toolbtn" id="sectionsBtn" title="Choose which sections are visible to viewers">👁 Sections ▾</button>
+    <div class="exp-menu" id="sectionsMenu" style="min-width:240px;max-height:340px;overflow:auto"></div>
+  </span>
   <span class="exp-wrap no-print">
     <button class="toolbtn" id="exportBtn" title="Export / print this program update">⤓ Export ▾</button>
     <div class="exp-menu" id="exportMenu">
@@ -42,6 +46,18 @@ const DASH_HTML = `
   <!-- OVERVIEW -->
   <section class="tab active" id="overview">
     <div class="kpis" id="kpis"></div>
+    <div class="card" id="card-commercial">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2 class="sec" style="margin:0">💼 Commercial</h2>
+        <span class="sec-hidden-badge">hidden from viewer</span>
+        <span style="flex:1"></span>
+      </div>
+      <p class="hint">Pre-program commercial items and commentary. Hide this section once the program starts (admin → 👁 Sections).</p>
+      <table id="commTable"><thead><tr>
+        <th>Item</th><th>Owner</th><th class="pillcell">Status</th><th>Commentary</th><th class="no-print"></th>
+      </tr></thead><tbody></tbody></table>
+      <div class="addrow no-print"><button class="toolbtn" data-add="commercial">+ Add commercial item</button></div>
+    </div>
     <div class="card">
       <h2 class="sec">Program Details</h2>
       <div class="pgrid">
@@ -309,6 +325,9 @@ function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;'
 function ce(bind,val){ // editable text cell
   return `<span class="editable" data-bind="${bind}">${esc(val)}</span>`;
 }
+function rce(bind,val){ // rich editable cell (supports bold/italic/bullets)
+  return `<span class="editable rich" data-bind="${bind}">${val==null?'':val}</span>`;
+}
 function ragSelect(bind,val){
   if(!EDIT) return `<span class="badge ${ragClass(val)}">${esc(val)}</span>`;
   return `<select class="st" data-bind="${bind}">`+RAGS.map(r=>`<option ${r===val?'selected':''}>${r}</option>`).join('')+`</select>`;
@@ -376,14 +395,63 @@ function renderRisks(){
     <td>${ce('risks.'+i+'.impact',r.impact)}</td>
     <td class="pillcell">${ragSelect('risks.'+i+'.rag',r.rag)}</td>
     <td>${ce('risks.'+i+'.mitigation',r.mitigation)}</td>
-    ${delBtn('risks',i)}
+    ${moveCtrls('risks',i,DATA.risks.length)}
   </tr>`).join('');
 }
 
+function renderCommercial(){
+  const tb=document.querySelector('#commTable tbody'); if(!tb) return;
+  tb.innerHTML=(DATA.commercial||[]).map((c,i)=>`<tr>
+    <td>${ce('commercial.'+i+'.item',c.item)}</td>
+    <td>${ce('commercial.'+i+'.owner',c.owner)}</td>
+    <td class="pillcell">${statusSelect('commercial.'+i+'.status',c.status,["Open","In Progress","Agreed","Closed","On Hold"])}</td>
+    <td>${rce('commercial.'+i+'.comment',c.comment)}</td>
+    ${delBtn('commercial',i)}
+  </tr>`).join('')||'<tr><td colspan="5" style="color:#94a3b8">No commercial items yet. Click “+ Add commercial item”.</td></tr>';
+}
+/* ---------- section visibility (admin chooses what viewers see) ---------- */
+const SECTIONS=[
+  {id:'commercial',label:'Commercial (Overview card)'},
+  {id:'weekly',label:'Weekly Updates'},
+  {id:'workpackages',label:'Work Packages'},
+  {id:'timeline',label:'Timeline'},
+  {id:'deliverables',label:'Deliverables'},
+  {id:'stories',label:'Functional Build Packages'},
+  {id:'gaps',label:'Product Gaps'},
+  {id:'catalog',label:'Product Catalog'},
+  {id:'payments',label:'Finance'},
+  {id:'resources',label:'Resources'},
+  {id:'newsletter',label:'Newsletter'}
+];
+function applyVisibility(){
+  const hidden=DATA.hidden||[];
+  const isViewer=document.body.classList.contains('view-mode');
+  document.querySelectorAll('nav.tabs button[data-tab]').forEach(b=>{
+    const id=b.dataset.tab, h=hidden.includes(id);
+    b.classList.toggle('tab-hidden',h);
+    b.style.display=(h&&isViewer)?'none':'';
+    if(h&&isViewer&&b.classList.contains('active')){ b.classList.remove('active'); const ov=document.querySelector('nav.tabs button[data-tab=overview]'); if(ov){ov.classList.add('active'); document.querySelectorAll('section.tab').forEach(s=>s.classList.remove('active')); document.getElementById('overview').classList.add('active'); } }
+  });
+  const cc=document.getElementById('card-commercial');
+  if(cc){ const h=hidden.includes('commercial'); cc.classList.toggle('section-hidden',h); cc.style.display=(h&&isViewer)?'none':''; }
+}
+function renderSectionsMenu(){
+  const m=document.getElementById('sectionsMenu'); if(!m) return;
+  const hidden=DATA.hidden||[];
+  m.innerHTML='<div style="padding:8px 12px;font-size:11px;color:#94a3b8;border-bottom:1px solid var(--line)">Tick = visible to viewers</div>'+
+    SECTIONS.map(s=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:13px;cursor:pointer"><input type="checkbox" data-sec="${s.id}" ${hidden.includes(s.id)?'':'checked'}> ${esc(s.label)}</label>`).join('');
+  m.querySelectorAll('[data-sec]').forEach(cb=>{ cb.onchange=()=>{
+    DATA.hidden=DATA.hidden||[];
+    const id=cb.dataset.sec;
+    if(cb.checked) DATA.hidden=DATA.hidden.filter(x=>x!==id);
+    else if(!DATA.hidden.includes(id)) DATA.hidden.push(id);
+    applyVisibility();
+  };});
+}
 function renderList(elId,arrPath){
   const arr=arrPath.split('.').reduce((o,k)=>o[k],DATA);
   document.getElementById(elId).innerHTML=arr.map((t,i)=>
-    `<li><span class="editable" data-bind="${arrPath}.${i}">${esc(t)}</span>${EDIT?` <button class="xbtn" data-dellist="${arrPath}:${i}" title="Remove">✕</button>`:''}</li>`
+    `<li><span class="editable" data-bind="${arrPath}.${i}">${esc(t)}</span>${EDIT?` <span class="li-actions"><button class="mvbtn" data-movelist="${arrPath}:${i}:-1" title="Move up" ${i>0?'':'disabled'}>▲</button><button class="mvbtn" data-movelist="${arrPath}:${i}:1" title="Move down" ${i<arr.length-1?'':'disabled'}>▼</button><button class="xbtn" data-dellist="${arrPath}:${i}" title="Remove">✕</button></span>`:''}</li>`
   ).join('')||'<li style="color:#94a3b8">—</li>';
 }
 function renderWeekly(){
@@ -420,7 +488,7 @@ function renderWeeklyArchive(){
         ${f('Completion','weeklyUpdates.'+i+'.completion',w.completion)}
         ${f('Next milestone','weeklyUpdates.'+i+'.nextMilestone',w.nextMilestone)}
       </div>
-      <p style="margin:0 0 12px"><b>Summary:</b> ${EDIT?`<span class="editable" data-bind="weeklyUpdates.${i}.summary">${esc(w.summary||'')}</span>`:esc(w.summary||'')}</p>
+      <p style="margin:0 0 12px"><b>Summary:</b> ${rce('weeklyUpdates.'+i+'.summary',w.summary)}</p>
       <div class="grid3">
         <div class="pillar" style="background:#f0fdf4"><h3>✓ Accomplished</h3>${elist(w.accomplishments,'weeklyUpdates.'+i+'.accomplishments')}</div>
         <div class="pillar" style="background:#eff6ff"><h3>→ Planned next</h3>${elist(w.planned,'weeklyUpdates.'+i+'.planned')}</div>
@@ -432,7 +500,7 @@ function renderWeeklyArchive(){
     <td><b>${esc(w.week)}</b></td>
     <td class="pillcell">${ragChip(w.overallStatus)}</td>
     <td class="pillcell">${esc(w.completion||'—')}</td>
-    <td>${esc(w.summary||'')}</td>
+    <td>${esc(stripHTML(w.summary||''))}</td>
     ${EDIT?`<td class="row-actions"><button class="xbtn" data-delweek="${i}" title="Delete week">✕</button></td>`:'<td class="no-print"></td>'}
   </tr>`).join('')||'<tr><td colspan="5" style="color:#94a3b8">No weeks archived yet.</td></tr>';
   tb.querySelectorAll('tr[data-week]').forEach(r=>r.onclick=e=>{ if(e.target.dataset.delweek)return; weekView=+r.dataset.week; renderWeeklyArchive(); document.querySelector('nav.tabs button[data-tab=weekly]').click(); });
@@ -558,7 +626,7 @@ function renderWP(){
     <td><div class="prog"><i style="width:${+w.pct||0}%;background:${ragColor(w.rag)}"></i></div>
         <small>${(EDIT && w.status!=='Not Started' && w.status!=='Complete')?`<span class="editable" data-bind="workPackages.${i}.pct">${esc(w.pct)}</span>`:esc(w.pct)}%${(EDIT&&(w.status==='Not Started'||w.status==='Complete'))?' <span style="color:#94a3b8" title="Set by status">🔒</span>':''}</small></td>
     <td class="pillcell">${ragSelect('workPackages.'+i+'.rag',w.rag)}</td>
-    <td>${ce('workPackages.'+i+'.note',w.note)}</td>
+    <td>${rce('workPackages.'+i+'.note',w.note)}</td>
     ${delBtn('workPackages',i)}
   </tr>`).join('');
   const critList=(arr,bind)=>{
@@ -991,11 +1059,13 @@ function renderNewsletter(){
 }
 
 function renderAll(){
-  renderHeader();renderKpis();renderPillars();renderWeekly();renderWeeklyArchive();renderRisks();renderWP();
+  renderHeader();renderKpis();renderCommercial();renderPillars();renderWeekly();renderWeeklyArchive();renderRisks();renderWP();
   renderTimeline();renderGantt();renderDeliverables();renderStories();renderGaps();renderCatalog();
   renderPayments();renderResources();renderNewsletter();
   fillBinds();
   bindEditables();
+  renderSectionsMenu();
+  applyVisibility();
 }
 
 /* ---------- editing ---------- */
@@ -1060,6 +1130,12 @@ function bindEditables(){
       const parts=path.split('.');let o=DATA;for(let i=0;i<parts.length-1;i++)o=o[parts[i]];
       o[parts[parts.length-1]].splice(+idx,1); renderAll(); };
   });
+  document.querySelectorAll('[data-movelist]').forEach(b=>{
+    b.onclick=()=>{ if(b.disabled)return; const [path,idx,dir]=b.dataset.movelist.split(':');
+      const parts=path.split('.');let o=DATA;for(let i=0;i<parts.length-1;i++)o=o[parts[i]];
+      const a=o[parts[parts.length-1]]; const i=+idx,j=i+ +dir; if(j<0||j>=a.length)return;
+      const t=a[i];a[i]=a[j];a[j]=t; renderAll(); };
+  });
   document.querySelectorAll('[data-addlist]').forEach(b=>{
     b.onclick=()=>{ if(!EDIT){alert('Turn on Edit mode first (✎ button, top right).');return;}
       const parts=b.dataset.addlist.split('.');let o=DATA;for(let i=0;i<parts.length-1;i++)o=o[parts[i]];
@@ -1077,7 +1153,8 @@ const TEMPLATES={
   gaps:{id:'GAP-???',area:'',description:'',ootb:'No',disposition:'Adapt',status:'Open',owner:'',priority:'Medium'},
   catalog:{item:'New item',type:'Product',platform:'G2',status:'Not Started',note:''},
   payments:{id:'PM?',delMonth:'DM0',milestone:'New milestone',pct:'0%',amount:'',status:'Not Due'},
-  resources:{name:'TBC',org:'Gentrack',role:'',responsibility:'',location:'Melbourne',availability:'Full Time',status:'To Be Confirmed'}
+  resources:{name:'TBC',org:'Gentrack',role:'',responsibility:'',location:'Melbourne',availability:'Full Time',status:'To Be Confirmed'},
+  commercial:{item:'New commercial item',owner:'',status:'Open',comment:''}
 };
 function addRow(arr){
   if(!EDIT){ alert('Turn on Edit mode first (✎ button, top right).'); return; }
@@ -1104,6 +1181,8 @@ document.getElementById('tabs').addEventListener('click',e=>{
 });
 document.querySelectorAll('[data-tlview]').forEach(b=>{ b.onclick=()=>setTimelineView(b.dataset.tlview); });
 (function(){ const bar=document.getElementById('richBar'); if(bar) bar.querySelectorAll('[data-rcmd]').forEach(b=>{ b.onmousedown=(e)=>{ e.preventDefault(); document.execCommand(b.dataset.rcmd,false,null); }; }); })();
+(function(){ const sb=document.getElementById('sectionsBtn'), sm=document.getElementById('sectionsMenu');
+  if(sb&&sm){ sb.onclick=(e)=>{ e.stopPropagation(); sm.classList.toggle('open'); }; document.addEventListener('click',(e)=>{ if(!sm.contains(e.target)&&e.target!==sb) sm.classList.remove('open'); }); } })();
 setTimelineView((function(){try{return localStorage.getItem('tlview')||'gantt';}catch(e){return 'gantt';}})());
 
 document.getElementById('archiveWeek').onclick=function(){
@@ -1271,7 +1350,8 @@ function setData(d){
   // Normalise so a program file missing any field can never break rendering.
   d=d||{};
   d.meta=d.meta||{};
-  ['workPackages','milestones','deliverables','stories','gaps','catalog','risks','weeklyUpdates','payments','resources'].forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
+  ['workPackages','milestones','deliverables','stories','gaps','catalog','risks','weeklyUpdates','payments','resources','commercial'].forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
+  if(!Array.isArray(d.hidden)) d.hidden=[]; // section ids hidden from the viewer
   if(!Array.isArray(d.pillars)||!d.pillars.length) d.pillars=[
     {id:'scope',name:'Scope',status:'Green',summary:''},
     {id:'timeline',name:'Timeline',status:'Green',summary:''},

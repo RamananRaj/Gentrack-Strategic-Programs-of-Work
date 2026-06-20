@@ -160,6 +160,13 @@ body.view-mode #editToggle, body.view-mode #download, body.view-mode #archiveWee
 .rich-bar button:hover{background:#1e3a8a}
 .editable.rich ul{margin:4px 0;padding-left:20px}
 .editable.rich{min-height:1.2em}
+.li-actions{white-space:nowrap;margin-left:4px}
+nav.tabs button.tab-hidden{opacity:.45}
+nav.tabs button.tab-hidden::after{content:'🙈';font-size:10px;margin-left:3px}
+.section-hidden{outline:2px dashed #f59e0b;outline-offset:2px}
+.sec-hidden-badge{display:none;font-size:11px;font-weight:700;color:#92400e;background:var(--amberbg);padding:2px 8px;border-radius:999px}
+.section-hidden .sec-hidden-badge{display:inline-block}
+body.view-mode #sectionsWrap{display:none}
 .exp-wrap{position:relative;display:inline-block}
 .exp-menu{position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.18);display:none;flex-direction:column;min-width:200px;z-index:50;overflow:hidden}
 .exp-menu.open{display:flex}
