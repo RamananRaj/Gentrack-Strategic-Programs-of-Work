@@ -1487,5 +1487,12 @@
       "comment": "GTK has proposed couple of Legal inclusion to satisfy HP requirement. Working with GTK Legal Team and HP to close this."
     }
   ],
-  "hidden": []
+  "hidden": [
+    "deliverables",
+    "stories",
+    "gaps",
+    "catalog",
+    "resources",
+    "newsletter"
+  ]
 }
