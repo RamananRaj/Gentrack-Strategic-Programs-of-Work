@@ -120,13 +120,22 @@ async function ghGet(path){
   const j=await r.json();
   return {json:JSON.parse(b64d(j.content)), sha:j.sha};
 }
-async function ghPut(path,obj,msg,sha){
+async function ghPut(path,obj,msg,sha,_retried){
   if(!GH.token) throw new Error('No token — cannot publish.');
   const body={message:msg, content:b64e(JSON.stringify(obj,null,2)), branch:GH.branch};
   if(sha) body.sha=sha;
   const r=await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`,
     {method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr()),body:JSON.stringify(body)});
-  if(!r.ok) throw new Error('PUT '+path+' → '+r.status+' '+(await r.text()).slice(0,200));
+  if(!r.ok){
+    const txt=await r.text();
+    // 409 = the file changed on GitHub since we loaded it (stale sha). Re-fetch the
+    // current sha and retry once so a terminal push / second tab doesn't block saving.
+    if(r.status===409 && !_retried){
+      const cur=await ghGet(path);
+      return ghPut(path,obj,msg,cur.sha,true);
+    }
+    throw new Error('PUT '+path+' → '+r.status+' '+txt.slice(0,200));
+  }
   return r.json();
 }
 function setStatus(el,msg,ok){ const e=document.getElementById(el); e.textContent=msg; e.className='pill-note '+(ok===true?'gh-ok':ok===false?'gh-bad':''); }
