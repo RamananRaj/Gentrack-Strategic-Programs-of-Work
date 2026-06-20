@@ -644,28 +644,28 @@
       "item": "Residential Electricity — Standard",
       "type": "Product",
       "platform": "G2",
-      "status": "Configured",
+      "status": "Not Started",
       "note": ""
     },
     {
       "item": "Residential Electricity — Time-of-Use",
       "type": "Product",
       "platform": "G2",
-      "status": "In Progress",
+      "status": "Not Started",
       "note": ""
     },
     {
       "item": "Business / C&I Electricity",
       "type": "Product",
       "platform": "G2",
-      "status": "In Progress",
+      "status": "Not Started",
       "note": ""
     },
     {
       "item": "Network Use of System (NUOS)",
       "type": "Network Charge",
       "platform": "VFN",
-      "status": "In Progress",
+      "status": "Not Started",
       "note": ""
     },
     {
@@ -968,8 +968,8 @@
       "platform": "G2",
       "type": "OOTB",
       "assignee": "",
-      "status": "In Progress",
-      "pct": 50,
+      "status": "Not Started",
+      "pct": 0,
       "sprint": "",
       "note": "Validate co-design user stories; configure standard rating."
     },
@@ -980,8 +980,8 @@
       "platform": "G2",
       "type": "OOTB",
       "assignee": "",
-      "status": "In Progress",
-      "pct": 50,
+      "status": "Not Started",
+      "pct": 0,
       "sprint": "",
       "note": ""
     },
@@ -1016,8 +1016,8 @@
       "platform": "G2",
       "type": "OOTB",
       "assignee": "",
-      "status": "In Progress",
-      "pct": 50,
+      "status": "Not Started",
+      "pct": 0,
       "sprint": "",
       "note": ""
     },
@@ -1028,8 +1028,8 @@
       "platform": "VFN",
       "type": "OOTB",
       "assignee": "",
-      "status": "In Progress",
-      "pct": 50,
+      "status": "Not Started",
+      "pct": 0,
       "sprint": "",
       "note": ""
     },
@@ -1052,8 +1052,8 @@
       "platform": "Both",
       "type": "Adapt",
       "assignee": "",
-      "status": "In Progress",
-      "pct": 50,
+      "status": "Not Started",
+      "pct": 0,
       "sprint": "",
       "note": "Per Integration Register & ICDs (WP4)."
     }
