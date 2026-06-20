@@ -477,7 +477,7 @@
       "criteria": "MS Project schedule with milestones, deliverables, dependencies",
       "draft": "M1",
       "final": "M1",
-      "status": "Complete"
+      "status": "Not Started"
     },
     {
       "wp": "WP9",
@@ -486,7 +486,7 @@
       "criteria": "Review/documentation of all inflight customer objects; records in/out of migration + treatment",
       "draft": "M0",
       "final": "M0",
-      "status": "Complete"
+      "status": "Not Started"
     },
     {
       "wp": "WP1",
@@ -495,7 +495,7 @@
       "criteria": "How configuration and code are managed",
       "draft": "M1",
       "final": "M1",
-      "status": "Complete"
+      "status": "Not Started"
     },
     {
       "wp": "WP1",
@@ -504,7 +504,7 @@
       "criteria": "Solution design per customisation addressing user-story acceptance criteria",
       "draft": "M5",
       "final": "M6",
-      "status": "In Progress"
+      "status": "Not Started"
     },
     {
       "wp": "WP4",
@@ -513,7 +513,7 @@
       "criteria": "Gentrack ICDs for G2-specific interfaces",
       "draft": "M5",
       "final": "M6",
-      "status": "In Progress"
+      "status": "Not Started"
     },
     {
       "wp": "WP2",
@@ -531,7 +531,7 @@
       "criteria": "Step-by-step migration flow; mapping of source entities/tables/attributes to target",
       "draft": "M1",
       "final": "—",
-      "status": "In Progress"
+      "status": "Not Started"
     },
     {
       "wp": "WP3",
@@ -540,7 +540,7 @@
       "criteria": "TM0–TM4 migration reports",
       "draft": "M1",
       "final": "M1",
-      "status": "In Progress"
+      "status": "Not Started"
     },
     {
       "wp": "WP3",
@@ -585,7 +585,7 @@
       "criteria": "How meter data conversion performed: volumes/batches, duration, approach",
       "draft": "M2",
       "final": "M5",
-      "status": "In Progress"
+      "status": "Not Started"
     },
     {
       "wp": "WP8",
@@ -699,18 +699,18 @@
       "mitigation": "Allocate key resources to be part of RSR Program"
     },
     {
-      "id": "R2",
+      "id": "W2",
       "title": "Adoption of AI to commence in the Month of July  - Early Start",
       "impact": "This will help to understand the challenges head of time || Also run \"AI First\" End to End for",
-      "rag": "Amber",
-      "mitigation": "Complete the AI - Integration with Configuration Data."
+      "rag": "Green",
+      "mitigation": "Complete the AI - Integration with Configuration Data, Interfaces, Workflows."
     },
     {
-      "id": "R3",
-      "title": "Workflow configuration",
-      "impact": "ICD validation delays",
+      "id": "W3",
+      "title": "Workflow mapping is required to ensure we have a baseline for G2",
+      "impact": "This baseline will assist in aligning with G2 Workflow configuration for HP",
       "rag": "Green",
-      "mitigation": "Integration Register baselined; joint test windows."
+      "mitigation": "Internal assessment required to validate that we can pull this data and not rely on HP"
     }
   ],
   "weekly": {
