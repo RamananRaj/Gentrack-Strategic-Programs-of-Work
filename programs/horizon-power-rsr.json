@@ -12,7 +12,7 @@
     "programStart": "Month 0 (SOW signature)",
     "programDuration": "16 delivery months (DM0–DM16)",
     "overallStatus": "Amber",
-    "overallNarrative": "Program in active build. Configure–Build (WP1) and Integration Rebuild (WP4) progressing. Data Migration trial cycles underway. Key watch items: OOTB validation backlog and product gap dispositions.",
+    "overallNarrative": "<ul><li>Program in active build. Configure–Build (WP1) and Integration Rebuild (WP4) progressing. Data Migration trial cycles underway. Key watch items: OOTB validation backlog and product gap dispositions.<br><br></li></ul>",
     "projectManager": "Ram Raj",
     "programEndDate": "2027-11-01",
     "contractValue": "8900000"
