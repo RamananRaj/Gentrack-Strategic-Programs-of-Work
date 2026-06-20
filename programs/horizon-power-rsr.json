@@ -72,7 +72,7 @@
       "name": "System Testing",
       "owner": "Gentrack",
       "status": "Not Started",
-      "pct": "75",
+      "pct": 0,
       "rag": "Green",
       "phase": "Testing",
       "scopeNote": "Execute System Test of solution components from approved user stories & RTM; log/triage/resolve defects before SI-led integrated testing.",
@@ -298,7 +298,7 @@
       "name": "Meter Data Conversion",
       "owner": "Gentrack",
       "status": "Not Started",
-      "pct": 15,
+      "pct": 0,
       "rag": "Green",
       "phase": "Cutover",
       "scopeNote": "Define & execute Meter Data Conversion Strategy: meter IDs, configs, registers, reads, historical consumption from legacy to G2/VFN.",
@@ -731,27 +731,7 @@
       "Note: AI First Adoption is what considered for this program end to end. No manual coding nor configuration nor testing. Working with Engineering to see how we can fast track this for the program"
     ]
   },
-  "weeklyUpdates": [
-    {
-      "week": "Week ending 2026-06-12",
-      "overallStatus": "Amber",
-      "completion": "15%",
-      "nextMilestone": "PM3 Build End (DM6)",
-      "summary": "Build progressing; design sign-offs trending late. TM1 trial migration prepared.",
-      "accomplishments": [
-        "WP1 Configure–Build: core billing user-story configuration started.",
-        "WP3 Data Migration: TM1 trial migration prepared and scheduled.",
-        "WP4 Integration Rebuild: integration register baselined."
-      ],
-      "planned": [
-        "Begin TM1 execution and reconciliation.",
-        "Progress Customisation Solution Design review."
-      ],
-      "blockers": [
-        "Two HP design decisions outstanding."
-      ]
-    }
-  ],
+  "weeklyUpdates": [],
   "payments": [
     {
       "id": "PM1",
