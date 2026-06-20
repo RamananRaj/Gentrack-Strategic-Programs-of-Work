@@ -715,11 +715,12 @@
   ],
   "weekly": {
     "accomplishments": [
-      "Finalized Most of the comments",
-      "WP4 Integration Rebuild: 3 ICDs drafted and circulated for review."
+      "SOW review with the working level now completed. It's now move to Suresh and Peter for final inputs",
+      "There are only 5 Items are for GTK to address. Most are being discussed with GTK Legal",
+      "SOC Security requirements are now provided for HP Auditors to review"
     ],
     "planned": [
-      "Close out Customisation Solution Design (PM3 / DM6) review comments.",
+      "Once Peter's Suresh's comments recieved",
       "Run TM2 trial migration cycle.",
       "Finalise remaining ICDs and promote validated integrations to test."
     ],
