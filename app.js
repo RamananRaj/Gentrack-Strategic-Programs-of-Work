@@ -1028,16 +1028,29 @@ function renderCatalog(){
   </tr>`).join('');
 }
 
-const NEWS_SECS=[['execSummary','Executive Summary'],['health','Program Health'],['commercial','Commercial'],['weekly','Weekly Update'],['inFocus','In Focus (WPs)'],['milestones','Upcoming Milestones'],['gaps','Product Gaps'],['risks','Risks']];
+const NEWS_SECS=[
+  {id:'execSummary',label:'Executive Summary'},
+  {id:'health',label:'Program Health',children:[{id:'health.scope',label:'Scope'},{id:'health.timeline',label:'Timeline'},{id:'health.quality',label:'Quality'}]},
+  {id:'commercial',label:'Commercial'},
+  {id:'weekly',label:'Weekly Update',children:[{id:'weekly.accomplished',label:'Accomplished'},{id:'weekly.planned',label:'Planned next'},{id:'weekly.blockers',label:'Blockers'}]},
+  {id:'inFocus',label:'In Focus (WPs)'},
+  {id:'milestones',label:'Upcoming Milestones'},
+  {id:'gaps',label:'Product Gaps'},
+  {id:'risks',label:'Risks / RAID'}
+];
 function renderNewsletter(){
   const m=DATA.meta||{}, wp=DATA.workPackages||[];
   const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
   const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
   const inc=DATA.newsletterInclude||{};
   const on=id=> inc[id]!==false;
-  // section picker
+  // section picker (with sub-items)
   const sel=document.getElementById('newsSections');
-  if(sel){ sel.innerHTML=NEWS_SECS.map(([id,label])=>`<label style="font-size:12px;display:flex;align-items:center;gap:5px"><input type="checkbox" data-nsec="${id}" ${on(id)?'checked':''}> ${esc(label)}</label>`).join('');
+  if(sel){ sel.innerHTML=NEWS_SECS.map(s=>{
+      const parent=`<label style="font-size:12.5px;display:flex;align-items:center;gap:5px;font-weight:700"><input type="checkbox" data-nsec="${s.id}" ${on(s.id)?'checked':''}> ${esc(s.label)}</label>`;
+      const kids=s.children?`<div style="margin-left:18px;display:flex;flex-direction:column;gap:2px">`+s.children.map(c=>`<label style="font-size:11.5px;display:flex;align-items:center;gap:5px;color:#475569"><input type="checkbox" data-nsec="${c.id}" ${on(c.id)?'checked':''} ${on(s.id)?'':'disabled'}> ${esc(c.label)}</label>`).join('')+`</div>`:'';
+      return `<div style="min-width:150px;margin-bottom:4px">${parent}${kids}</div>`;
+    }).join('');
     sel.querySelectorAll('[data-nsec]').forEach(cb=>{ cb.onchange=()=>{ DATA.newsletterInclude=DATA.newsletterInclude||{}; DATA.newsletterInclude[cb.dataset.nsec]=cb.checked; renderNewsletter(); }; });
   }
   const ragChip=s=>{ const c={Green:['#166534','#dcfce7'],Amber:['#92400e','#fef3c7'],Red:['#991b1b','#fee2e2']}[s]||['#475569','#f1f5f9']; return `<span style="display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;color:${c[0]};background:${c[1]}">${esc(s)}</span>`; };
@@ -1050,9 +1063,9 @@ function renderNewsletter(){
     <div style="color:#64748b;font-size:12px;margin-bottom:12px">${esc(m.subtitle||'')} · As at ${esc(m.reportWeek||m.reportDate||'')} · PM ${esc(m.projectManager||m.reportOwner||'')}</div>
     ${card(`<b>Overall:</b> ${ragChip(m.overallStatus)} &nbsp; <b>Completion:</b> ${avg}% &nbsp; <b>Next:</b> ${next?esc(next.id+' '+next.name+' ('+next.delMonth+')'):'—'}`,'#f8fafc','#e2e8f0')}`;
   if(on('execSummary')&&m.overallNarrative) html+=card(h3('Executive Summary')+`<div style="font-size:13.5px">${m.overallNarrative}</div>`,'#fffef5','#fde68a');
-  if(on('health')) html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 14px">${DATA.pillars.map(p=>`<div style="flex:1;min-width:180px;background:${pillBg(p.status)};border:1px solid ${pillBd(p.status)};border-radius:12px;padding:12px"><div style="font-weight:800;margin-bottom:4px">${esc(p.name)} ${ragChip(p.status)}</div><div style="font-size:12.5px;color:#334155">${p.summary||''}</div></div>`).join('')}</div>`;
+  if(on('health')){ const ps=DATA.pillars.filter(p=>on('health.'+p.id)); if(ps.length) html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 14px">${ps.map(p=>`<div style="flex:1;min-width:180px;background:${pillBg(p.status)};border:1px solid ${pillBd(p.status)};border-radius:12px;padding:12px"><div style="font-weight:800;margin-bottom:4px">${esc(p.name)} ${ragChip(p.status)}</div><div style="font-size:12.5px;color:#334155">${p.summary||''}</div></div>`).join('')}</div>`; }
   if(on('commercial')&&(DATA.commercial||[]).length) html+=card(h3('Commercial')+`<ul style="margin:4px 0;padding-left:18px;font-size:13px">${DATA.commercial.map(c=>`<li><b>${esc(c.item)}</b>${c.owner?' ('+esc(c.owner)+')':''} ${c.status?stChip(c.status):''}${c.comment?' — '+c.comment:''}</li>`).join('')}</ul>`,'#fff','#e2e8f0');
-  if(on('weekly')){ const blk=(t,a)=>(a&&a.length)?`${h3(t)}<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''; html+=blk('Accomplished This Week',DATA.weekly.accomplishments)+blk('Planned Next Week',DATA.weekly.planned)+blk('Blockers / Issues',DATA.weekly.blockers); }
+  if(on('weekly')){ const blk=(t,a,flag)=>(on(flag)&&a&&a.length)?`${h3(t)}<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''; html+=blk('Accomplished This Week',DATA.weekly.accomplishments,'weekly.accomplished')+blk('Planned Next Week',DATA.weekly.planned,'weekly.planned')+blk('Blockers / Issues',DATA.weekly.blockers,'weekly.blockers'); }
   if(on('inFocus')){ const f=wp.filter(w=>w.status==='In Progress'); html+=h3('In Focus')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${f.length?f.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}</li>`).join(''):'<li>—</li>'}</ul>`; }
   if(on('milestones')) html+=h3('Upcoming Milestones')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,6).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)})</li>`).join('')||'<li>—</li>'}</ul>`;
   if(on('gaps')){ const og=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review'); html+=h3('Product Gaps — Open')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${og.length?og.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · owner ${esc(g.owner)}</li>`).join(''):'<li>None.</li>'}</ul>`; }
