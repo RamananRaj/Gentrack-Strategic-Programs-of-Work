@@ -1430,5 +1430,44 @@
     "PM8": "Not Due",
     "PM9": "Not Due"
   },
-  "paymentDates": {}
+  "paymentDates": {},
+  "commercial": [
+    {
+      "item": "Imp SoW- Delay caused by TCS/Computershare is deemed HP Delays",
+      "owner": "HP",
+      "status": "In Progress",
+      "comment": "This is getting reviewed by HP Internally - Delay Ownership"
+    },
+    {
+      "item": "Imp SoW - Provide As-Is - Business Workflows",
+      "owner": "GTK",
+      "status": "In Progress",
+      "comment": "HP wants to remove this dependency from them. GTK is working internally how AI can read this workflows and turn them into AS-IS Workflows - Business Continuity"
+    },
+    {
+      "item": "Imp SoW - Data Masking - GTK have providing steps how it should be done to ensure data is masked",
+      "owner": "HP",
+      "status": "In Progress",
+      "comment": "HP (Suresh) to ok GTK input"
+    },
+    {
+      "item": "Imp Sow - Meter Data Conversion - GTK has proposed High-Level Strategy -",
+      "owner": "HP",
+      "status": "In Progress",
+      "comment": "In Principle HP is ok with this approach. Waiting for HP to close this open item in SOW post their internal review"
+    },
+    {
+      "item": "Imp SoW - Hypercare Service Level needs to be included",
+      "owner": "GTK",
+      "status": "Open",
+      "comment": "Working to define how the Incidents will be addressed during Hypercare. -"
+    },
+    {
+      "item": "Imp SoW - Quality Management Framework of GTK to be documented",
+      "owner": "GTK",
+      "status": "Open",
+      "comment": "Working internally to define this (we have done for other proposals), need to include that for the program"
+    }
+  ],
+  "hidden": []
 }
