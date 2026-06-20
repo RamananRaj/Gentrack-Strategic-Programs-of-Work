@@ -13,7 +13,7 @@
     "programDuration": "16 delivery months (DM0–DM16)",
     "overallStatus": "Amber",
     "overallNarrative": "<ul><li>There are only few comments (&lt; than 5) left on Gentrack to address. They key items are around languages where GTK Legal team is assisting to address</li><li>There are similar number of comments where HP has taken internally to review based on GTK input</li><li>All SOW's will be signed around the similar time.</li><li>Early Termination points to finalised with HP. This is an open item we will discuss and close in the coming week.</li><li>HP is currently working with Minister in the final presentation and Go Decision - This is anticipated SoW signoff date now shift to Mid to End July. Working closely with HP on this.&nbsp;</li><li>There is still possibility to pickup closer to 30% of the Milestone payments before Sept 2026.<br><br></li></ul>",
-    "projectManager": "Ram Raj",
+    "projectManager": "TBC",
     "programEndDate": "2027-11-01",
     "contractValue": "8900000"
   },
@@ -699,17 +699,24 @@
       "mitigation": "Allocate key resources to be part of RSR Program"
     },
     {
+      "id": "R2",
+      "title": "Program Manager for Horizon Power is still not fullfilled",
+      "impact": "This will impact commencement of the Program",
+      "rag": "Amber",
+      "mitigation": "Request for Hiring has been tabled."
+    },
+    {
       "id": "W2",
       "title": "Adoption of AI to commence in the Month of July  - Early Start",
       "impact": "This will help to understand the challenges head of time || Also run \"AI First\" End to End for",
-      "rag": "Green",
+      "rag": "Amber",
       "mitigation": "Complete the AI - Integration with Configuration Data, Interfaces, Workflows."
     },
     {
       "id": "W3",
       "title": "Workflow mapping is required to ensure we have a baseline for G2",
       "impact": "This baseline will assist in aligning with G2 Workflow configuration for HP",
-      "rag": "Green",
+      "rag": "Amber",
       "mitigation": "Internal assessment required to validate that we can pull this data and not rely on HP"
     }
   ],
