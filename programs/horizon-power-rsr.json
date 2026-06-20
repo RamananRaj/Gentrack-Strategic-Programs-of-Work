@@ -22,19 +22,19 @@
       "id": "scope",
       "name": "Scope",
       "status": "Green",
-      "summary": "11 work packages defined and baselined against SOW. OOTB-first approach holding; customisations controlled via gap register."
+      "summary": "<ul><li>11 work packages defined and baselined against SOW. OOTB-first approach holding; customisations controlled via gap register.</li></ul>"
     },
     {
       "id": "timeline",
       "name": "Timeline",
       "status": "Green",
-      "summary": "Tracking to DM0–DM16 milestone schedule. Build End (PM3, DM6) is the next critical gate. Some design sign-offs trending late."
+      "summary": "Timeline is 19 Months - Refer to the timeline.&nbsp;"
     },
     {
       "id": "quality",
       "name": "Quality",
       "status": "Green",
-      "summary": "Unit testing evidence captured in Jira. System Test entry criteria being met. Defect management process operational."
+      "summary": "<ul><li>All Story - UT Test Cases - Results will be tracked in Jira</li><li>Gentrack to upload 550+ User Stories in preparation for the upcoming program</li></ul>"
     }
   ],
   "workPackages": [
@@ -1489,5 +1489,10 @@
     "resources",
     "newsletter"
   ],
-  "newsletterInclude": {}
+  "newsletterInclude": {
+    "inFocus": false,
+    "gaps": false,
+    "milestones": false,
+    "timeline": true
+  }
 }
