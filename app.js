@@ -81,7 +81,7 @@ const DASH_HTML = `
     </div>
     <div class="card">
       <h2 class="sec">Executive Summary</h2>
-      <p class="editable bindfill rich" data-bind="meta.overallNarrative" style="margin:0"></p>
+      <div class="editable bindfill rich" data-bind="meta.overallNarrative" style="margin:0"></div>
     </div>
     <div class="card" style="border-left:4px solid var(--brand2)">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -339,7 +339,8 @@ function ce(bind,val){ // editable text cell
   return `<span class="editable" data-bind="${bind}">${esc(val)}</span>`;
 }
 function rce(bind,val){ // rich editable cell (supports bold/italic/bullets)
-  return `<span class="editable rich" data-bind="${bind}">${val==null?'':val}</span>`;
+  // use a block <div> (not <span>/<p>) so bulleted lists nest validly without orphaning
+  return `<div class="editable rich" data-bind="${bind}" style="display:inline-block;min-width:60px;vertical-align:top">${val==null?'':val}</div>`;
 }
 function ragSelect(bind,val){
   if(!EDIT) return `<span class="badge ${ragClass(val)}">${esc(val)}</span>`;
@@ -398,7 +399,7 @@ function renderPillars(){
   document.getElementById('pillars').innerHTML=DATA.pillars.map((p,i)=>`
     <div class="pillar" style="background:${p.status==='Green'?'#f0fdf4':p.status==='Amber'?'#fffbeb':'#fef2f2'}">
       <h3>${esc(p.name)} ${ragSelect('pillars.'+i+'.status',p.status)}</h3>
-      <p class="editable rich" data-bind="pillars.${i}.summary">${p.summary||''}</p>
+      <div class="editable rich" data-bind="pillars.${i}.summary">${p.summary||''}</div>
     </div>`).join('');
 }
 
