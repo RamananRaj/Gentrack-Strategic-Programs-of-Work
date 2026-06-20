@@ -1472,7 +1472,19 @@
       "item": "Imp - SoW - Cost Reimbursement Clause C11 got extended by capping this reimbursement to 10K.",
       "owner": "GTK",
       "status": "Open",
-      "comment": "This is moving back and forth between both GTK and HP. Checkign with GTK Legal if they are ok for this to be claimed through Reciprocal Liability Cap.&nbsp;<br>"
+      "comment": "This is moving back and forth between both GTK and HP. Checking with GTK Legal if they are ok for this to be claimed through Reciprocal Liability Cap.&nbsp;<br>"
+    },
+    {
+      "item": "Imp - SoW - HP wants key personal named in the SoW, similar to what we did during Blueprint.",
+      "owner": "GTK",
+      "status": "Open",
+      "comment": "This will be tabled towards closure of the Program. Working internally on the resource names"
+    },
+    {
+      "item": "Imp - SoW - HP wants Co-Location of resources across the program.",
+      "owner": "HP",
+      "status": "In Progress",
+      "comment": "GTK has proposed couple of Legal inclusion to satisfy HP requirement. Working with GTK Legal Team and HP to close this."
     }
   ],
   "hidden": []
