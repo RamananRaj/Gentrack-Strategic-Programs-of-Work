@@ -6,7 +6,7 @@
     "supplier": "Gentrack Pty Ltd",
     "sowRef": "HPSR0548 — Implementation SOW (Cust Version Draft V0.15)",
     "reportOwner": "Ram Raj",
-    "reportDate": "2026-06-18",
+    "reportDate": "2026-06-20",
     "reportWeek": "Week ending 2026-06-19",
     "programStartDate": "2026-07-01",
     "programStart": "Month 0 (SOW signature)",
@@ -693,17 +693,17 @@
   "risks": [
     {
       "id": "R1",
-      "title": "Design sign-off slippage",
-      "impact": "Build End (PM3, DM6) at risk",
+      "title": "Ensuring the Right Team is allocated to RSR Program",
+      "impact": "Re Learning all the scope - From Blueprint",
       "rag": "Amber",
-      "mitigation": "Daily design clinics; escalate late approvals to SteerCo."
+      "mitigation": "Allocate key resources to be part of RSR Program"
     },
     {
       "id": "R2",
-      "title": "Data quality in legacy (Velocity/mData21)",
-      "impact": "Migration reconciliation failures",
+      "title": "Adoption of AI to commence in the Month of July  - Early Start",
+      "impact": "This will help to understand the challenges head of time || Also run \"AI First\" End to End for",
       "rag": "Amber",
-      "mitigation": "Early trial cycles + cleansing; exclusion list agreed in writing."
+      "mitigation": "Complete the AI - Integration with Configuration Data."
     },
     {
       "id": "R3",
@@ -715,8 +715,7 @@
   ],
   "weekly": {
     "accomplishments": [
-      "WP1 Configure–Build: completed sprint configuration for core billing user stories.",
-      "WP3 Data Migration: trial migration cycle TM1 executed; reconciliation review underway.",
+      "Finalized Most of the comments",
       "WP4 Integration Rebuild: 3 ICDs drafted and circulated for review."
     ],
     "planned": [
@@ -1427,5 +1426,6 @@
     "PM7": "Not Due",
     "PM8": "Not Due",
     "PM9": "Not Due"
-  }
+  },
+  "paymentDates": {}
 }
