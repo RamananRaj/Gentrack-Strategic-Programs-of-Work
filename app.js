@@ -82,9 +82,10 @@ const DASH_HTML = `
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <h2 class="sec" style="margin:0">Weekly Update — <span class="editable bindfill" data-bind="meta.reportWeek"></span></h2>
         <span style="flex:1"></span>
+        <button class="toolbtn no-print" id="rollWeek" title="Archive this week, then start next week pre-filled from this one (Planned → Accomplished, blockers kept)">🔄 Start next week</button>
         <button class="toolbtn warn no-print" id="archiveWeek" title="Save this week as a snapshot in the archive">📌 Archive this week</button>
       </div>
-      <p class="hint">Update the three lists, set the week label, then click <b>Archive this week</b> to snapshot it into the Weekly Updates archive — and <b>Save data.json</b> + commit so every user can see it. Lists also flow into the Newsletter.</p>
+      <p class="hint">Update the three lists, set the week label, then click <b>Archive this week</b> to snapshot it. Or click <b>Start next week</b> to archive this week and roll into the next one pre-filled (last week's <i>Planned</i> becomes this week's <i>Accomplished</i>, blockers carry over) — no starting from scratch. Then <b>Save data.json</b> + commit. Lists also flow into the Newsletter.</p>
       <div class="grid3">
         <div class="pillar" style="background:#f0fdf4">
           <h3>✓ Accomplished this week</h3>
@@ -293,8 +294,11 @@ const DASH_HTML = `
         <button class="toolbtn" id="copyNewsText">📋 Copy (plain)</button>
         <button class="toolbtn" onclick="window.print()">🖨 Print</button>
       </div>
-      <p class="hint" style="margin:8px 0 4px">Tick the sections to include, then email or export. The rich version keeps colours &amp; rounded cards in the email body; PDF is for attaching.</p>
-      <div id="newsSections" style="display:flex;flex-wrap:wrap;gap:6px 16px"></div>
+      <details class="news-pick" open>
+        <summary>📋 Sections to include in this newsletter</summary>
+        <p class="hint" style="margin:6px 0 8px">Tick what to include, then email or export. The rich version keeps colours &amp; rounded cards in the email body; PDF is for attaching.</p>
+        <div id="newsSections" style="display:flex;flex-wrap:wrap;gap:6px 16px"></div>
+      </details>
     </div>
     <div class="news"><div class="paper" id="newsPaper"></div></div>
   </section>
@@ -548,6 +552,49 @@ function archiveWeek(){
   renderAll();
   document.querySelector('nav.tabs button[data-tab=weekly]').click();
   alert('Week archived. Click "⬇ Save data.json" and commit to publish it to everyone.');
+}
+function nextWeekLabel(label){
+  // Try to find a date in the label and advance it 7 days, keeping surrounding text.
+  const s=String(label||'');
+  const m=s.match(/(\d{4})-(\d{2})-(\d{2})/);            // ISO yyyy-mm-dd
+  if(m){ const d=new Date(m[0]); d.setDate(d.getDate()+7); return s.replace(m[0],d.toISOString().slice(0,10)); }
+  const m2=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);   // dd/mm/yyyy
+  if(m2){ let [_,dd,mm,yy]=m2; yy=yy.length===2?'20'+yy:yy; const d=new Date(+yy,+mm-1,+dd); d.setDate(d.getDate()+7);
+    const out=('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear(); return s.replace(m2[0],out); }
+  const m3=s.match(/(\d+)\s*$/);                          // trailing "Week N"
+  if(m3){ return s.replace(/(\d+)\s*$/,(+m3[1]+1)); }
+  // fallback: a fresh "week ending +7 days"
+  const d=new Date(); d.setDate(d.getDate()+7); return 'Week ending '+d.toISOString().slice(0,10);
+}
+function rollWeek(){
+  if(!confirm('Start next week?\n\nThis archives the current week, then opens the next week pre-filled:\n• last week’s Planned → this week’s Accomplished\n• Blockers carry over\n• Planned next starts empty for you to fill')) return;
+  archiveWeekSilent();
+  const prevPlanned=[...(DATA.weekly.planned||[])];
+  const prevBlockers=[...(DATA.weekly.blockers||[])];
+  DATA.meta.reportWeek=nextWeekLabel(DATA.meta.reportWeek);
+  DATA.weekly.accomplishments=prevPlanned;   // what you planned is now the basis for what you did
+  DATA.weekly.blockers=prevBlockers;          // open blockers stay until cleared
+  DATA.weekly.planned=[];                      // fresh forward look
+  weekView=0;
+  renderAll();
+  alert('Rolled into "'+DATA.meta.reportWeek+'". Edit the lists, then click "⬇ Save data.json" and commit to publish.');
+}
+function archiveWeekSilent(){
+  const wp=DATA.workPackages||[];
+  const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
+  const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
+  const snap={
+    week:DATA.meta.reportWeek||('Week ending '+new Date().toISOString().slice(0,10)),
+    overallStatus:DATA.meta.overallStatus, completion:avg+'%',
+    nextMilestone:next?(next.id+' '+next.name+' ('+next.delMonth+')'):'—',
+    summary:DATA.meta.overallNarrative,
+    accomplishments:[...(DATA.weekly.accomplishments||[])],
+    planned:[...(DATA.weekly.planned||[])],
+    blockers:[...(DATA.weekly.blockers||[])]
+  };
+  DATA.weeklyUpdates=DATA.weeklyUpdates||[];
+  const ex=DATA.weeklyUpdates.findIndex(w=>w.week===snap.week);
+  if(ex>=0) DATA.weeklyUpdates[ex]=snap; else DATA.weeklyUpdates.unshift(snap);
 }
 function pctNum(p){ return parseFloat(String(p==null?'':p).replace(/[^0-9.]/g,''))||0; }
 function money(n){ return '$'+Math.round(n).toLocaleString(); }
@@ -1211,6 +1258,10 @@ document.getElementById('archiveWeek').onclick=function(){
   if(!EDIT){ alert('Turn on Edit mode first (✎ button, top right).'); return; }
   archiveWeek();
 };
+(function(){ const rw=document.getElementById('rollWeek'); if(rw) rw.onclick=function(){
+  if(!EDIT){ alert('Turn on Edit mode first (✎ button, top right).'); return; }
+  rollWeek();
+}; })();
 
 document.getElementById('editToggle').onclick=function(){
   EDIT=!EDIT;
