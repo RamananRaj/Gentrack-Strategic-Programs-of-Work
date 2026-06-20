@@ -283,15 +283,19 @@ const DASH_HTML = `
 
   <!-- NEWSLETTER -->
   <section class="tab" id="newsletter">
-    <div class="card no-print" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <h2 class="sec" style="margin:0">Management Newsletter</h2>
-      <span class="spacer" style="flex:1"></span>
-      <button class="toolbtn" id="copyNews">📋 Copy (rich)</button>
-      <button class="toolbtn" id="copyNewsText">📋 Copy (plain text)</button>
-      <button class="toolbtn primary" id="mailNews">✉ Open in email</button>
-      <button class="toolbtn" onclick="window.print()">🖨 Print / PDF</button>
+    <div class="card no-print">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <h2 class="sec" style="margin:0">Management Newsletter</h2>
+        <span class="spacer" style="flex:1"></span>
+        <button class="toolbtn primary" id="mailNews">✉ Email (body + PDF)</button>
+        <button class="toolbtn" id="copyNews">📋 Copy (rich)</button>
+        <button class="toolbtn" id="dlNewsPdf">📄 Download PDF</button>
+        <button class="toolbtn" id="copyNewsText">📋 Copy (plain)</button>
+        <button class="toolbtn" onclick="window.print()">🖨 Print</button>
+      </div>
+      <p class="hint" style="margin:8px 0 4px">Tick the sections to include, then email or export. The rich version keeps colours &amp; rounded cards in the email body; PDF is for attaching.</p>
+      <div id="newsSections" style="display:flex;flex-wrap:wrap;gap:6px 16px"></div>
     </div>
-    <p class="hint no-print">Auto-generated from the current dashboard data. Update the dashboard, then copy this into your email or click "Open in email".</p>
     <div class="news"><div class="paper" id="newsPaper"></div></div>
   </section>
 
@@ -1024,37 +1028,36 @@ function renderCatalog(){
   </tr>`).join('');
 }
 
+const NEWS_SECS=[['execSummary','Executive Summary'],['health','Program Health'],['commercial','Commercial'],['weekly','Weekly Update'],['inFocus','In Focus (WPs)'],['milestones','Upcoming Milestones'],['gaps','Product Gaps'],['risks','Risks']];
 function renderNewsletter(){
-  const m=DATA.meta, wp=DATA.workPackages;
+  const m=DATA.meta||{}, wp=DATA.workPackages||[];
   const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
-  const ragChip=s=>`<span class="badge ${ragClass(s)}">${s}</span>`;
-  const inFocus=wp.filter(w=>w.status==='In Progress');
-  const next=DATA.milestones.find(x=>x.status!=='Complete');
-  const openGaps=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review');
-  const html=`
-    <h1>${esc(m.program)} — Program Update</h1>
-    <div style="color:#64748b;font-size:12px">${esc(m.subtitle)} · Reporting period as at ${esc(m.reportDate)} · ${esc(m.reportOwner)}</div>
-    <div style="margin:14px 0;padding:12px 14px;background:#f8fafc;border-radius:10px">
-      <b>Overall status:</b> ${ragChip(m.overallStatus)} &nbsp; <b>Completion:</b> ${avg}% &nbsp;
-      <b>Next milestone:</b> ${next?esc(next.id+' '+next.name+' ('+next.delMonth+')'):'—'}
-      <div style="margin-top:6px">${m.overallNarrative||''}</div>
-    </div>
-    <h3>Health — Scope · Timeline · Quality</h3>
-    <ul>${DATA.pillars.map(p=>`<li><b>${esc(p.name)}</b> ${ragChip(p.status)} — ${p.summary||''}</li>`).join('')}</ul>
-    <h3>Accomplished This Week</h3>
-    <ul>${(DATA.weekly.accomplishments||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul>
-    <h3>Planned Next Week</h3>
-    <ul>${(DATA.weekly.planned||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>—</li>'}</ul>
-    ${(DATA.weekly.blockers&&DATA.weekly.blockers.length)?`<h3>Blockers / Issues</h3><ul>${DATA.weekly.blockers.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
-    <h3>In Focus This Period</h3>
-    <ul>${inFocus.length?inFocus.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}${w.note?' · '+esc(w.note):''}</li>`).join(''):'<li>No work packages currently in progress.</li>'}</ul>
-    <h3>Upcoming Milestones</h3>
-    <ul>${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,4).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)}) · ${esc(x.deliverables)}</li>`).join('')}</ul>
-    <h3>Product Gaps — Open</h3>
-    <ul>${openGaps.length?openGaps.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · ${esc(g.priority)} priority · owner ${esc(g.owner)}</li>`).join(''):'<li>No open gaps.</li>'}</ul>
-    <h3>Risks &amp; Watch Items</h3>
-    <ul>${DATA.risks.map(r=>`<li>${ragChip(r.rag)} <b>${esc(r.title)}</b> — ${esc(r.impact)}. <i>Mitigation:</i> ${esc(r.mitigation)}</li>`).join('')}</ul>
-    <div style="margin-top:18px;color:#94a3b8;font-size:11px">Generated from the RSR Program Dashboard · ${esc(m.sowRef)}</div>`;
+  const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
+  const inc=DATA.newsletterInclude||{};
+  const on=id=> inc[id]!==false;
+  // section picker
+  const sel=document.getElementById('newsSections');
+  if(sel){ sel.innerHTML=NEWS_SECS.map(([id,label])=>`<label style="font-size:12px;display:flex;align-items:center;gap:5px"><input type="checkbox" data-nsec="${id}" ${on(id)?'checked':''}> ${esc(label)}</label>`).join('');
+    sel.querySelectorAll('[data-nsec]').forEach(cb=>{ cb.onchange=()=>{ DATA.newsletterInclude=DATA.newsletterInclude||{}; DATA.newsletterInclude[cb.dataset.nsec]=cb.checked; renderNewsletter(); }; });
+  }
+  const ragChip=s=>{ const c={Green:['#166534','#dcfce7'],Amber:['#92400e','#fef3c7'],Red:['#991b1b','#fee2e2']}[s]||['#475569','#f1f5f9']; return `<span style="display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;color:${c[0]};background:${c[1]}">${esc(s)}</span>`; };
+  const stChip=s=>`<span style="display:inline-block;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;color:#475569;background:#f1f5f9">${esc(s)}</span>`;
+  const pillBg=s=>({Green:'#f0fdf4',Amber:'#fffbeb',Red:'#fef2f2'}[s]||'#f8fafc');
+  const pillBd=s=>({Green:'#bbf7d0',Amber:'#fde68a',Red:'#fecaca'}[s]||'#e2e8f0');
+  const card=(inner,bg,bd)=>`<div style="background:${bg||'#fff'};border:1px solid ${bd||'#e2e8f0'};border-radius:12px;padding:14px 16px;margin:0 0 14px">${inner}</div>`;
+  const h3=t=>`<div style="font-size:12.5px;text-transform:uppercase;letter-spacing:.5px;color:#0ea5e9;font-weight:700;margin:0 0 8px">${esc(t)}</div>`;
+  let html=`<h1 style="font-size:20px;margin:0 0 2px;color:#1e3a8a">${esc(m.program)} — Program Update</h1>
+    <div style="color:#64748b;font-size:12px;margin-bottom:12px">${esc(m.subtitle||'')} · As at ${esc(m.reportWeek||m.reportDate||'')} · PM ${esc(m.projectManager||m.reportOwner||'')}</div>
+    ${card(`<b>Overall:</b> ${ragChip(m.overallStatus)} &nbsp; <b>Completion:</b> ${avg}% &nbsp; <b>Next:</b> ${next?esc(next.id+' '+next.name+' ('+next.delMonth+')'):'—'}`,'#f8fafc','#e2e8f0')}`;
+  if(on('execSummary')&&m.overallNarrative) html+=card(h3('Executive Summary')+`<div style="font-size:13.5px">${m.overallNarrative}</div>`,'#fffef5','#fde68a');
+  if(on('health')) html+=`<div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 14px">${DATA.pillars.map(p=>`<div style="flex:1;min-width:180px;background:${pillBg(p.status)};border:1px solid ${pillBd(p.status)};border-radius:12px;padding:12px"><div style="font-weight:800;margin-bottom:4px">${esc(p.name)} ${ragChip(p.status)}</div><div style="font-size:12.5px;color:#334155">${p.summary||''}</div></div>`).join('')}</div>`;
+  if(on('commercial')&&(DATA.commercial||[]).length) html+=card(h3('Commercial')+`<ul style="margin:4px 0;padding-left:18px;font-size:13px">${DATA.commercial.map(c=>`<li><b>${esc(c.item)}</b>${c.owner?' ('+esc(c.owner)+')':''} ${c.status?stChip(c.status):''}${c.comment?' — '+c.comment:''}</li>`).join('')}</ul>`,'#fff','#e2e8f0');
+  if(on('weekly')){ const blk=(t,a)=>(a&&a.length)?`${h3(t)}<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''; html+=blk('Accomplished This Week',DATA.weekly.accomplishments)+blk('Planned Next Week',DATA.weekly.planned)+blk('Blockers / Issues',DATA.weekly.blockers); }
+  if(on('inFocus')){ const f=wp.filter(w=>w.status==='In Progress'); html+=h3('In Focus')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${f.length?f.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}</li>`).join(''):'<li>—</li>'}</ul>`; }
+  if(on('milestones')) html+=h3('Upcoming Milestones')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,6).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)})</li>`).join('')||'<li>—</li>'}</ul>`;
+  if(on('gaps')){ const og=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review'); html+=h3('Product Gaps — Open')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${og.length?og.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · owner ${esc(g.owner)}</li>`).join(''):'<li>None.</li>'}</ul>`; }
+  if(on('risks')) html+=h3('Risks &amp; Watch Items')+`<ul style="margin:4px 0 12px;padding-left:18px;font-size:13px">${DATA.risks.map(r=>`<li>${ragChip(r.rag)} <b>${esc(r.title)}</b> — ${esc(r.impact)}. <i>Mitigation:</i> ${esc(r.mitigation)}</li>`).join('')||'<li>None.</li>'}</ul>`;
+  html+=`<div style="margin-top:16px;color:#94a3b8;font-size:11px">Generated from ${esc(m.program||'')} dashboard · ${esc(m.sowRef||'')}</div>`;
   document.getElementById('newsPaper').innerHTML=html;
 }
 
@@ -1213,13 +1216,40 @@ document.getElementById('copyNews').onclick=async function(){
 };
 document.getElementById('copyNewsText').onclick=async function(){
   try{ await navigator.clipboard.writeText(document.getElementById('newsPaper').innerText); this.textContent='✓ Copied'; }
-  catch(e){ this.textContent='Failed'; } setTimeout(()=>this.textContent='📋 Copy (plain text)',1500);
+  catch(e){ this.textContent='Failed'; } setTimeout(()=>this.textContent='📋 Copy (plain)',1500);
 };
-document.getElementById('mailNews').onclick=function(){
-  const m=DATA.meta;
-  const subject=`${m.program} — Program Update (${m.reportDate})`;
-  const body=document.getElementById('newsPaper').innerText;
-  window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+function newsletterPDF(cb){
+  const el=document.getElementById('newsPaper');
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>{
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>{
+      window.html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
+        const jsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+        const pdf=new jsPDF('p','mm','a4');
+        const pw=210, ph=297, mg=8, iw=pw-mg*2, ih=canvas.height*iw/canvas.width, pageH=ph-mg*2;
+        const img=canvas.toDataURL('image/png');
+        let remaining=ih, sY=0;
+        while(remaining>0){ pdf.addImage(img,'PNG',mg, mg - sY, iw, ih); remaining-=pageH; if(remaining>0){ pdf.addPage(); sY+=pageH; } }
+        const name=((DATA.meta&&DATA.meta.program)||'Program')+' — Update.pdf';
+        if(cb) cb(pdf,name); else pdf.save(name);
+      }).catch(e=>alert('PDF build failed: '+e.message));
+    });
+  });
+}
+document.getElementById('dlNewsPdf').onclick=function(){ const b=this; b.textContent='Building…'; newsletterPDF((pdf,name)=>{ pdf.save(name); b.textContent='📄 Download PDF'; }); };
+document.getElementById('mailNews').onclick=async function(){
+  const m=DATA.meta||{};
+  const subject=`${m.program} — Program Update (${m.reportWeek||m.reportDate||''})`;
+  // 1) put the rich newsletter on the clipboard for pasting into the email body
+  try{ await navigator.clipboard.write([new ClipboardItem({
+    'text/html':new Blob([document.getElementById('newsPaper').innerHTML],{type:'text/html'}),
+    'text/plain':new Blob([document.getElementById('newsPaper').innerText],{type:'text/plain'})})]); }catch(e){}
+  // 2) download the PDF to attach
+  newsletterPDF((pdf,name)=>{
+    pdf.save(name);
+    // 3) open the email client
+    window.location.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent('(Paste the rich update here with Cmd/Ctrl+V — it is on your clipboard. The PDF version has been downloaded to attach.)\n\n'+document.getElementById('newsPaper').innerText);
+    alert('Ready to email:\n\n1. The rich newsletter is on your clipboard — paste it into the email body (Cmd/Ctrl+V).\n2. The PDF was downloaded — attach it to the email.');
+  });
 };
 
 /* ---------- export menu (Email / Slack / PPT / Print) ---------- */
@@ -1352,6 +1382,7 @@ function setData(d){
   d.meta=d.meta||{};
   ['workPackages','milestones','deliverables','stories','gaps','catalog','risks','weeklyUpdates','payments','resources','commercial'].forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
   if(!Array.isArray(d.hidden)) d.hidden=[]; // section ids hidden from the viewer
+  d.newsletterInclude=(d.newsletterInclude&&typeof d.newsletterInclude==='object')?d.newsletterInclude:{};
   if(!Array.isArray(d.pillars)||!d.pillars.length) d.pillars=[
     {id:'scope',name:'Scope',status:'Green',summary:''},
     {id:'timeline',name:'Timeline',status:'Green',summary:''},
