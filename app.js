@@ -1091,6 +1091,7 @@ const NEWS_SECS=[
   {id:'inFocus',label:'In Focus (WPs)'},
   {id:'timeline',label:'Plan on a Page (Gantt)'},
   {id:'milestones',label:'Upcoming Milestones'},
+  {id:'finance',label:'Finance (Payment Milestones)'},
   {id:'gaps',label:'Product Gaps'},
   {id:'risks',label:'Risks / RAID'}
 ];
@@ -1099,8 +1100,8 @@ function renderNewsletter(){
   const avg=wp.length?Math.round(wp.reduce((a,b)=>a+(+b.pct||0),0)/wp.length):0;
   const next=(DATA.milestones||[]).find(x=>x.status!=='Complete');
   const inc=DATA.newsletterInclude||{};
-  // most sections default ON; the Gantt snapshot is heavier so it's opt-in (default OFF)
-  const OPT_IN={timeline:true};
+  // most sections default ON; Gantt snapshot (heavy) and Finance (sensitive $) are opt-in (default OFF)
+  const OPT_IN={timeline:true,finance:true};
   const on=id=> OPT_IN[id] ? inc[id]===true : inc[id]!==false;
   // section picker (with sub-items)
   const sel=document.getElementById('newsSections');
@@ -1130,6 +1131,14 @@ function renderNewsletter(){
   if(on('inFocus')){ const f=wp.filter(w=>w.status==='In Progress'); B.push(h3('In Focus')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${f.length?f.map(w=>`<li><b>${esc(w.id)} ${esc(w.name)}</b> — ${w.pct}% ${ragChip(w.rag)}</li>`).join(''):'<li>—</li>'}</ul>`); }
   if(on('timeline')) B.push(h3('Plan on a Page — Implementation Timeline')+`<div id="nlTimeline" style="margin:4px 0 0"></div>`);
   if(on('milestones')) B.push(h3('Upcoming Milestones')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${DATA.milestones.filter(x=>x.status!=='Complete').slice(0,6).map(x=>`<li><b>${esc(x.id)} ${esc(x.name)}</b> — ${esc(x.delMonth)} (${esc(x.pct)})</li>`).join('')||'<li>—</li>'}</ul>`);
+  if(on('finance')){ const cv=parseFloat(String((DATA.meta||{}).contractValue||'').replace(/[^0-9.]/g,''))||0; const ms=DATA.milestones||[]; const ps=DATA.paymentStatus||{}, pd=DATA.paymentDates||{};
+    const stCol=s=>({Paid:['#166534','#dcfce7'],Invoiced:['#1e40af','#dbeafe'],Overdue:['#991b1b','#fee2e2']}[s]||['#475569','#f1f5f9']);
+    const stChipF=s=>{const c=stCol(s);return `<span style="display:inline-block;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:700;color:${c[0]};background:${c[1]}">${esc(s)}</span>`;};
+    const th='padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#64748b;border-bottom:2px solid #e2e8f0;font-weight:700'; const thR=th+';text-align:right'; const td='padding:7px 10px;font-size:12.5px;color:#334155;border-bottom:1px solid #eef2f7;vertical-align:top'; const tdR=td+';text-align:right;white-space:nowrap';
+    const pctSum=ms.reduce((a,m)=>a+pctNum(m.pct),0), total=cv*pctSum/100, paid=ms.filter(m=>ps[m.id]==='Paid').reduce((a,m)=>a+cv*pctNum(m.pct)/100,0);
+    const rows=ms.length?ms.map(m=>{const amt=cv*pctNum(m.pct)/100; const st=ps[m.id]||'Not Due'; const dt=pd[m.id]||''; return `<tr><td style="${td};font-weight:700;color:#1e293b;white-space:nowrap">${esc(m.id)}</td><td style="${td};white-space:nowrap">${esc(m.delMonth)}</td><td style="${td}">${esc(m.name)}</td><td style="${tdR}">${esc(m.pct||'—')}</td><td style="${tdR}">${cv?money(amt):'—'}</td><td style="${td};white-space:nowrap">${dt?esc(fmtD(dt)):'—'}</td><td style="${td};white-space:nowrap">${stChipF(st)}</td></tr>`;}).join(''):`<tr><td style="${td}" colspan="7">No payment milestones yet.</td></tr>`;
+    const foot=`<tr style="font-weight:700;background:#f8fafc"><td style="${td}" colspan="3">Total</td><td style="${tdR}">${Math.round(pctSum*100)/100}%</td><td style="${tdR}">${cv?money(total):'—'}</td><td style="${td}"></td><td style="${td};white-space:nowrap">${paid?('Paid '+money(paid)):''}</td></tr>`;
+    B.push(card(h3('Finance — Payment Milestones')+`<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%"><thead><tr><th style="${th};white-space:nowrap">PM</th><th style="${th};white-space:nowrap">Month</th><th style="${th}">Milestone</th><th style="${thR}">%</th><th style="${thR}">Amount</th><th style="${th};white-space:nowrap">Invoice Date</th><th style="${th};white-space:nowrap">Status</th></tr></thead><tbody>${rows}${foot}</tbody></table>`,'#fff','#e2e8f0')); }
   if(on('gaps')){ const og=DATA.gaps.filter(g=>g.status==='Open'||g.status==='Under Review'); B.push(h3('Product Gaps — Open')+`<ul style="margin:4px 0 0;padding-left:18px;font-size:13px">${og.length?og.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.area)} — ${esc(g.disposition)} · owner ${esc(g.owner)}</li>`).join(''):'<li>None.</li>'}</ul>`); }
   if(on('risks')){ const th='padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#64748b;border-bottom:2px solid #e2e8f0;font-weight:700'; const td='padding:7px 10px;font-size:12.5px;color:#334155;border-bottom:1px solid #eef2f7;vertical-align:top';
     const rows=DATA.risks.length?DATA.risks.map(r=>`<tr><td style="${td};white-space:nowrap">${ragChip(r.rag)}</td><td style="${td};font-weight:700;color:#1e293b">${esc(r.title)}</td><td style="${td}">${esc(r.impact)}</td><td style="${td}">${esc(r.mitigation)}</td></tr>`).join(''):`<tr><td style="${td}" colspan="4">None.</td></tr>`;
