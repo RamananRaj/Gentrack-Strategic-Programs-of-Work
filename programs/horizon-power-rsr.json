@@ -6,12 +6,12 @@
     "supplier": "Gentrack Pty Ltd",
     "sowRef": "HPSR0548 — Implementation SOW (Cust Version Draft V0.15)",
     "reportOwner": "Ram Raj",
-    "reportDate": "2026-06-20",
+    "reportDate": "2026-06-21",
     "reportWeek": "Week ending 2026-06-19",
     "programStartDate": "2026-07-01",
     "programStart": "Month 0 (SOW signature)",
     "programDuration": "16 delivery months (DM0–DM16)",
-    "overallStatus": "Amber",
+    "overallStatus": "Green",
     "overallNarrative": "<ul><li>There are only few comments (&lt; than 5) left on Gentrack to address. They key items are around languages where GTK Legal team is assisting to address</li><li>There are similar number of comments where HP has taken internally to review based on GTK input</li><li>All SOW's will be signed around the similar time.</li><li>Early Termination points to finalised with HP. This is an open item we will discuss and close in the coming week.</li><li>HP is currently working with Minister in the final presentation and Go Decision - This is anticipated SoW signoff date now shift to Mid to End July. Working closely with HP on this.&nbsp;</li><li>There is still possibility to pickup closer to 30% of the Milestone payments before Sept 2026.<br><br></li></ul>",
     "projectManager": "TBC",
     "programEndDate": "2027-11-01",
@@ -362,29 +362,29 @@
       "pct": "10%",
       "status": "Not Started",
       "deliverables": "SOW execution",
-      "date": "2026-07-23"
+      "date": "2026-07-31"
     },
     {
       "id": "PM1.2",
-      "delMonth": "DM0",
+      "delMonth": "DM1",
       "phase": "Team Onboarding",
       "name": "Team Onboarding",
       "trigger": "",
       "pct": "10%",
       "status": "Not Started",
       "deliverables": "SOW+ 1 MOnth",
-      "date": "2026-07-31"
+      "date": "2026-08-31"
     },
     {
       "id": "PM2",
-      "delMonth": "DM1",
+      "delMonth": "DM2",
       "phase": "Plan & Initiation",
       "name": "Build Start",
       "trigger": "Implementation Schedule, Inflight, Config & Code Mgmt",
       "pct": "10%",
       "status": "Not Started",
       "deliverables": "Implementation Schedule; Inflight; Configuration Management & Code Management",
-      "date": "2026-09-29"
+      "date": "2026-09-30"
     },
     {
       "id": "PM3",
@@ -418,7 +418,7 @@
     },
     {
       "id": "PM6",
-      "delMonth": "DM10",
+      "delMonth": "DM13",
       "phase": "Data Migration",
       "name": "Trial Migration End",
       "trigger": "Data Migration Design + Migration Report",
@@ -435,17 +435,6 @@
       "pct": "10%",
       "status": "Not Started",
       "deliverables": "UAT Report (External); Migration Cutover Strategy"
-    },
-    {
-      "id": "PM?",
-      "delMonth": "DM0",
-      "phase": "Cutover & Hypercare",
-      "name": "Go Live",
-      "trigger": "",
-      "pct": "0%",
-      "status": "Not Started",
-      "deliverables": "Go No Go Decision",
-      "date": "2028-01-08"
     },
     {
       "id": "PM8",
