@@ -1404,7 +1404,7 @@
   },
   "paymentStatus": {
     "PM1": "Invoiced",
-    "PM2": "Invoiced",
+    "PM2": "Not Due",
     "PM3": "Not Due",
     "PM4": "Not Due",
     "PM5": "Not Due",
@@ -1489,6 +1489,6 @@
     "gaps": false,
     "milestones": false,
     "timeline": true,
-    "finance": true
+    "finance": false
   }
 }
