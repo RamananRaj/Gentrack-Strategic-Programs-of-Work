@@ -416,7 +416,8 @@
       "trigger": "Final SIT Report (External)",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "Final SIT Report (External)"
+      "deliverables": "Final SIT Report (External)",
+      "date": "2027-07-30"
     },
     {
       "id": "PM6",
@@ -426,7 +427,8 @@
       "trigger": "Data Migration Design + Migration Report",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "Data Migration Design Document; Migration Report"
+      "deliverables": "Data Migration Design Document; Migration Report",
+      "date": "2027-07-31"
     },
     {
       "id": "PM7",
@@ -436,7 +438,8 @@
       "trigger": "UAT Report + Migration Cutover Strategy",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "UAT Report (External); Migration Cutover Strategy"
+      "deliverables": "UAT Report (External); Migration Cutover Strategy",
+      "date": "2027-09-30"
     },
     {
       "id": "PM8",
@@ -447,7 +450,7 @@
       "pct": "10%",
       "status": "Not Started",
       "deliverables": "CAB Report (External); Deployment Runbook",
-      "date": "2027-11-29"
+      "date": "2027-12-01"
     },
     {
       "id": "PM9",
@@ -457,7 +460,8 @@
       "trigger": "Program Closure Report",
       "pct": "5%",
       "status": "Not Started",
-      "deliverables": "Program Closure Report"
+      "deliverables": "Program Closure Report",
+      "date": "2027-03-31"
     }
   ],
   "deliverables": [
