@@ -394,7 +394,8 @@
       "trigger": "Customisation Solution Design + ICDs",
       "pct": "15%",
       "status": "Not Started",
-      "deliverables": "Customisation Solution Design Document; Interface Contract Documents (ICDs)"
+      "deliverables": "Customisation Solution Design Document; Interface Contract Documents (ICDs)",
+      "date": "2027-04-30"
     },
     {
       "id": "PM4",
@@ -404,7 +405,8 @@
       "trigger": "Test Summary Report",
       "pct": "10%",
       "status": "Not Started",
-      "deliverables": "Test Summary Report"
+      "deliverables": "Test Summary Report",
+      "date": "2027-05-14"
     },
     {
       "id": "PM5",
