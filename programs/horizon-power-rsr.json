@@ -6,7 +6,7 @@
     "supplier": "Gentrack Pty Ltd",
     "sowRef": "HPSR0548 — Implementation SOW (Cust Version Draft V0.15)",
     "reportOwner": "Ram Raj",
-    "reportDate": "2026-06-21",
+    "reportDate": "2026-06-23",
     "reportWeek": "Week ending 2026-06-19",
     "programStartDate": "2026-07-01",
     "programStart": "Month 0 (SOW signature)",
@@ -28,7 +28,7 @@
       "id": "timeline",
       "name": "Timeline",
       "status": "Green",
-      "summary": "Timeline is 19 Months - Refer to the timeline.&nbsp;"
+      "summary": "<ul><li>Timeline is 19 Months - Refer to the timeline.&nbsp;</li></ul>"
     },
     {
       "id": "quality",
@@ -734,7 +734,42 @@
       "Note: AI First Adoption is what considered for this program end to end. No manual coding nor configuration nor testing. Working with Engineering to see how we can fast track this for the program"
     ]
   },
-  "weeklyUpdates": [],
+  "weeklyUpdates": [
+    {
+      "week": "Week ending 2026-06-29",
+      "overallStatus": "Green",
+      "completion": "0%",
+      "nextMilestone": "PM1.1 Kick Off (DM0)",
+      "summary": "",
+      "accomplishments": [],
+      "planned": [],
+      "blockers": []
+    },
+    {
+      "week": "Week ending 2026-06-19",
+      "overallStatus": "Green",
+      "completion": "0%",
+      "nextMilestone": "PM1.1 Kick Off (DM0)",
+      "summary": "<ul><li>There are only few comments (&lt; than 5) left on Gentrack to address. They key items are around languages where GTK Legal team is assisting to address</li><li>There are similar number of comments where HP has taken internally to review based on GTK input</li><li>All SOW's will be signed around the similar time.</li><li>Early Termination points to finalised with HP. This is an open item we will discuss and close in the coming week.</li><li>HP is currently working with Minister in the final presentation and Go Decision - This is anticipated SoW signoff date now shift to Mid to End July. Working closely with HP on this.&nbsp;</li><li>There is still possibility to pickup closer to 30% of the Milestone payments before Sept 2026.<br><br></li></ul>",
+      "accomplishments": [
+        "SOW review with the working level now completed. It's now move to Suresh and Peter for final inputs",
+        "There are only 5 Items are for GTK to address. Most are being discussed with GTK Legal",
+        "SOC Security requirements are now provided for HP Auditors to review"
+      ],
+      "planned": [
+        "Once Peter's Suresh's comments received, this will move to Final Legal Review",
+        "Focus now turns to Product Schedule formatting and Support SOW Closure",
+        "Internally publish the list of Product Gaps for this program",
+        "Reviewing the resource requirements for the Program of Work",
+        "Early Start internally is considered - This will help to recognise any bottle necks within the program and recognise revenue earlier"
+      ],
+      "blockers": [
+        "Note: TCS wants to include language to create a Back to Back dependencies between TCS and GTK within the HP SOW - Have pushed back on their ask",
+        "Issue: Team currently table to start the program are totally new compared to who we had in Blueprint. This will be an issue for HP and Internally as well",
+        "Note: AI First Adoption is what considered for this program end to end. No manual coding nor configuration nor testing. Working with Engineering to see how we can fast track this for the program"
+      ]
+    }
+  ],
   "payments": [
     {
       "id": "PM1",
@@ -829,13 +864,13 @@
       "status": "To Be Confirmed"
     },
     {
-      "name": "Vijay Srinivasan",
+      "name": "TBC",
       "org": "Gentrack",
       "role": "Solution Architect",
       "responsibility": "Overall Technical Solution Owner",
       "location": "Melbourne",
       "availability": "Full Time",
-      "status": "Active"
+      "status": "To Be Confirmed"
     },
     {
       "name": "TBC",
@@ -847,7 +882,7 @@
       "status": "Active"
     },
     {
-      "name": "TBC",
+      "name": "Trang",
       "org": "Gentrack",
       "role": "Snr BA – Network Operations",
       "responsibility": "Network Billing Analyst",
@@ -883,67 +918,49 @@
       "status": "To Be Confirmed"
     },
     {
-      "name": "Suresh Parimi",
-      "org": "Horizon Power",
-      "role": "Snr Manager – Digital Transformation",
-      "responsibility": "Contract Manager",
-      "location": "Perth",
-      "availability": "Part Time",
-      "status": "Active"
-    },
-    {
-      "name": "Liam Lynch",
-      "org": "Horizon Power",
-      "role": "Program Manager",
-      "responsibility": "SOW Manager",
-      "location": "Perth",
+      "name": "TBC",
+      "org": "Gentrack",
+      "role": "Migration Lead",
+      "responsibility": "Lead Migration include Near Real time",
+      "location": "Melbourne",
       "availability": "Full Time",
-      "status": "Active"
+      "status": "To Be Confirmed"
     },
     {
-      "name": "Peter Dearlove",
-      "org": "Horizon Power",
-      "role": "Snr Manager Retail Project Enablement",
-      "responsibility": "Business Lead",
-      "location": "Perth",
-      "availability": "Part Time",
-      "status": "Active"
-    },
-    {
-      "name": "Matt De Pinto",
-      "org": "Horizon Power",
-      "role": "Product Owner",
-      "responsibility": "M2C Product Owner",
-      "location": "Perth",
+      "name": "TBC",
+      "org": "Gentrack",
+      "role": "Data Migration Engineer",
+      "responsibility": "Perform ETL - Migration across",
+      "location": "Melbourne",
       "availability": "Full Time",
-      "status": "Active"
+      "status": "To Be Confirmed"
     },
     {
-      "name": "Ronny Flendt",
-      "org": "Horizon Power",
-      "role": "Product Owner",
-      "responsibility": "ECS Owner",
-      "location": "Perth",
-      "availability": "Part Time",
-      "status": "Active"
+      "name": "TBC",
+      "org": "Gentrack",
+      "role": "Integration Engineer",
+      "responsibility": "All V4 Integration Lift and Shift to G2",
+      "location": "Melbourne",
+      "availability": "Full Time",
+      "status": "To Be Confirmed"
     },
     {
-      "name": "Kathleen Temby",
-      "org": "Horizon Power",
-      "role": "Product Owner",
-      "responsibility": "Meter Data Management",
-      "location": "Perth",
-      "availability": "Part Time",
-      "status": "Active"
+      "name": "TBC",
+      "org": "Gentrack",
+      "role": "Test Automation Engineer",
+      "responsibility": "Automatation of Test Suite End to End",
+      "location": "India",
+      "availability": "Full Time",
+      "status": "To Be Confirmed"
     },
     {
-      "name": "Ricky Gush",
-      "org": "Horizon Power",
-      "role": "Solution Architect",
-      "responsibility": "Solution Architect",
-      "location": "Perth",
-      "availability": "Part Time",
-      "status": "Active"
+      "name": "TBC",
+      "org": "Gentrack",
+      "role": "AI Enablement Engineer",
+      "responsibility": "Configs - Harness - Guardrails",
+      "location": "Melbourne",
+      "availability": "Full Time",
+      "status": "To Be Confirmed"
     }
   ],
   "stories": [
@@ -1489,6 +1506,6 @@
     "gaps": false,
     "milestones": false,
     "timeline": true,
-    "finance": false
+    "finance": true
   }
 }
