@@ -6,7 +6,7 @@
     "supplier": "Gentrack Pty Ltd",
     "sowRef": "HPSR0548 — Implementation SOW (Cust Version Draft V0.15)",
     "reportOwner": "Ram Raj",
-    "reportDate": "2026-06-23",
+    "reportDate": "2026-06-27",
     "reportWeek": "Week ending 2026-06-19",
     "programStartDate": "2026-07-01",
     "programStart": "Month 0 (SOW signature)",
@@ -741,8 +741,14 @@
       "completion": "0%",
       "nextMilestone": "PM1.1 Kick Off (DM0)",
       "summary": "",
-      "accomplishments": [],
-      "planned": [],
+      "accomplishments": [
+        "HP - TCS - GTK Session Held"
+      ],
+      "planned": [
+        "Suresh to address the Open items of HP this week",
+        "Support SoW Finalisation",
+        "MBR is planned for 6th July"
+      ],
       "blockers": []
     },
     {
